@@ -88,6 +88,20 @@ describe('collab.submit 带上 site/ 的改动', () => {
     expect(git(bob.repo, 'status', '--porcelain', '--untracked-files=all')).toBe('')
   })
 
+  it('sources/ 下的源数据也带上：成员改了照常提交，不跑类型检查，提交说明写明源数据；仓里别处的改动不带上', async () => {
+    const script = path.join(bob.repo, 'sources', 'lab', 'build.mjs')
+    mkdirSync(path.dirname(script), { recursive: true })
+    writeFileSync(script, 'console.log(1)\n')
+    writeFileSync(path.join(bob.repo, 'stray.txt'), '别处的改动\n')
+    const { typecheck, ran } = fakeTypecheck('passed')
+    const result = await submitCollab(bob, merges(), typecheck)
+    expect(result).toMatchObject({ siteFiles: 0, sourceFiles: 1, workflowFiles: 0, siteTypecheck: null })
+    expect(ran).toEqual([])
+    expect(git(bob.repo, 'log', '-1', '--format=%s', result.commit!)).toBe('bob 的源数据改动')
+    expect(git(bob.repo, 'show', '--name-only', '--format=', result.commit!)).toBe('sources/lab/build.mjs')
+    expect(git(bob.repo, 'status', '--porcelain', '--untracked-files=all')).toBe('?? stray.txt')
+  })
+
   it('站点检查与类型检查不过：不提交、不推送，逐条写明', async () => {
     writeSite(bob.repo, { 'comments/2026-10-10-dave/index.mdx': threadFile('dave'), 'journal/2026-02-30.mdx': '# 不存在的一天\n' })
     const { typecheck, ran } = fakeTypecheck('passed')

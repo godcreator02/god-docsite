@@ -7,9 +7,9 @@ import { watchCollabRepo, type CollabRepoWatcher } from './watch.js'
 
 export { collabRepoLocalStateOf, type CollabRepoLocalState } from './local-state.js'
 
-/** collab/、site/ 都没有还没提交审核的文件，也没有冲突；仓里别处的改动不算 */
+/** collab/、site/、sources/ 都没有还没提交审核的文件，也没有冲突；仓里别处的改动不算 */
 function hasNoUnsubmittedFilesOrConflicts({ unsubmitted, conflicts }: CollabRepoLocalState): boolean {
-  return unsubmitted.records.length === 0 && unsubmitted.siteFiles.length === 0 && conflicts.length === 0
+  return unsubmitted.records.length === 0 && unsubmitted.siteFiles.length === 0 && unsubmitted.sourceFiles.length === 0 && conflicts.length === 0
 }
 
 /** 一个项目最近一次自动同步：什么时候、结果 */
@@ -20,7 +20,7 @@ export type CollabRepoSyncDeps = {
   install: InstallDependencies
   /** 本机状态或自动同步的结果变了 */
   onChange(repo: string): void
-  /** 自动同步后协作仓没有东西可提交了：collab/、site/ 没有改动、没有冲突，本地 main 不领先 origin/main */
+  /** 自动同步后协作仓没有东西可提交了：collab/、site/、sources/ 没有改动、没有冲突，本地 main 不领先 origin/main */
   onNothingToSubmit(repo: string): void
   log: { warn(message: string): void }
   now(): Date

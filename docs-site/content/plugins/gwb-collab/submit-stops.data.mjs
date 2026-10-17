@@ -20,7 +20,7 @@ const executorRejectComment = [
 ]
 
 /** 等结论：每 2 秒查一次合并请求，最多 180 秒 */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="33-36" hash="1553118eddb9" blob="4c35701efab6" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="36-39" hash="1553118eddb9" blob="b2999a5430a9" */
 export const verdictWait = { pollSeconds: 2, timeoutSeconds: 180 }
 
 /** bob 新建的任务文件（规范写法，两格缩进、以换行结尾） */
@@ -42,7 +42,7 @@ export const steps = [
   '在 main 上，取回 origin',
   'collab/ 没有新的格式问题（比分叉点）',
   'site/ 有改动时：站点检查与类型检查',
-  '提交 collab/、site/ 与 .gitea/',
+  '提交 collab/、site/、sources/ 与 .gitea/',
   '把 origin/main 合进来',
   '合进来以后再查一遍',
   '没改只有负责人能改的内容',
@@ -66,19 +66,19 @@ const notReached = { state: 'skip', note: '没走到' }
 const mergedCase = {
   id: 'merged',
   label: '合并了',
-  text: 'bob 改了 admin 那条任务的状态，又新建了自己的任务。八步都过：格式没有新问题，site/ 没改动不用查站点，本地 main 不落后不用合，推上去开出 #7，执行器合并。提交只带 collab/、site/ 与 .gitea/，暂存区里别的文件原样留着。',
+  text: 'bob 改了 admin 那条任务的状态，又新建了自己的任务。八步都过：格式没有新问题，site/ 没改动不用查站点，本地 main 不落后不用合，推上去开出 #7，执行器合并。提交只带 collab/、site/、sources/ 与 .gitea/，暂存区里别的文件原样留着。',
   changes: {
     files: [
       { path: adminTaskPath, groups: [{ title: null, old: ['  "status": "todo",'], now: ['  "status": "done",'] }] },
       bobNewTaskFile,
     ],
-    note: '仓根的 notes.txt 已暂存，不在 collab/、site/、.gitea/ 下，不带上',
+    note: '仓根的 notes.txt 已暂存，不在 collab/、site/、sources/、.gitea/ 下，不带上',
   },
   steps: [passed, passed, { state: 'skip', note: 'site/ 没改动' }, passed, { state: 'ok', note: '本地 main 不落后，不用合' }, passed, passed, { state: 'ok', note: `#${pullNumber} 合并了` }],
   end: 'merged',
   leftInRepo: `这次的提交只含两个记录文件；notes.txt 仍暂存着（A  notes.txt）；本地 main 等合并的推送经实时推送触发取回、快进`,
   error: null,
-  receipt: [`pull: { number: ${pullNumber} }`, 'siteFiles: 0', 'workflowFiles: 0', 'siteTypecheck: null'],
+  receipt: [`pull: { number: ${pullNumber} }`, 'siteFiles: 0', 'sourceFiles: 0', 'workflowFiles: 0', 'siteTypecheck: null'],
   noticeBar: { pills: [], note: null },
 }
 
@@ -133,7 +133,7 @@ const timeoutCase = {
 
 /* lead-only、site-check 两种情况照 submit-site 的用例：一个用例连着跑六种场景，这里取成员改 scripts 被拦、
  * 站点检查拦下不存在日期的日志页（同时加的评论作者不在人员列表里，不被拦）两段 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-site.slow.test.ts" lines="43-107" hash="c71bd9b9fe50" blob="e1dc1d730e71" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-site.slow.test.ts" lines="43-121" hash="330191d26119" blob="4bc959c7a450" */
 const leadOnlyCase = {
   id: 'lead-only',
   label: '成员改 scripts',
@@ -195,7 +195,7 @@ const conflictCase = {
     '本地 main 多出 bob 的提交，合并没完成；那个文件里留着冲突标记（以 <<<<<<< 开头的行）；没推送；自动同步跳过，原因「提交审核时把 main 合进来出了冲突，还没改好：让 AI 改好冲突、再提交审核」。改好后再 collab.submit，那次提交完成这次合并（合并提交有两个父提交）',
   error: [
     /* 把 origin/main 合进来停在半路时的拒绝原话 */
-    /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="83-96" hash="96288abf3896" blob="4c35701efab6" */
+    /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="87-100" hash="96288abf3896" blob="b2999a5430a9" */
     '把 origin/main 合进来有冲突，没有推送；冲突标记留在这些文件里（网站顶部的提示栏也会列出来）：',
     'collab/records/20260925130000-ddddddd.json',
     '让 AI 按两边的意思改好，再运行 collab.submit',

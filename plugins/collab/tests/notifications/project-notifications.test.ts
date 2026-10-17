@@ -9,7 +9,7 @@ const project: Project = { repo: 'D:/projects/hybrid-mmc/collab', collabDir: 'D:
 function readersWith(overrides: Partial<NotificationReaders> = {}): NotificationReaders {
   return {
     openProject: async () => project,
-    collabLocalStateOf: async () => ({ branch: 'main', unsubmitted: { records: ['records/a.json'], siteFiles: [] }, conflicts: [] }),
+    collabLocalStateOf: async () => ({ branch: 'main', unsubmitted: { records: ['records/a.json'], siteFiles: [], sourceFiles: [] }, conflicts: [] }),
     syncProblemOf: () => null,
     submitFailureOf: () => null,
     collabSetupProblemsOf: () => [],
@@ -67,7 +67,7 @@ describe('一个项目此刻的通知', () => {
 
   it('没有通知时提示词为 null', async () => {
     const quiet = readersWith({
-      collabLocalStateOf: async () => ({ branch: 'main', unsubmitted: { records: [], siteFiles: [] }, conflicts: [] }),
+      collabLocalStateOf: async () => ({ branch: 'main', unsubmitted: { records: [], siteFiles: [], sourceFiles: [] }, conflicts: [] }),
       recordsOf: async () => ({ inbox: { tasks: [], mentions: [], repliesToMe: [] }, problems: [], people: [] }),
       otherHeadsOf: async () => [],
     })

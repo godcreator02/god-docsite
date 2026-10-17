@@ -42,15 +42,20 @@ function collabRepoWithRemote() {
 
 describe('协作仓的本机状态', () => {
   // 一条用例在一个仓里演进四种状态：空 → 没提交审核的文件 → 合并冲突 → 别的分支与分离头
-  it('没改动时是空的；未提交的 collab/、site/ 分开、仓里别处不算；冲突从状态码里读；不在 main 写分支名、分离头为 null', async () => {
+  it('没改动时是空的；未提交的 collab/、site/、sources/ 分开、仓里别处不算；冲突从状态码里读；不在 main 写分支名、分离头为 null', async () => {
     const { base, repo } = collabRepoWithRemote()
-    expect(await collabRepoLocalStateOf(repo)).toEqual({ branch: 'main', unsubmitted: { records: [], siteFiles: [] }, conflicts: [] })
+    expect(await collabRepoLocalStateOf(repo)).toEqual({ branch: 'main', unsubmitted: { records: [], siteFiles: [], sourceFiles: [] }, conflicts: [] })
 
     write(path.join(repo, 'collab', 'records', '20260926120000-abc1234.json'), '{}\n')
     write(path.join(repo, 'site', 'people.json'), '[ ]\n')
     write(path.join(repo, 'site', 'content', 'a.mdx'), '# a\n')
+    write(path.join(repo, 'sources', 'lab', 'build.mjs'), '\n')
     write(path.join(repo, 'README.md'), 'y\n')
-    expect((await collabRepoLocalStateOf(repo)).unsubmitted).toEqual({ records: ['records/20260926120000-abc1234.json'], siteFiles: ['content/a.mdx', 'people.json'] })
+    expect((await collabRepoLocalStateOf(repo)).unsubmitted).toEqual({
+      records: ['records/20260926120000-abc1234.json'],
+      siteFiles: ['content/a.mdx', 'people.json'],
+      sourceFiles: ['lab/build.mjs'],
+    })
 
     git(repo, 'checkout', '-q', '--', '.')
     const other = path.join(base, 'other')

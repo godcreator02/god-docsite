@@ -1,0 +1,30 @@
+---
+born-at: 2026-10-17T20:50
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 协作仓仓根加源数据目录 sources/，提交审核连它一起提交；它的未提交文件不进提示栏的通知
+domain: 协作
+---
+
+## 背景
+
+SST 项目把协作站页面的源数据（讲原理的小电路、核对用的仿真、出图脚本、例子代码）放在单独的仓 collab-lab 里。用户觉得它不该单独存在：
+
+> 这东西应该直接并入collab下的一个新文件夹，不应该单独存在
+
+定下放在协作仓仓根的 `sources/`。`collab.submit` 原来只提交 `collab/`、`site/`、`.gitea/`，放进去的文件提交审核带不上。
+
+## 结论与边界
+
+- `collab.submit` 连 `sources/` 一起提交，提交说明与合并请求标题多一样「源数据」，回执多一个 `sourceFiles`。`sources/` 不做格式检查；执行器只拦只有负责人能改的内容，`sources/` 不在其中，谁都能改，执行器不用动
+- 本机状态多记 `sourceFiles`：自动同步之后判断「没有东西可提交」时算上它，免得只改了 `sources/` 时清掉上次提交审核失败的通知
+- `sources/` 的未提交文件不进「本机有 N 个文件还没提交审核」这条通知，只改了它时网站提示栏没有一键提交，由 AI 调 `collab.submit`。插件只升 y
+
+## 否掉的候选
+
+- **通知 `unsubmitted` 加一个字段 `sourceFiles`**：站点按 collab 包的形状逐字段核对推来的通知，多一个字段就整份拒收（`checkedNotificationsOf`），先升插件、站点还是旧包时提示栏会整个出错；要做得把 collab 包升 x、各协作站跟着升级，这次不做
+- **把 `sources/` 的文件混进 `siteFiles`**：原文按 `site/` 加前缀列出，路径会写错
+
+## 依据
+
+无实验。`tests/collab-repo/submit/submit-site.slow.test.ts` 的「sources/ 下的源数据也带上」与 `tests/collab-repo/sync/state.slow.test.ts` 的本机状态用例。

@@ -54,7 +54,7 @@ export const noticeSentences = {
 
 /** 冲突没改好时只列冲突、不在 main 时不列「没能自动同步」——两条规矩在 notifications-of.ts */
 
-/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="29-47" hash="6d600c19c472" blob="7e945c82036a" */
+/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="29-48" hash="98c50a3f1227" blob="74fd85f1f3c7" */
 export const suppressionNote = '「上次提交审核没成功」「没能自动同步」都不列——它们说的都是冲突这一件事'
 
 export const conflictFile = 'collab/records/20260925130000-ddddddd.json'

@@ -34,6 +34,7 @@ function collabRepoFactsOf({ collabRepo, records, webhookProblem, checkErrors }:
   const hasConflicts = local.conflicts.length > 0
   const offMain = local.branch !== mainBranch
   const facts: Array<NotificationFacts | null> = [
+    // sources/ 的文件不进这条通知：站点按 @godcreator/collab 的通知形状逐字段核对，多一个字段就整份拒收
     local.unsubmitted.records.length + local.unsubmitted.siteFiles.length > 0 ? { kind: 'unsubmitted', records: local.unsubmitted.records, siteFiles: local.unsubmitted.siteFiles } : null,
     hasConflicts ? { kind: 'conflicts', files: local.conflicts } : null,
     submitFailure !== null && !hasConflicts ? { kind: 'submit-failure', message: submitFailure.message, at: submitFailure.at } : null,

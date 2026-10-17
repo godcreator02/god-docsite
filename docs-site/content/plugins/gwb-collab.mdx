@@ -74,9 +74,9 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 不能快进不是错误：什么都不动，原因记下来，成为「没能自动同步 main 上的新改动」的通知（图里不在 main、冲突没改好两种情况不列这条）；下一次完整刷新取回成功后再试。
 
-自动同步之后协作仓没有东西可提交（`collab/`、`site/` 没有改动、没有冲突、本地 main 不领先），上次提交审核失败的那条通知就清掉。
+自动同步之后协作仓没有东西可提交（`collab/`、`site/`、`sources/` 没有改动、没有冲突、本地 main 不领先），上次提交审核失败的那条通知就清掉。
 
-本机状态的监视：协作仓里任何文件变了都重算，`.git/` 里只看 `index`、`HEAD`、`packed-refs`、`refs/`；`git status` 只跑一次，按路径分出 `collab/` 与 `site/`。监视事件的行为假设在 `tests/verified/watch.test.ts`，动了监视要跑 `pnpm test:verified`。
+本机状态的监视：协作仓里任何文件变了都重算，`.git/` 里只看 `index`、`HEAD`、`packed-refs`、`refs/`；`git status` 只跑一次，按路径分出 `collab/`、`site/` 与 `sources/`。`sources/` 的未提交文件只用来判断有没有东西可提交，不进「本机有 N 个文件还没提交审核」那条通知：通知的形状由 collab 包定，站点逐个字段核对，多一个字段就整份拒收。所以只改了 `sources/` 时网站提示栏不出这条通知，也就没有一键提交，由 AI 调 `collab.submit`。监视事件的行为假设在 `tests/verified/watch.test.ts`，动了监视要跑 `pnpm test:verified`。
 
 ## 提交审核
 
@@ -86,9 +86,9 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 站点检查查两样：`site/journal/` 的文件名（站点布局按它读，文件名不是真实日期整站打不开）；`site/content/` 的文件放对了没有（规则在平台包的 `./content-layout` 出口，放错的页面会从侧栏消失、build 会失败；开发服务对它只报不拦，所以在进 main 之前拦）。`site/package.json` 写了 `typecheck` 脚本就在 `site/` 里跑一次，没写就跳过。别的站点问题由 gwb-docsite 启动站点时查。
 
-提交只带 `collab/`、`site/`、`.gitea/` 里有改动的那几个目录，暂存区里别的文件不带上（空的 `collab/` 不被 git 跟踪，不会写进提交命令；目录里的文件删光了，删除照样提交）；上次合 main 出的冲突已经改好时，这次提交就完成那次合并。`.gitea/` 下是执行器的工作流，只有负责人能改：协作仓的 main 谁都不能直接推，负责人升检查工具的版本（工作流里的 `MERGE_CHECK_RANGE`）也是改好这一行再提交审核，成员改了它在推送前那一步被拦下。提交说明与合并请求标题按带了哪几样写：「`<身份>` 的协作记录」「的页面改动」「的工作流改动」，几样都有时连起来，如「的协作记录与工作流改动」，回执里的 `siteFiles`、`workflowFiles` 是 `site/`、`.gitea/` 下各改了几个文件。推送用 AGit：`HEAD:refs/for/main`，主题固定是自己的身份，同一个人推的都进同一个合并请求；之后每 2 秒查一次合并请求，最多等 3 分钟。执行器那边怎么查、怎么合并见 [实时推送与执行器](/gitea/push)。
+提交只带 `collab/`、`site/`、`sources/`、`.gitea/` 里有改动的那几个目录，暂存区里别的文件不带上（空的 `collab/` 不被 git 跟踪，不会写进提交命令；目录里的文件删光了，删除照样提交）；上次合 main 出的冲突已经改好时，这次提交就完成那次合并。`sources/` 是仓根下的源数据目录（页面用到的实验、出图脚本、例子代码），不做格式检查，谁都能改。`.gitea/` 下是执行器的工作流，只有负责人能改：协作仓的 main 谁都不能直接推，负责人升检查工具的版本（工作流里的 `MERGE_CHECK_RANGE`）也是改好这一行再提交审核，成员改了它在推送前那一步被拦下。提交说明与合并请求标题按带了哪几样写：「`<身份>` 的协作记录」「的页面改动」「的源数据改动」「的工作流改动」，几样都有时连起来，如「的协作记录与工作流改动」，回执里的 `siteFiles`、`sourceFiles`、`workflowFiles` 是 `site/`、`sources/`、`.gitea/` 下各改了几个文件。推送用 AGit：`HEAD:refs/for/main`，主题固定是自己的身份，同一个人推的都进同一个合并请求；之后每 2 秒查一次合并请求，最多等 3 分钟。执行器那边怎么查、怎么合并见 [实时推送与执行器](/gitea/push)。
 
-{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="136-198" hash="1679e1df34e6" blob="4c35701efab6" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="145-208" hash="91b3dd9c65b9" blob="b2999a5430a9" */}
 
 本机查的两样与两个参照点都在这份短文件里：
 
@@ -137,7 +137,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 协作仓组有两条让某些通知不列的规矩：冲突没改好时，提交失败与同步不了说的都是这件事，只列冲突；不在 main 时自动同步一定停着，不再列同步不了：
 
-{/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="29-81" hash="fd26b91bd6d5" blob="7e945c82036a" */}
+{/* ref file="../plugins/collab/src/notifications/notifications-of.ts" lines="29-82" hash="4fecbb80c75a" blob="74fd85f1f3c7" */}
 
 「找我的」由 collab 包的 `inboxOf` 算：负责人是我、还没做完的任务；没解决的评论串里别人写的、正文 @ 了我的；我发起或回复过之后别人写的回复。评论串标为已解决，它带来的 @ 与回复就不再列；重新打开又列出来。记录与人员列表读的是工作区（网站显示的也是工作区），所以本机刚保存、还没提交审核的改动也会立刻反映在「找我的」里：
 

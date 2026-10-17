@@ -4,7 +4,7 @@ import { notificationsOf, type NotificationSources } from '../../src/notificatio
 
 /** 什么事都没有的一个项目：在 main 上，没有改动、没有出错，别的仓与服务器一样 */
 const quiet: NotificationSources = {
-  collabRepo: { name: 'collab', local: { branch: 'main', unsubmitted: { records: [], siteFiles: [] }, conflicts: [] }, syncProblem: null, submitFailure: null, setupProblems: [] },
+  collabRepo: { name: 'collab', local: { branch: 'main', unsubmitted: { records: [], siteFiles: [], sourceFiles: [] }, conflicts: [] }, syncProblem: null, submitFailure: null, setupProblems: [] },
   records: { inbox: { tasks: [], mentions: [], repliesToMe: [] }, problems: [] },
   otherRepos: { heads: [{ repo: 'firmware', ahead: 0, behind: 0 }], reviews: [], setupProblems: [] },
   webhookProblem: null,
@@ -22,7 +22,7 @@ const at = '2026-10-03T08:00:00.000Z'
 
 /** 每种 kind 都出现一次的项目 */
 const busy = sources((draft) => {
-  draft.collabRepo.local.unsubmitted = { records: ['records/a.json'], siteFiles: ['pages/a/page.mdx'] }
+  draft.collabRepo.local.unsubmitted = { records: ['records/a.json'], siteFiles: ['pages/a/page.mdx'], sourceFiles: ['lab/build.mjs'] }
   draft.collabRepo.submitFailure = { at, message: '被打回' }
   draft.collabRepo.syncProblem = '工作区里没提交的改动和 main 上的新改动碰到了同一个文件'
   draft.collabRepo.setupProblems = ['main 没有分支保护']

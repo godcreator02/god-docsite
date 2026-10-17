@@ -9,7 +9,7 @@ import type { RemoteProject } from '../../../src/project/project.js'
 
 const repo = path.resolve('/projects/sst/collab')
 const project = { repo, person: 'bob' } as RemoteProject
-const merged: SubmitResult = { commit: 'abc', siteFiles: 0, workflowFiles: 0, siteTypecheck: null, pull: { number: 7, url: 'https://git.test/pulls/7' } }
+const merged: SubmitResult = { commit: 'abc', siteFiles: 0, sourceFiles: 0, workflowFiles: 0, siteTypecheck: null, pull: { number: 7, url: 'https://git.test/pulls/7' } }
 
 /** 时刻依次是 t1、t2……；submitProject 由测试控制什么时候、怎样结束 */
 function submitsWith(submitProject: (project: RemoteProject) => Promise<SubmitResult>) {

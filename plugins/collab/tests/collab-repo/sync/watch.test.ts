@@ -43,7 +43,7 @@ describe('盯协作仓', () => {
         },
         { timeout: 15_000, interval: 100 },
       )
-    await waitFor((state) => expect(state).toEqual({ branch: 'main', unsubmitted: { records: [], siteFiles: [] }, conflicts: [] }))
+    await waitFor((state) => expect(state).toEqual({ branch: 'main', unsubmitted: { records: [], siteFiles: [], sourceFiles: [] }, conflicts: [] }))
     write(path.join(repo, 'site', 'pages', 'a.mdx'), '# a\n')
     await waitFor((state) => expect(state.unsubmitted.siteFiles).toEqual(['pages/a.mdx']))
     git(repo, 'add', '.')

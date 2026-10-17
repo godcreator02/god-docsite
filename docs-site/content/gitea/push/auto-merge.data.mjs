@@ -41,9 +41,9 @@ export const checkNames = ['和 main 没有冲突', '没改只有负责人能改
 /** 2026-09-30 实测时检查的三条，只给 cases 用：那时前一条不过，后面的不再查 */
 export const measuredCheckNames = ['和 main 没有冲突', '合并后只改了 collab/', '合并后没有新的格式问题'];
 
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="53-58" hash="05d032a8d704" blob="4c35701efab6" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="64-90" hash="ef805ffd25f5" blob="4c35701efab6" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="179-179" hash="770f3420697e" blob="4c35701efab6" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="56-61" hash="777ef88fb340" blob="b2999a5430a9" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="68-94" hash="9a68aae4bee7" blob="b2999a5430a9" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="189-189" hash="770f3420697e" blob="b2999a5430a9" */
 const submitLines = [
   { text: 'git add --all -- collab', kind: 'cmd' },
   { text: `git commit -m "${example.person} 的协作记录" -- collab`, kind: 'cmd' },
@@ -106,7 +106,7 @@ export const runSteps = [
     title: 'bob 提交审核',
     place: 'submit',
     seams: [1],
-    text: `bob 让 AI 调 collab.submit：插件在 bob 的本地 main 上把 collab/、site/ 与 .gitea/ 的改动一起提交，用 AGit 推到 refs/for/main，主题是 bob 的身份。这次只有一条任务，提交说明是「${example.person} 的协作记录」；带了 site/ 的改动（页面、评论）时写「${example.person} 的页面改动」或「${example.person} 的协作记录与页面改动」。合并插件不参与：推完它每 2 秒查一次合并请求，等执行器合并或打回。`,
+    text: `bob 让 AI 调 collab.submit：插件在 bob 的本地 main 上把 collab/、site/、sources/ 与 .gitea/ 的改动一起提交，用 AGit 推到 refs/for/main，主题是 bob 的身份。这次只有一条任务，提交说明是「${example.person} 的协作记录」；带了 site/ 的改动（页面、评论）时写「${example.person} 的页面改动」或「${example.person} 的协作记录与页面改动」。合并插件不参与：推完它每 2 秒查一次合并请求，等执行器合并或打回。`,
     artifact: { kind: 'term', title: 'bob · main', lines: submitLines },
   },
   {
