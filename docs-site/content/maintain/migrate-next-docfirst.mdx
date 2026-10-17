@@ -9,12 +9,17 @@ description: 用 Next 与 @godcreator/docfirst-workflow 建的旧文档站，怎
 第二个是 gwb-windows-backup 的 `docs-site`（docfirst-workflow 0.5.2 + docfirst-explainer 0.1.1，29 个 mdx、六个用讲解组件包画的组件），讲解组件包怎么换出自这一次。
 之后 gwb-gitea、gwb-unit-folder、gwb-nas-suite、gwb-mineru、gwb-agents 五个站照这页迁过，组件样式写在全站 CSS 里、组件没有数据文件这几条出自它们；
 再之后 lceda-studio、gwb-block-note、gwb-cgm-alert、gwb-qq-bot、codedoc_fpga_customperiph、gwb-ui-plugins、gwb-base-plugins 七个站由 ZCode 照这页迁、Claude 复查提交，
-生成正本里的组件、正文里的 `fumadocs-ui` import、没有轨迹卡的旧站、仓根脚本用 `--filter` 这几条出自它们。
+生成正本里的组件、正文里的 `fumadocs-ui` import、没有轨迹卡的旧站、仓根脚本用 `--filter` 这几条出自它们；
+页数上百的 gwb-kernel、gwb-lifecycle-plugins、gwb-paper-fetch 也照这页迁过，仓根 `allowBuilds`、卡的 frontmatter 写法、跨区共用组件这几条出自它们。
 
 开始前站点要停着，`git status` 里没有别人在 `docs-site/` 下未提交的改动。
 站是仓根 pnpm 工作区的成员时（仓根 `pnpm-workspace.yaml` 的 `packages` 里列着 `docs-site`），先从那里去掉：平台站自带 `pnpm-workspace.yaml`，留在里面就是工作区里嵌套工作区。
 去掉后在仓根 `pnpm install`，锁文件里站的那一份依赖跟着删掉，一起提交。
-仓根 `package.json` 的脚本用 `pnpm --filter <站的包名> …` 调站里命令的（gwb-base-plugins 的 `doc`、`doc:confirm`、`doc:render`），站移出工作区后 filter 找不到它，改成 `pnpm -C docs-site run …`。
+仓根 `package.json` 的脚本用 `pnpm --filter <站的包名> …` 调站里命令的（gwb-base-plugins 的 `doc`、`doc:confirm`、`doc:render`），站移出工作区后 filter 找不到它，改成 `pnpm -C docs-site run …`；
+为了排除站写的 `--filter=!<站的包名>`（gwb-kernel 的 `build`）一起去掉。
+仓根 `pnpm-workspace.yaml` 的 `allowBuilds` 不要跟着站一起删：注释写着「文档站带进来的」也先在锁文件里查清是谁带的，gwb-lifecycle-plugins 的 `esbuild`、`@parcel/watcher` 实际是插件的依赖带的，
+删了仓根 install 报 `Ignored build scripts` 退出码 1，pnpm 还往 `pnpm-workspace.yaml` 里写一段占位设置，要整段改回。
+仓根锁文件除了删掉站的那份依赖，别的条目会重新排版；核对新增的条目旧锁文件里都有，就没有版本变化。
 
 ## 1. 生成骨架
 
@@ -66,6 +71,8 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 `content/trajectory/` 整个挪到站点根 `trajectory/`，删掉里面的 `meta.json`：那是旧站给星轨盘入口排侧栏用的，新站的入口由 trajectory 功能放在侧栏站名下。
 卡的地址还是 `/trajectory/<卡身份>`，正文里的卡链接不用改。
 旧站一张卡都没有的（codedoc_fpga_customperiph），照说明书 `trajectory` 的卡格式新写一张根卡，`born-at` 取建站那次提交的时间，再写迁移卡。
+旧卡的 frontmatter 值里有「冒号加空格」的（gwb-lifecycle-plugins 一张卡的 `title`、`label` 含 `catalog: `），新 docfirst 读成嵌套映射报 `Nested mappings are not allowed`：
+只给这几个值加引号，正文不动。卡里链到旧跳转地址的链接（gwb-kernel 约 30 处）照旧留着，卡只增不改，在迁移卡里记一句。
 
 ### 讲解组件
 
@@ -78,7 +85,8 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - 只给一页用的组件挪进那一页的同名文件夹：gwb-vscode 首页 `content/docs/index.mdx` 用的接缝图挪进 `content/docs/index/`，在侧栏里不会多出一组；
   gwb-windows-backup 的 `windows-backup/health.mdx` 用的选情况组件挪进 `windows-backup/health/`
 - 同一组里几页共用的放进组里 `_` 开头的文件夹：gwb-windows-backup 的接缝图 `SeamMap` 由 `docs/index.mdx` 与 `docs/windows-backup/index.mdx` 共用，
-  和两张图共用的图标、几个组件共用的样式一起放进 `content/docs/_shared/`。跨组共用的才放站点 `app/components/`，放之前先问人
+  和两张图共用的图标、几个组件共用的样式一起放进 `content/docs/_shared/`。跨组共用的才放站点 `app/components/`，放之前先问人：
+  gwb-paper-fetch 的 `icons.tsx`、`file-tree.tsx`、`paper.css` 被 docs 与 paper-data 两区的组件共用，问过人后放进了 `app/components/`。交给 ZCode 批量迁时它没法停下来问，回报里要单列出来，提交前由派任务的一方问
 - 页面开头加 import，路径相对页面：`import { VscodeSeams } from './index/vscode-seams'`、`import { SeamMap } from '../_shared/seam-map/seam-map'`。旧站靠全局组件表，页面里不用 import
 - 去掉文件头的 `'use client'`：React Router 站没有服务端组件
 - 站自己的组件样式：旧站在 `src/app/global.css` 里统一引（gwb-windows-backup 是 `@import '../components/backup.css'`），新站的 `app/app.css` 是骨架的，不再引它们；
@@ -179,6 +187,9 @@ pnpm build
 再 `docsite.site.start {"dir":"<站目录>"}`，请求首页、各区首页、一张卡页、`/llms.txt`，都回 200。没有 index 页的区（未来区常常只有 `roadmap.mdx`）请求区的地址是 404，
 下拉框点进去去的是它的第一页，验收时请求第一页。有讲解组件的页，照 `docs-site` 说明书的「讲解组件截图验收」每个组件截浅色、深色、375 宽各一张逐张看，
 动画拖到中段与后段再截；然后 `docsite.site.stop`。要常驻的站改用 `docsite.site.add`。
+
+页面里 import 组件的相对路径算错了层级，`pnpm typecheck` 发现不了（它不解析 mdx 里的 import），要到 `pnpm build` 才报 `UNRESOLVED_IMPORT` / `Module not found`；
+同名文件夹本身是路径的一段，`content/docs/x/index.mdx` 到 `content/docs/_shared/` 是 `../_shared`。
 
 开发服务的日志里 `Failed to resolve dependency: @godcreator/code-pin > @types/mdast, present in client 'optimizeDeps.include'` 每个平台站都有，骨架站也有，不影响页面。
 
