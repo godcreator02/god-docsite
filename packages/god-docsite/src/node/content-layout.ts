@@ -1,8 +1,21 @@
-import { readdirSync } from 'node:fs'
+import { readdirSync, type Dirent } from 'node:fs'
 import path from 'node:path'
 import { pageNameOf } from '../core/page-files.js'
 
 const wherePageFilesGo = '只给一页用的放进和页面同名的文件夹，同一组里几页共用的放进组里 _ 开头的文件夹，几组都要用的放站点 app/components/'
+
+/**
+ * 父目录列出来的子目录，进去之前可能已经被删掉（dev 运行中 git 改名、挪目录，每删一个文件就触发一次检查）：
+ * 删掉的目录里没有放错的文件，按空目录算；删掉它的那次改动还会再触发一次检查。别的读目录错误照旧抛出
+ */
+function entriesOfSubdirectory(dir: string): Dirent[] {
+  try {
+    return readdirSync(dir, { withFileTypes: true })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+    throw error
+  }
+}
 
 /**
  * 内容目录里放错位置的文件，每条写明是哪个文件（相对内容目录）、该怎么放；都放对了是空数组。
@@ -14,7 +27,7 @@ export function misplacedContentFilesOf(contentDir: string): string[] {
   const problems: string[] = []
 
   const visitPageAssets = (dir: string, relative: string) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    for (const entry of entriesOfSubdirectory(dir)) {
       const entryPath = `${relative}/${entry.name}`
       if (entry.isDirectory()) visitPageAssets(path.join(dir, entry.name), entryPath)
       else if (entry.name === 'meta.json' || pageNameOf(entry.name) !== null) {
@@ -24,7 +37,7 @@ export function misplacedContentFilesOf(contentDir: string): string[] {
   }
 
   const visitGroup = (dir: string, relative: string) => {
-    const entries = readdirSync(dir, { withFileTypes: true })
+    const entries = relative === '' ? readdirSync(dir, { withFileTypes: true }) : entriesOfSubdirectory(dir)
     const pageNames = new Set(entries.filter((entry) => !entry.isDirectory()).map((entry) => pageNameOf(entry.name)))
     for (const entry of entries) {
       const entryPath = relative === '' ? entry.name : `${relative}/${entry.name}`

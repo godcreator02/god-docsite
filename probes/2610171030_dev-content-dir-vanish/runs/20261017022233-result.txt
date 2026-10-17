@@ -1,0 +1,32 @@
+{
+  "runTag": "20261017022233",
+  "rounds": [
+    {
+      "round": 1,
+      "alive": true,
+      "status": 200
+    },
+    {
+      "round": 2,
+      "alive": true,
+      "status": 200
+    },
+    {
+      "round": 3,
+      "alive": true,
+      "status": 200
+    },
+    {
+      "round": 4,
+      "alive": true,
+      "status": 200
+    },
+    {
+      "round": 5,
+      "alive": true,
+      "status": 200
+    }
+  ],
+  "crashed": false,
+  "enoent": null
+}

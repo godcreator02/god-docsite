@@ -1,0 +1,12 @@
+{
+  "runTag": "20261017022212",
+  "rounds": [
+    {
+      "round": 1,
+      "alive": false,
+      "status": null
+    }
+  ],
+  "crashed": true,
+  "enoent": "ENOENT: no such file or directory, scandir 'D:\\unitfolders\\oz47p-docsite-kit\\god-docsite\\full-test\\site\\content\\zz-vanish-20261017022212-1\\sub-23\\page-0'\r"
+}

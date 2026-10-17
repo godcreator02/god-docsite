@@ -67,7 +67,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 ## 建站器：按功能目录生成汇总文件
 
-`createSite` 往空目录里复制模板，把模板 `package.json` 里的 `{{version}}` 换成依赖写法——registry（发版后从 registry 装，写 `^<版本>`）、link（直接用仓里的包）、file（`pnpm pack` 的 tarball）三种——再写站名、`people.json`、`pnpm-workspace.yaml`，最后写出空的汇总文件。它不装依赖、不起服务。
+`createSite` 往空目录里复制模板，把模板 `package.json` 里的 `{{version}}` 换成依赖写法——registry（发版后从 registry 装，写 `^<版本>`）、link（直接用仓里的包）、file（`pnpm pack` 的 tarball）三种——再写站名、`people.json`、`pnpm-workspace.yaml`，最后写出空的汇总文件。它不装依赖、不启动开发服务。
 
 {/* ref file="../packages/god-docsite/src/node/scaffold/create-site.ts" lines="112-132" hash="78906872439f" blob="c32d8e1255e1" */}
 
@@ -172,7 +172,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 - **布局与侧栏**：整站布局是 fumadocs 的 `DocsLayout`；目录切换按钮按 `meta.json` 写了 `"root": true` 的文件夹生成，不在任何一组里的页面归进以站名命名的一组；在任务、全站评论这类不在页面树里的功能页面上，侧栏显示最近看过的那一组。站名下一横排是搜索按钮与各功能的侧栏入口。
 - **首页**：`app/routes/home.tsx` 在整站布局之外、地址是 `/`，内容目录根上不能再写 index 页；「文档」链接指向第一组的第一页。
 - **TSX 与 HTML 页面**：TSX 页的标题、描述、搜索文字来自它导出的 `meta`；HTML 页的标题取 `<title>`，只有写了 `id` 的标题才进目录与搜索锚点。
-- **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面；vite 插件在 build 与 dev 启动时检查，放错了就报错、不启动。
+- **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面；vite 插件在 build 与 dev 启动时检查，放错了就报错、不启动；dev 运行中每增删一个文件或文件夹就重查一遍，放错了在终端与浏览器的错误层里报出来。重查途中子文件夹被删掉（git 改名、挪目录时一次删几百个文件）按已经不存在算，开发服务不退出；内容目录本身不在照旧报错。
 - **搜索**：中文站点把 fumadocs 搜索的容错与命中阈值都设成 0，每个词都要原样出现。
 - **Markdown 与 llms**：每一页都有 Markdown 形式（MDX 走 `getText('processed')`，TSX、HTML 页在来源数据里），`/api/markdown`、`llms.txt`、`llms-full.txt` 用它；构建时只预渲染两份 llms 文本。
 - **术语标注**：站点根的 `glossary.json` 列术语；构建时长词优先、西文要词边界、一篇只标第一次，代码、公式、标题、链接里不标，所以排在 `remark-math` 之后。
