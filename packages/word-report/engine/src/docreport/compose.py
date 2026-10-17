@@ -10,6 +10,8 @@ import re
 from docreport.plain_math import INLINE_MATH_STYLE
 from docreport.word import utf16_length, find_text, MarkerFinder
 
+BODY_MARKER = re.compile(r'@(?:FIELD|NUMSTART|NUMEND|LINK|NOTE)\d+@')
+
 
 def mm(value):
     """Convert millimetres to Word points."""
@@ -227,30 +229,74 @@ class ContentComposer(Composer):
         self.appendix_numbering = None
         self.appendix_count = 0
         self._inline_math_style = None
+        # Each COM call crosses into the Word process; style objects, the bookmark collection
+        # and the start of the paragraph just written are fetched once and reused.
+        self._style_objects = {}
+        self._bookmark_collection = doc.Bookmarks
+        self._last_range, self._last_start = None, None
+        self._token_positions = {}
 
-    def point(self):
-        rng = self.doc.Content.Duplicate if self.container is None else self.container.Range.Duplicate
+    def style_object(self, name):
+        style = self._style_objects.get(name)
+        if style is None:
+            style = self._style_objects[name] = self.doc.Styles.Item(name)
+        return style
+
+    def in_main_story(self):
+        """Body paragraphs and body table cells; a footnote container is another story."""
+        return self.container is None or self.cell
+
+    def range_at(self, start, end):
+        if self.in_main_story():
+            return self.doc.Range(start, end)
+        rng = self.container.Range.Duplicate
+        rng.SetRange(start, end)
+        return rng
+
+    def insertion_point(self):
+        if self.container is None:
+            position = self.doc.Content.End - 1
+            return self.doc.Range(position, position), position
+        rng = self.container.Range.Duplicate
         # Word exposes the cell's CR/BEL terminator as one Range position.
         position = rng.End - 1
         rng.SetRange(position, position)
-        return rng
+        return rng, position
+
+    def point(self):
+        return self.insertion_point()[0]
 
     def paragraph(self, text, style=None):
-        rng = self.point()
-        start = rng.Start
+        rng, start = self.insertion_point()
+        # InsertBefore expands the range over the inserted text and paragraph mark.
         rng.InsertBefore(text + '\r')
-        rng.SetRange(start, start + utf16_length(text) + 1)
-        rng.Style = self.doc.Styles.Item(self.style if style is None else style)
+        rng.Style = self.style_object(self.style if style is None else style)
+        self._last_range, self._last_start = rng, start
+        self.record_tokens(text, start)
         return rng
 
+    def record_tokens(self, text, start):
+        """Body positions of field, number, note and link markers, so finish() needs no Find.
+
+        Content is only appended after a recorded marker, so its position holds until
+        build() replaces markers; notes and links shift later positions, fields go back to front.
+        """
+        if not self.in_main_story():
+            return
+        for match in BODY_MARKER.finditer(text):
+            self._token_positions[match.group()] = start + utf16_length(text[:match.start()])
+
     def part(self, rng, offset, length):
+        if rng is self._last_range:
+            return self.range_at(self._last_start + offset, self._last_start + offset + length)
         result = rng.Duplicate
-        result.SetRange(rng.Start + offset, rng.Start + offset + length)
+        start = rng.Start
+        result.SetRange(start + offset, start + offset + length)
         return result
 
     def mark(self, identifier, rng, suffix=''):
         from .content import bookmark
-        self.doc.Bookmarks.Add(bookmark(identifier, suffix), rng)
+        self._bookmark_collection.Add(bookmark(identifier, suffix), rng)
 
     def math_token(self, node, inline):
         from .content import bookmark
@@ -315,21 +361,29 @@ class ContentComposer(Composer):
     def rich_paragraph(self, nodes, style=None, prefix='', suffix=''):
         text, spans = self.inline(nodes)
         rng = self.paragraph(prefix + text + suffix, style)
-        self.apply_marks(rng, utf16_length(prefix), spans)
+        self.apply_marks_at(self._last_start + utf16_length(prefix), spans)
         return rng
 
     def apply_marks(self, rng, offset, spans):
+        start = self._last_start if rng is self._last_range else rng.Start
+        self.apply_marks_at(start + offset, spans)
+
+    def apply_marks_at(self, base, spans):
         for start, length, marks in spans:
             if not marks:
                 continue
-            run = self.part(rng, offset + start, length)
+            run = self.range_at(base + start, base + start + length)
             for mark in marks:
                 if mark == 'code':
                     run.Font.Name = 'Consolas'
                 elif mark == 'math':
                     run.Style = self.inline_math_style()
+                elif mark == 'strong':
+                    run.Bold = True
+                elif mark == 'em':
+                    run.Italic = True
                 else:
-                    setattr(run.Font, {'strong': 'Bold', 'em': 'Italic', 'sup': 'Superscript', 'sub': 'Subscript'}[mark], True)
+                    setattr(run.Font, {'sup': 'Superscript', 'sub': 'Subscript'}[mark], True)
 
     def inline_math_style(self):
         """Character style of inline formulas written as text; created in the document, the DOTX stays unchanged."""
@@ -343,11 +397,13 @@ class ContentComposer(Composer):
         """Write a one-paragraph cell in one assignment; the general path inserts then trims a paragraph."""
         text, spans = self.inline(node['content'])
         rng = cell.Range
+        start = rng.Start
         rng.Text = text
-        rng = self.part(cell.Range, 0, utf16_length(text))
-        rng.Style = self.doc.Styles.Item(self.layout.get(node['id'], {}).get('style') or self.style)
-        self.apply_marks(rng, 0, spans)
-        self.mark(node['id'], rng, '_b')
+        self.record_tokens(text, start)
+        target = self.range_at(start, start + utf16_length(text))
+        target.Style = self.style_object(self.layout.get(node['id'], {}).get('style') or self.style)
+        self.apply_marks_at(start, spans)
+        self.mark(node['id'], target, '_b')
 
     def chapter_sequence(self, kind, bookmark):
         """「章号-序号」 for an equation, figure or table in the current top-level chapter."""
@@ -494,7 +550,7 @@ class ContentComposer(Composer):
         table.AllowAutoFit = False
         table.Borders.Enable = 1
         table.Rows.AllowBreakAcrossPages = 0
-        table.Range.Style = self.doc.Styles.Item('Table Text')
+        table.Range.Style = self.style_object('Table Text')
         table.TopPadding = table.BottomPadding = 3
         table.LeftPadding = table.RightPadding = 4
         layout = self.layout.get(node['id'], {})
@@ -512,14 +568,19 @@ class ContentComposer(Composer):
             table.Rows.Item(r).Shading.BackgroundPatternColor = 0xEFEFEF
         if layout.get('minRowHeightPt'):
             table.Rows.HeightRule, table.Rows.Height = 1, layout['minRowHeightPt']
-        cells = {(r, c): table.Cell(r + 1, c + 1).Range.Duplicate
-                 for r in range(len(node['rows'])) for c in range(len(node['columns']))}
-        for r, c, rs, cs, cell in reversed(placements):
-            if rs > 1 or cs > 1:
-                cells[r, c].Cells.Item(1).Merge(cells[r + rs - 1, c + cs - 1].Cells.Item(1))
+        if any(rs > 1 or cs > 1 for _, _, rs, cs, _ in placements):
+            # Merging renumbers cells; ranges taken before merging still find each placed cell.
+            cells = {(r, c): table.Cell(r + 1, c + 1).Range.Duplicate
+                     for r in range(len(node['rows'])) for c in range(len(node['columns']))}
+            for r, c, rs, cs, cell in reversed(placements):
+                if rs > 1 or cs > 1:
+                    cells[r, c].Cells.Item(1).Merge(cells[r + rs - 1, c + cs - 1].Cells.Item(1))
+            cell_at = lambda r, c: cells[r, c].Cells.Item(1)
+        else:
+            cell_at = lambda r, c: table.Cell(r + 1, c + 1)
         saved = self.container, self.cell, self.style, self.width
         for r, c, rs, cs, cell in placements:
-            self.container = cells[r, c].Cells.Item(1)
+            self.container = cell_at(r, c)
             self.cell = True
             self.style = 'Table Header' if r < node['headerRows'] else 'Table Text'
             self.width = sum(widths[c:c + cs]) - 8
@@ -608,6 +669,92 @@ class ContentComposer(Composer):
             else:
                 raise ValueError(f'Unsupported block: {kind}')
 
+    def replace_body_marker(self, token, replace):
+        """Replace a note or link marker; markers recorded after it move by the change in body length."""
+        position = self._token_positions.pop(token, None)
+        if position is None:
+            replace(find_text(self.doc, token))
+            return
+        before = self.doc.Content.End
+        replace(self.doc.Range(position, position + utf16_length(token)))
+        delta = self.doc.Content.End - before
+        if delta:
+            for marker, recorded in self._token_positions.items():
+                if recorded > position:
+                    self._token_positions[marker] = recorded + delta
+
+    def compose_note(self, target, identifier):
+        target.Text = ''
+        note = self.doc.Footnotes.Add(Range=target, Text='')
+        saved = self.container, self.cell, self.style, self.width
+        self.container, self.cell, self.style = note, False, -30
+        self.blocks(self.context['index'][identifier]['blocks'])
+        self.trim_container()
+        self.container, self.cell, self.style, self.width = saved
+
+    def add_link(self, target, text, url):
+        # Word can retain a nonempty anchor's placeholder even when
+        # TextToDisplay is supplied. Replace the range explicitly before
+        # adding the hyperlink so the saved document contains source text.
+        target.Text = text
+        self.doc.Hyperlinks.Add(target, url)
+
+    def add_field(self, token, rng, code, bookmark):
+        field = self.doc.Fields.Add(rng, -1, code, False)
+        font = field.Code.Font
+        font.Bold, font.Italic = 0, 0
+        if bookmark:
+            self._bookmark_collection.Add(bookmark, field.Result)
+
+    def finish(self):
+        """Body markers go back to front, so each replacement leaves earlier positions unchanged.
+
+        A collapsed or adjacent Word range does not follow a field inserted right before it,
+        so the end of a 「章号-序号」 bookmark is tracked from the change in body length.
+        Markers inside footnotes are not recorded and are found by searching.
+        """
+        if self._finished:
+            raise RuntimeError('Composer.finish() may only be called once.')
+        doc = self.doc
+        fields = {token: (code, bookmark) for token, code, bookmark in self._pending_fields}
+        openings = {begin: (end, bookmark) for begin, end, bookmark in self._pending_numbers}
+        closings = {end for _, end, _ in self._pending_numbers}
+        open_number = None
+        for position, token in sorted(((p, t) for t, p in self._token_positions.items()), reverse=True):
+            rng = doc.Range(position, position + utf16_length(token))
+            if token in fields:
+                if open_number is None:
+                    self.add_field(token, rng, *fields.pop(token))
+                    continue
+                before = doc.Content.End
+                self.add_field(token, rng, *fields.pop(token))
+                open_number[1] += doc.Content.End - before
+            elif token in closings:
+                if open_number is not None:
+                    raise RuntimeError(f'Number marker nested in another number: {token}')
+                rng.Delete()
+                open_number = [token, position]
+            elif token in openings:
+                end_token, bookmark = openings.pop(token)
+                if open_number is None or open_number[0] != end_token:
+                    raise RuntimeError(f'Number marker without its end: {token}')
+                rng.Delete()
+                self._bookmark_collection.Add(bookmark, doc.Range(position, open_number[1] - utf16_length(token)))
+                open_number = None
+            else:
+                raise RuntimeError(f'Body marker left unhandled: {token}')
+        if openings:
+            raise RuntimeError(f'Number markers outside the body: {sorted(openings)}')
+        finder = MarkerFinder(doc)
+        for token, code, bookmark in self._pending_fields:
+            if token in fields:
+                self.add_field(token, finder.find(token), *fields.pop(token))
+        for table in doc.Tables:
+            following = doc.Range(table.Range.End, table.Range.End).Paragraphs.First.Format
+            following.SpaceBefore = max(6, following.SpaceBefore)
+        self._finished = True
+        return self.pending_math
+
     def build(self):
         metadata = self.content['metadata']
         values = dict(reportTitle=metadata['title'], projectName='', author='、'.join(metadata.get('authors', [])),
@@ -623,21 +770,9 @@ class ContentComposer(Composer):
         self.doc.Bookmarks.Add('ReportBodyStart', self.doc.Range(start, start))
         self.blocks(self.content['blocks'])
         for token, identifier in self.note_tokens:
-            target = find_text(self.doc, token)
-            target.Text = ''
-            note = self.doc.Footnotes.Add(Range=target, Text='')
-            saved = self.container, self.cell, self.style, self.width
-            self.container, self.cell, self.style = note, False, -30
-            self.blocks(self.context['index'][identifier]['blocks'])
-            self.trim_container()
-            self.container, self.cell, self.style, self.width = saved
+            self.replace_body_marker(token, lambda target: self.compose_note(target, identifier))
         for token, text, url in self.links:
-            target = find_text(self.doc, token)
-            # Word can retain a nonempty anchor's placeholder even when
-            # TextToDisplay is supplied. Replace the range explicitly before
-            # adding the hyperlink so the saved document contains source text.
-            target.Text = text
-            self.doc.Hyperlinks.Add(target, url)
+            self.replace_body_marker(token, lambda target: self.add_link(target, text, url))
         pending = self.finish()
         for index, section in enumerate(self.doc.Sections, 1):
             if index > 1:

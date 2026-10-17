@@ -8,7 +8,7 @@ import copy
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 from zipfile import ZipFile
 
 from docreport.__main__ import load_report, reserve_output
@@ -238,6 +238,32 @@ class ChapterNumberFieldTests(unittest.TestCase):
         composer.chapter_sequence('Table', 'bm')
         self.assertEqual([code for _, code, _ in composer._pending_fields],
                          [r'STYLEREF "Appendix Heading" \s \* CHARFORMAT', r'SEQ TableAppendixB \* ARABIC \* CHARFORMAT'])
+
+
+class BodyMarkerTests(unittest.TestCase):
+    def composer(self):
+        composer = ContentComposer.__new__(ContentComposer)
+        Composer.__init__(composer, MagicMock())
+        composer.container, composer.cell, composer._token_positions = None, False, {}
+        return composer
+
+    def test_body_markers_are_recorded_at_utf16_positions_and_footnote_markers_are_not(self):
+        composer = self.composer()
+        composer.record_tokens('图😀@FIELD0@，@NOTE1@@MATH0@', 10)
+        self.assertEqual(composer._token_positions, {'@FIELD0@': 13, '@NOTE1@': 22})
+        composer.container = MagicMock()
+        composer.record_tokens('@FIELD2@', 0)
+        self.assertNotIn('@FIELD2@', composer._token_positions)
+
+    def test_a_note_or_link_moves_only_the_markers_after_it(self):
+        composer = self.composer()
+        composer._token_positions = {'@FIELD0@': 5, '@LINK0@': 20, '@FIELD1@': 40}
+        type(composer.doc.Content).End = PropertyMock(side_effect=[100, 107])
+        replaced = []
+        composer.replace_body_marker('@LINK0@', replaced.append)
+        composer.doc.Range.assert_called_once_with(20, 27)
+        self.assertEqual(replaced, [composer.doc.Range.return_value])
+        self.assertEqual(composer._token_positions, {'@FIELD0@': 5, '@FIELD1@': 47})
 
 
 class ReportBoundaryTests(unittest.TestCase):
