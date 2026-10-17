@@ -1,0 +1,24 @@
+---
+born-at: 2026-10-17T16:20
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: Vite 只给 tsconfig 收进来的文件按 paths 解析：模板 tsconfig 的 include 加 "**/*.mdx"，mdx 页面里的 @components/… 才解析得了
+domain: 站点模板
+---
+
+## 背景
+
+几组页面共用的组件挪进 `content/_components/`，站点 tsconfig 的 `paths` 加了 `@components/*`，vite 配置本来就开着 `resolve.tsconfigPaths`。
+pivots-from:: [几组页面共用的组件放内容根下的 _components/](2026-10-17-shared-components-in-content.md)
+
+## 结论与边界
+
+- plecs-studio 的 docs-site 把 mdx 里的 `SeamMap` import 改成 `@components/seam-map/seam-map` 后，`pnpm build` 报 Rolldown `failed to resolve import "@components/seam-map/seam-map" from ".../content/sweep/index.mdx?collection=docs"`；
+  同一批 gwb-paper-fetch 只在 `.tsx` 组件里用 `@components/…`，构建通过。
+- tsconfig 的 `include` 写 `"**/*"` 时 TypeScript 只收它认得的扩展名，`.mdx` 不在里面，Vite 就不按 `paths` 解析 mdx 里的 import。
+  `include` 里显式加 `"**/*.mdx"` 后 plecs-studio 构建通过，`tsc --noEmit` 照常通过（TypeScript 不报 mdx 的错）。
+- 平台模板的 tsconfig 带上 `"**/*.mdx"`；早建的站用 `@components/…` 时自己补。
+
+## 依据
+
+无 probes 目录：证据是 plecs-studio `docs-site` 改 tsconfig 前后各跑一次 `pnpm build`，前一次失败、后一次通过。

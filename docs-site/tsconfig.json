@@ -1,5 +1,5 @@
 {
-  "include": ["app", "content", "comments", "react-router.config.ts", "vite.config.ts", "source.config.ts", ".react-router/types/**/*"],
+  "include": ["app", "content", "content/**/*.mdx", "comments", "react-router.config.ts", "vite.config.ts", "source.config.ts", ".react-router/types/**/*"],
   "exclude": ["node_modules", "build"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2023"],

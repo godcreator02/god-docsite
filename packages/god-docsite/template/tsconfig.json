@@ -1,5 +1,5 @@
 {
-  "include": ["**/*", ".react-router/types/**/*"],
+  "include": ["**/*", "**/*.mdx", ".react-router/types/**/*"],
   "exclude": ["node_modules", "build"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2023"],
