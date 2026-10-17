@@ -7,11 +7,14 @@ description: 用 Next 与 @godcreator/docfirst-workflow 建的旧文档站，怎
 做法是在空目录用 `docfirst.create` 生成一套新站，把建站器负责的文件整份换进旧站，`content/` 的正文留着，再逐类处理差异。
 第一个这样迁过来的是 gwb-vscode 的 `docs-site`（Next 16 + docfirst-workflow 0.5.2，14 个 mdx、一个讲解组件）；
 第二个是 gwb-windows-backup 的 `docs-site`（docfirst-workflow 0.5.2 + docfirst-explainer 0.1.1，29 个 mdx、六个用讲解组件包画的组件），讲解组件包怎么换出自这一次。
-之后 gwb-gitea、gwb-unit-folder、gwb-nas-suite、gwb-mineru、gwb-agents 五个站照这页迁过，组件样式写在全站 CSS 里、组件没有数据文件这几条出自它们。
+之后 gwb-gitea、gwb-unit-folder、gwb-nas-suite、gwb-mineru、gwb-agents 五个站照这页迁过，组件样式写在全站 CSS 里、组件没有数据文件这几条出自它们；
+再之后 lceda-studio、gwb-block-note、gwb-cgm-alert、gwb-qq-bot、codedoc_fpga_customperiph、gwb-ui-plugins、gwb-base-plugins 七个站由 ZCode 照这页迁、Claude 复查提交，
+生成正本里的组件、正文里的 `fumadocs-ui` import、没有轨迹卡的旧站、仓根脚本用 `--filter` 这几条出自它们。
 
 开始前站点要停着，`git status` 里没有别人在 `docs-site/` 下未提交的改动。
 站是仓根 pnpm 工作区的成员时（仓根 `pnpm-workspace.yaml` 的 `packages` 里列着 `docs-site`），先从那里去掉：平台站自带 `pnpm-workspace.yaml`，留在里面就是工作区里嵌套工作区。
 去掉后在仓根 `pnpm install`，锁文件里站的那一份依赖跟着删掉，一起提交。
+仓根 `package.json` 的脚本用 `pnpm --filter <站的包名> …` 调站里命令的（gwb-base-plugins 的 `doc`、`doc:confirm`、`doc:render`），站移出工作区后 filter 找不到它，改成 `pnpm -C docs-site run …`。
 
 ## 1. 生成骨架
 
@@ -40,9 +43,11 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 再删掉旧站的 Next 文件：`src/app/`、`src/lib/`、`src/proxy.ts`、`src/components/mdx.tsx` 与 `registry.ts`、`next.config.mjs`、`postcss.config.mjs`、
 `scripts/verify-roster.mjs`、create-fumadocs 留在站目录里的 `README.md`。`registry.ts` 与 `verify-roster.mjs` 是核对组件名册两边一致用的，
 新站的组件由页面自己 import，名册只剩 `docfirst.config.mjs` 一处。已跟踪的文件用 `git mv` / `git rm`，挪动的历史留得住。
+站里别的脚本只测 Next 那套文件的（codedoc 的 `scripts/verify-markdown.mjs` 测的是 `src/lib/` 里的文件），随 Next 文件一起删。
 
 构建产物与旧依赖也删掉：`.next/`、`.source/`、`out/`（旧命令行写出的各页机读文本 `*.mdx.ai.md`）、`node_modules/`、`next-env.d.ts`、`tsconfig.tsbuildinfo`，然后 `pnpm install`。
 新的 `.gitignore` 不再忽略 `.next/`，不删它就出现在 `git status` 里；仓根 `.gitignore` 里专给旧站产物写的规则（`docs-site/.next/` 这类）一起删掉。
+`next dev` 在站目录里写过 `AGENTS.md`、`CLAUDE.md` 的（旧 `.gitignore` 忽略、没有跟踪），换了 `.gitignore` 后会露出来，一起删。
 
 ## 3. 每类差异怎么改
 
@@ -53,12 +58,14 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - `content/meta.json` 写站名与 `pages`，如 `{ "title": "gwb-vscode", "pages": ["docs", "future"] }`
 - 每个区的 `meta.json` 加 `title` 与 `"root": true`
 - 地址不变：`content/docs/x.mdx` 还是 `/docs/x`，站内链接不用改
+- 旧 `next.config.mjs` 里的历史跳转（gwb-base-plugins 的 `/docs/roadmap` → `/future/roadmap` 等）新站没有对应，删了以后旧地址回 404。先查站内有没有链接指向它们，有就改链接；跳转本身不补，记进这个站的迁移卡
 - `content/` 根上不放 `index` 页。首页是 `app/routes/home.tsx`；旧站多是把 `/` 跳到 `/docs`，新站首页写站名、一句介绍和去文档的链接：骨架首页里那句「这是站点的首页，写在 app/routes/home.tsx 里。」换成这个站的介绍
 
 ### 轨迹卡
 
 `content/trajectory/` 整个挪到站点根 `trajectory/`，删掉里面的 `meta.json`：那是旧站给星轨盘入口排侧栏用的，新站的入口由 trajectory 功能放在侧栏站名下。
 卡的地址还是 `/trajectory/<卡身份>`，正文里的卡链接不用改。
+旧站一张卡都没有的（codedoc_fpga_customperiph），照说明书 `trajectory` 的卡格式新写一张根卡，`born-at` 取建站那次提交的时间，再写迁移卡。
 
 ### 讲解组件
 
@@ -78,6 +85,9 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
   改成每个组件开头 `import` 自己用到的样式文件，几个组件共用的那份放进上面的 `_` 文件夹、各自 import。
   组件的颜色变量与类直接写在 `global.css` 里的（gwb-gitea 的 `--gitea-seam-accent`、gwb-unit-folder 的 `.uf-seams`、gwb-nas-suite 的 `--seam-*`），
   删 `src/app/` 之前先把这几段挪成组件旁的 `.css`：三条验收命令都不会因为它们丢了报错，组件只是悄悄没了颜色
+- 用在生成正本里的组件（gwb-qq-bot 的 `qq-bot-plugin-api.mdx` 用 `RegistrationLife`）：正本里写 import 会让 render 拒绝生成。
+  组件照样放进正本的同名文件夹，再登记进站点的全局组件表 `app/lib/mdx-components.tsx`，正本不 import 也能写；render 后看生成物逐字没变
+- 组件之间借用别的组件的样式文件的（gwb-block-note 的 `comment-edges.tsx` 借 `technical.module.css`），样式跟着它的主人走，借用的一方改成相对路径 import
 - 组件没有 `.data.mjs`、机读文字直接写在 `docfirst.config.mjs` 里的，规则照抄，只改注释里的组件路径，不用补下面的 `.d.mts`
 - 数据文件保持 `.mjs`（`docfirst.config.mjs` 在 Node 里直接 import 它），旁边补一份同名的 `.d.mts` 写出导出的类型。
   旧站的 `tsconfig.json` 开着 `allowJs`，类型是推断出来的；新站不开，不补就报 `TS7016: Could not find a declaration file for module './vscode-seams.data.mjs'`。
@@ -125,10 +135,13 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - SKILL.md 的映射照旧写对象形式 `{ to, frontmatter: ['name', 'description'] }`
 - 配置里有 `glossary` 的去掉，术语表转成站点根的 `glossary.json`（每条 `term` / `aliases` / `def` / `href`）
 
-### Note 组件
+### Note 组件与 fumadocs-ui 的 import
 
 旧站的 `src/components/mdx.tsx` 自己定义了 `Note`；新站的组件表里没有它，`fumadocsRoster` 只给它在生成物里的机读规则。
 页面里用到 `<Note>` 的，现状页改成 fumadocs 的 `<Callout>`；生成正本里的改成引用块，名册里没有 `Callout` 的机读规则，用了 `pnpm doc` 报红。
+
+正文里 `import { Steps, Step } from 'fumadocs-ui/components/steps'` 这类 import（codedoc 有八页）直接删掉：新站装的是 `@fumadocs/base-ui`，没有 `fumadocs-ui` 这个包名，
+import 解析不了；`Steps`、`Step`、`Accordion`、`Accordions`、`ImageZoom` 平台的组件表已经提供，页面不 import 就能写。
 
 ### 术语表
 
@@ -148,7 +161,10 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
   `[http://127.0.0.1:4313），不用](http://127.0.0.1:4313），不用)`）。之后的版本照原文写出；站里装的还是 0.1.0 时，把网址放进反引号，或改写那一句
 - 旧站 AGENTS / README 正本里「先 `pnpm build` 再 `pnpm start`（端口 43xx）」「`pnpm dev`，端口 43xx」这类说法都过时了，
   改成开发服务由工作台托管：`docsite.site.add {"dir":"<站目录>"}`，地址看 `docsite.site.list`；正本里说说明书属于 `@godcreator/gwb-docfirst-workflow` 的，改成 `@godcreator/gwb-docsite`
-- 未来区 `inbox/` 里要求升级 docfirst-workflow 的反馈，迁完站里已经没有这个包，删掉
+- 未来区 `inbox/` 里要求升级 docfirst-workflow 或 fumadocs 的反馈，迁完站里已经换成骨架带的版本，删掉；别的反馈（如立创行为的）照留
+
+钉着站外文件的页（gwb-ui-plugins 的 `dev.mdx`、gwb-base-plugins 的 `develop.mdx` 钉站的 `package.json`、`docfirst.config.mjs`、仓根 scripts）因为迁移改了这些文件会亮黄灯，
+未提交时算红：照说明书 `docs-site` 逐条看，论断还成立就 `pnpm doc:confirm <页> --accept`；不成立的先改正文（gwb-base-plugins 的「工作区是 `plugins/*` 与 `docs-site`」改成文档站不在工作区里）。
 
 ## 4. 验收
 
@@ -179,3 +195,5 @@ pnpm build
 - 旧页面 frontmatter 里的 `full: true` 不再生效：平台的页面组件不把它交给 fumadocs 的 `DocsPage`，正文旁边照样有目录栏。
   gwb-windows-backup 两张 1200 宽的接缝图因此在 593 宽的正文里横向滚动，图本身画全了；这是平台包的事，迁移时不改页面
 - 旧站 `global.css` 里给 `@theme` 设的字体（如更纱黑体）不在骨架的 `app/app.css` 里，迁过来用的是平台默认字体
+- 有的页面是 CRLF 行尾（gwb-base-plugins 的 `mcp.mdx`）：批量给页面插 import 的脚本只认 LF 就会漏掉它，插入时跟着文件自己的行尾
+- `pnpm exec docfirst trajectory` 文本输出的卡数不算根卡，新卡写好后数字看着少一张时用 `--json` 看 `cards`
