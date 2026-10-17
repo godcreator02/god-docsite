@@ -1,0 +1,39 @@
+---
+born-at: 2026-10-17T11:10
+type: evidence
+parent: [2026-09-03-god-live-doc]
+label: 协作站正文经 KaTeX MathML 转 OMML 导出 Word：验证可行，没有采用
+domain: 报告
+---
+
+## 背景
+
+报告要在协作站上读和评论、在 Word 里交付。2026-10-10 在本机仓 collab-word-lab 试了一条路：正文写成 MDX（Markdown 加 LaTeX），网页用 KaTeX 显示，
+导出时同一份 LaTeX 经 KaTeX 转成 MathML、再用 Office 自带的 `MML2OMML.XSL` 转成 Word 原生公式（OMML），由 Python 经 Word COM 排成正式版式。
+同一天另一个仓 word-conversion-lab 在比较 Word 生成路线，并把 MathType 定为正式流程。材料 2026-10-17 才挪进 `probes/`。
+
+## 结论与边界
+
+这条路走得通：10 页样例的表格、图片、OMML 公式、横向节、目录与公式编号都由 Word 正确生成，导出后公式在 Word 里可以改、改了保存重开还在。
+没有采用，原因是公式的正式形式当天已定为 MathType 对象，不是 OMML：用户确认后续报告的行内与行间公式都用 MathType（见 [正式流程](2026-10-10-formal-report-workflow.md)），
+之后的报告引擎（今天的 `packages/word-report/engine/`）就是 Word COM 加 MathType；2026-10-17 加 MDX 写法时也选择编译成 docreport、引擎不动（见 [报告正文加 MDX 写法](2026-10-17-report-mdx-source.md)），
+引擎里没有「LaTeX → MathML → OMML」这一步的位置。只验证了这一页样例的 Markdown 子集（标题、段落、列表、GFM 表格、代码块、图片、链接、行内与行间公式、章节版式标记）与本机 Word 16；
+合并单元格、脚注、修订、从 Word 读回网站都不在范围内，复杂 LaTeX 经 XSLT 转出的 OMML 是否都对也没有逐条验过。
+
+## 经过
+
+样例取自一份 SST 报告的 10 个页面（按完整段落与完整表格取样），由 `import_sample.py` 一次性转成 `page.mdx`，之后导出只读 MDX 与图片。
+remark 解析结构、KaTeX 把公式转成 MathML，Python 经 Word COM 逐段写入，公式经 XSLT 转成 OMML 后插入目标段落或表格单元格。
+首次导出遇到 Word 自动压缩图片，改成先由 Word 建一个空白文档、在它的设置里关掉自动压缩，再插入原图与正文。
+导出后独立检查逐格比对表格、逐条比对公式结构、比对图片字节；另在独立副本里把一个分式分母从 8 改成 9，保存重开后读回。
+还临时改了一句正文、一个表格参数（100kW 改 101kW）与一条公式的写法，网页与再次导出的 DOCX 三处都跟着变，之后恢复原文。
+
+## 依据
+
+数字出自当时的验证记录（collab-word-lab 的 README「验证记录」一节，原样留在 `probes/2610101631_collab-word-omml/lab-README.md`）：
+10 页、6 张表、2 张图、15 个原生公式、3 个方向节、1 个自动目录、2 个公式编号域，247 个表格单元格逐格一致，15 个公式结构一致，两张图片字节一致。
+每次导出的原始输出在当时仓里被忽略的 `out/` 下，没有带过来，本卡数字为写卡时转述那份记录，无原始输出可核对。脚本在 `probes/2610101631_collab-word-omml/routes/word-com/`。
+
+## 否掉的候选
+
+- **OMML 当正式公式形式**：Word 原生、不依赖 MathType 授权，网页与 Word 共用一份 LaTeX。被否在用户 2026-10-10 选定 MathType：MathType 的六类样例当天已完成创建、保存重开读回与显示验证，正式流程照它建

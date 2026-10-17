@@ -1,0 +1,22 @@
+{
+  "name": "collab-word-lab-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4342 --strictPort",
+    "start": "node start.mjs",
+    "check": "node check.mjs"
+  },
+  "dependencies": {
+    "@godcreator/collab-site": "0.29.0",
+    "@godcreator/collab-model": "0.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "vite": "8.3.0",
+    "katex": "0.16.47",
+    "unified": "11.0.5",
+    "remark-parse": "11.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-math": "6.0.0"
+  }
+}
