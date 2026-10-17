@@ -54,6 +54,15 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 新的 `.gitignore` 不再忽略 `.next/`，不删它就出现在 `git status` 里；仓根 `.gitignore` 里专给旧站产物写的规则（`docs-site/.next/` 这类）一起删掉。
 `next dev` 在站目录里写过 `AGENTS.md`、`CLAUDE.md` 的（旧 `.gitignore` 忽略、没有跟踪），换了 `.gitignore` 后会露出来，一起删。
 
+站里还有这几样的，照下面处理：
+
+- **`.ledger.json`**：记录还写在这个文件里时用的记录簿。旧站在 docfirst-workflow 0.5.x 上 `pnpm doc` 全绿、页面里的 `ref` 记号都带着 `hash` 与 `blob`，就说明记录早已写进记号，这个文件没人读了，`git rm`（plecs-studio 是这样）。
+  记号还没带记录的站不能照这页迁：新 docfirst 不认没有记录的正式记号，也没有把记录簿写进记号的命令，停下来问人
+- **站目录自己的 `.npmrc`**（plecs-studio 的写着旧的本机源与 `auto-install-peers`）：删掉。pnpm 不读项目级 `.npmrc` 里的安装设置，骨架的 `pnpm-workspace.yaml` 已经写好
+- **`public/`**：照留。平台站在开发服务和构建产物里都把它挂在站点根上，页面里写的绝对地址（anpc-lcl 的 `/figures/…`、plecs-studio 轨迹卡里的 `/trajectory/<目录>/x.png`）不用改，
+  `/trajectory/` 底下的文件也不会被卡页路由拦住。新加的图仍放进页面的同名文件夹
+- **`content/` 下的空目录**（plecs-studio 的 `spec/`、`feedback/`，git 不跟踪）：删掉，不然侧栏会多出空的一项
+
 ## 3. 每类差异怎么改
 
 ### 分区与侧栏
@@ -63,6 +72,9 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - `content/meta.json` 写站名与 `pages`，如 `{ "title": "gwb-vscode", "pages": ["docs", "future"] }`
 - 每个区的 `meta.json` 加 `title` 与 `"root": true`
 - 地址不变：`content/docs/x.mdx` 还是 `/docs/x`，站内链接不用改
+- 旧站给某个区单独写了 Next 布局的（plecs-studio 的 `sweep/`），新站里它只是 `content/` 下又一个目录：`meta.json` 加 `title` 与 `"root": true`，目录名加进 `content/meta.json` 的 `pages`
+- 旧站自己写的、平台没有对应的页面（plecs-studio 的轨迹卡目录 `/trajectory/browse`，按日期列卡、按关键词与领域筛），迁过来就没有了：新站里这个地址被卡页路由接走、回 404。
+  删掉还是在站点 `app/routes/` 里照新平台重写，问人定；删掉的记进迁移卡
 - 旧 `next.config.mjs` 里的历史跳转（gwb-base-plugins 的 `/docs/roadmap` → `/future/roadmap` 等）新站没有对应，删了以后旧地址回 404。先查站内有没有链接指向它们，有就改链接；跳转本身不补，记进这个站的迁移卡
 - `content/` 根上不放 `index` 页。首页是 `app/routes/home.tsx`；旧站多是把 `/` 跳到 `/docs`，新站首页写站名、一句介绍和去文档的链接：骨架首页里那句「这是站点的首页，写在 app/routes/home.tsx 里。」换成这个站的介绍
 
@@ -96,6 +108,11 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - 用在生成正本里的组件（gwb-qq-bot 的 `qq-bot-plugin-api.mdx` 用 `RegistrationLife`）：正本里写 import 会让 render 拒绝生成。
   组件照样放进正本的同名文件夹，再登记进站点的全局组件表 `app/lib/mdx-components.tsx`，正本不 import 也能写；render 后看生成物逐字没变
 - 组件之间借用别的组件的样式文件的（gwb-block-note 的 `comment-edges.tsx` 借 `technical.module.css`），样式跟着它的主人走，借用的一方改成相对路径 import
+- 旧站用脚本按目录生成组件汇总表的（plecs-studio 的 `scripts/explain-index.mjs` 生成 `src/components/explain/index.ts` 与 `index.ai.mjs`，再交给全局组件表与 `docfirst.config.mjs`），
+  脚本和两份汇总表一起删：页面各自 import 组件，`docfirst.config.mjs` 逐个 import 各组件的 `.ai.mjs` 规则
+- 机读规则用 `readFileSync(new URL('./x.data.json', import.meta.url))` 读数据的（anpc-lcl 的 `ring-down.ai.mjs`），数据文件跟组件挪进同一个文件夹，路径不用改
+- 站里组件直接 import 的第三方包（anpc-lcl 的 `math.tsx` 用 `katex`）写进站的 `package.json` 依赖：骨架只带了 `rehype-katex`，pnpm 不让代码 import 没声明的包。
+  旧站声明了却没有代码在用的包（anpc-lcl 的 `motion`）不带过来
 - 组件没有 `.data.mjs`、机读文字直接写在 `docfirst.config.mjs` 里的，规则照抄，只改注释里的组件路径，不用补下面的 `.d.mts`
 - 数据文件保持 `.mjs`（`docfirst.config.mjs` 在 Node 里直接 import 它），旁边补一份同名的 `.d.mts` 写出导出的类型。
   旧站的 `tsconfig.json` 开着 `allowJs`，类型是推断出来的；新站不开，不补就报 `TS7016: Could not find a declaration file for module './vscode-seams.data.mjs'`。
@@ -109,7 +126,9 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 
 #### 换讲解组件包
 
-用到 `@godcreator/docfirst-explainer` 的组件换成平台的 `@godcreator/explainer`，只换 import：
+用到 `@godcreator/docfirst-explainer` 的组件换成平台的 `@godcreator/explainer`，只换 import。
+`@godcreator/explainer-player` 是 docfirst-explainer 改名前的包名（anpc-lcl 用的 0.1.1），入口与构建产物和 docfirst-explainer 0.1.1 一样，
+只差样式里 `.dx-caption` 的 `max-width: 70ch`，新包没有这条，说明文字会铺满整行；下表左列的包名换成 `explainer-player` 照样适用：
 
 | 旧站里写的 | 换成 | 取的是什么 |
 | --- | --- | --- |
@@ -153,7 +172,8 @@ import 解析不了；`Steps`、`Step`、`Accordion`、`Accordions`、`ImageZoom
 
 ### 术语表
 
-旧站把术语表写成数据文件的（gwb-windows-backup 是 `src/glossary.data.mjs`，由 `src/lib/source.ts` 交给术语标注），转成站点根的 `glossary.json`，每条照抄 `term`、`def`、`href`，`aliases` 没有就不写。
+旧站把术语表写成数据文件的（gwb-windows-backup 是 `src/glossary.data.mjs`，由 `src/lib/source.ts` 交给术语标注；plecs-studio 是 `src/glossary.ts`，导出 `TermEntry[]`），
+转成站点根的 `glossary.json`，每条照抄 `term`、`def`、`href`，`aliases` 没有就不写。
 数据文件头注释里的收词判据没地方放了，挪进术语页正文。用这份数据画术语页的组件跟着改：
 
 - 画面 `import glossary from '../../../glossary.json'`（路径相对组件），站内链接的 `next/link` 换成 `fumadocs-core/link`
@@ -185,7 +205,7 @@ pnpm build
 ```
 
 再 `docsite.site.start {"dir":"<站目录>"}`，请求首页、各区首页、一张卡页、`/llms.txt`，都回 200。没有 index 页的区（未来区常常只有 `roadmap.mdx`）请求区的地址是 404，
-下拉框点进去去的是它的第一页，验收时请求第一页。有讲解组件的页，照 `docs-site` 说明书的「讲解组件截图验收」每个组件截浅色、深色、375 宽各一张逐张看，
+下拉框点进去去的是它的第一页，验收时请求第一页。有 `public/` 的站，再请求几张页面里用到的图片地址。有讲解组件的页，照 `docs-site` 说明书的「讲解组件截图验收」每个组件截浅色、深色、375 宽各一张逐张看，
 动画拖到中段与后段再截；然后 `docsite.site.stop`。要常驻的站改用 `docsite.site.add`。
 
 页面里 import 组件的相对路径算错了层级，`pnpm typecheck` 发现不了（它不解析 mdx 里的 import），要到 `pnpm build` 才报 `UNRESOLVED_IMPORT` / `Module not found`；
