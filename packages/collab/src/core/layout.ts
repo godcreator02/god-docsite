@@ -1,3 +1,5 @@
+import { avatarsDirInSite } from '@godcreator/identity'
+
 /**
  * 项目仓的布局是固定的：任务与模块的记录在仓根的 collab/，站点在仓根的 site/，人员列表是站点的 site/people.json，
  * 站点的身份文件 site/docsite.json 写着 "kind": "collab"（认协作仓就看它，格式归平台包 god-docsite）；都是相对仓根、用 / 分隔的路径
@@ -6,6 +8,8 @@ export const collabPathInRepo = 'collab'
 export const sitePathInRepo = 'site'
 export const peoplePathInRepo = 'site/people.json'
 export const siteIdentityPathInRepo = 'site/docsite.json'
+/** 站点里的头像文件夹（身份包 avatarsDirInSite 放在 site/ 下）：每人一个 <人员 id>.webp，只有本人或负责人能改 */
+export const avatarsPathInRepo = `${sitePathInRepo}/${avatarsDirInSite}`
 /** 模块的分组列表：只有负责人能改 */
 export const moduleGroupsPathInRepo = 'collab/groups.json'
 

@@ -11,6 +11,8 @@ const fullTestSitePackage = 'full-test-site'
 
 /** full-test 的 people.json 里测试员的身份码：服务带着它启动，站点认出「测试员」，可以写评论与任务 */
 export const testerIdentityCode = 'e2etestcode01'
+/** 测试站 people.json 里带着 testerIdentityCode 的那个人 */
+export const testerPersonId = 'tester'
 
 /** 构建测试站依赖的本仓包（不含站点自己：站点在 start 那一轮里构建） */
 export function buildSitePackages(logDir) {

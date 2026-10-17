@@ -19,7 +19,7 @@ export const site = {
   contentDir: path.join(dir, 'content'),
   commentsDir: path.join(dir, 'comments'),
   commentEntries: comments,
-  /** 带身份码，只在服务端用；给浏览器的经 publicPeopleOf */
+  /** 带身份码，只在服务端用；给浏览器的经 publicPeopleOf 或 publicPeopleWithAvatars */
   people: () => sitePeople(dir),
   /** start（build 之后的发布版）一律只读 */
   identity: () => siteIdentity(dir, mode),

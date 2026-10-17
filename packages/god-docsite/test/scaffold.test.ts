@@ -190,7 +190,7 @@ describe('addFeature', () => {
     expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'beta', 'zeta'])
   })
 
-  it('addBaseFeatures：模板跟着装的包里带 template/ 的补进功能目录（comments），没有的跳过（identity），重复运行只补缺的；没装先报错', () => {
+  it('addBaseFeatures：模板跟着装的包里带 template/ 的补进功能目录（comments），没有的跳过（这里装的 identity 是没有 template/ 的假包），重复运行只补缺的；没装先报错', () => {
     const siteDir = newSite()
     expect(() => addBaseFeatures({ siteDir })).toThrow(/node_modules 里没有 @godcreator\/comments/)
     const commentsTemplate = { 'routes.ts': 'export default []\n', 'styles.css': '.c {}\n' }

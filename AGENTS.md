@@ -11,7 +11,7 @@
 | 目录 | 内容 |
 | --- | --- |
 | `packages/god-docsite/` | 平台包：三种页面来源、布局与侧栏、搜索、llms、推送（SSE）、术语标注、vite 插件 `godDocsite()`（开发服务没给端口就随机挑、把地址告诉站点）、发布版启动命令 `docsite-serve`；`template/` 是唯一的站点模板，`./scaffold` 是建站器（建站、加功能、重写功能汇总文件），`./identity` 读写站点根的身份文件 `docsite.json`（类别 base / docs / collab 与布局代号，gwb-docsite 托管前、gwb-collab 认协作仓都只看它）；react、fumadocs、vite 等 peer 全标可选，只用建站器的 Node 使用方（gwb-docsite）不连带装它们 |
-| `packages/identity/`、`packages/comments/` | 身份（people.json、身份码、给浏览器的公开投影）与评论（评论文件、唯一一份写入 action、右下角的本页评论收件箱、正文下方的评论浮窗与正文定位、全站评论表格）；基础站默认装这两个。comments 的 `template/` 是全站评论页（也是评论写入的 `/comments` action）、侧栏入口、样式与正文高亮，建站、装完依赖后由建站器 `addBaseFeatures` 补进站点 `app/features/comments/` |
+| `packages/identity/`、`packages/comments/` | 身份（people.json、身份码、给浏览器的公开投影、头像：站点的 `public/avatars/<人员 id>.webp`，侧栏底部的身份标记点开上传）与评论（评论文件、唯一一份写入 action、右下角的本页评论收件箱、正文下方的评论浮窗与正文定位、全站评论表格）；基础站默认装这两个。comments 的 `template/` 是全站评论页（也是评论写入的 `/comments` action）、侧栏入口、样式与正文高亮，identity 的 `template/` 是头像写入路由 `/identity/avatar`，建站、装完依赖后由建站器 `addBaseFeatures` 补进站点 `app/features/<包名>/` |
 | `packages/explainer/` | 讲解组件与它们给生成物用的机读文字 |
 | `packages/code-pin/`、`packages/doc-export/`、`packages/trajectory/` | 钉码、生成物（mdx 正本生成 AGENTS.md / README / SKILL.md）、轨迹卡与星轨盘 |
 | `packages/docfirst/` | 命令行 `docfirst`：读 `docfirst.config.mjs`，把 check / render / confirm 分派给上面三个功能包；`template/` 是文档维护的起始物 |

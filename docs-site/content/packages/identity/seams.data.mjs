@@ -122,10 +122,10 @@ export const identitySeams = defineSeamGraph({
       name: '平台模板接线',
       a: ['platform-server', 'platform-layout'],
       b: ['read', 'public', 'ui'],
-      iface: 'siteIdentity(dir, mode) · sitePeople(dir) · publicPeopleOf(people) · IdentityProvider / IdentityBadge',
+      iface: 'siteIdentity(dir, mode) · sitePeople(dir) · publicPeopleWithAvatars(dir, people) · IdentityProvider / IdentityBadge',
       convention: false,
       via: 'code',
-      text: 'site.server.ts 每次请求现取本机身份与名单；布局路由把名单经 publicPeopleOf 投影成公开形状，交给 IdentityProvider，侧栏底部放 IdentityBadge。',
+      text: 'site.server.ts 每次请求现取本机身份与名单；布局路由把名单经 publicPeopleWithAvatars 投影成公开形状、补上头像地址，交给 IdentityProvider，侧栏底部放 IdentityBadge。',
     },
     {
       n: 6,

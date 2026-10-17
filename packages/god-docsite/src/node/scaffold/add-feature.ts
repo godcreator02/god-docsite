@@ -52,8 +52,8 @@ function basePackageNames(): string[] {
 }
 
 /**
- * 基础站自带的功能：模板跟着装的包里带 template/ 的（如评论 comments 的全站评论页与样式），补进 app/features/。
- * createSite、装好依赖之后调；对同一站点重复运行只补缺的。没有 template/ 的（如 identity）不是功能，跳过
+ * 基础站自带的功能：模板跟着装的包里带 template/ 的（评论 comments 的全站评论页与样式、身份 identity 的头像写入路由），补进 app/features/。
+ * createSite、装好依赖之后调；对同一站点重复运行只补缺的。没有 template/ 的包不是功能，跳过
  */
 export function addBaseFeatures({ siteDir }: { siteDir: string }): AddedFeature[] {
   const added: AddedFeature[] = []

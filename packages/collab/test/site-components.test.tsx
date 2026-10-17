@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
-import { act } from 'react'
+import { act, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { createRoutesStub, data, redirect } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { IdentityProvider } from '@godcreator/identity/site'
 import { notificationOf } from '../src/core/notifications/notifications.js'
-import type { RecordLinkTargets, RecordPageData, TasksPageData, WriteResult } from '../src/site/index.js'
+import type { CollabViewer, RecordLinkTargets, RecordPageData, TasksPageData, WriteResult } from '../src/site/index.js'
 import { CollabViewerProvider, NotificationBar, RecordLink, RecordView, TasksView } from '../src/site/index.js'
 
 const people = [
@@ -13,6 +14,14 @@ const people = [
 ]
 const viewer = { people, person: 'bob', projectLeads: null }
 const task = { id: '20261001090000-aaaaaaa', author: 'admin', status: 'todo' as const, title: '画采样板' }
+/** 站点上协作页都在整站布局里：布局给 IdentityProvider（头像按它查），页面自己给 CollabViewerProvider */
+function PageProviders({ viewer: pageViewer, children }: { viewer: CollabViewer; children: ReactNode }) {
+  return (
+    <IdentityProvider identity={{ person: people[1]! }} people={pageViewer.people}>
+      <CollabViewerProvider viewer={pageViewer}>{children}</CollabViewerProvider>
+    </IdentityProvider>
+  )
+}
 const noComments = { threads: [], access: { kind: 'readonly' as const, reasonCode: 'readonly', reasonText: '只读' } }
 
 let container: HTMLDivElement
@@ -53,9 +62,9 @@ describe('记录那一页改字段走 useFetcher 提交到调用方给的地址'
       {
         path: '/tasks/:recordId',
         Component: () => (
-          <CollabViewerProvider viewer={pageData}>
+          <PageProviders viewer={pageData}>
             <RecordView data={pageData} action={`/tasks/${task.id}`} />
-          </CollabViewerProvider>
+          </PageProviders>
         ),
         action: async ({ request }) => {
           received.push(Object.fromEntries(await request.formData()))
@@ -79,9 +88,9 @@ describe('任务页新建任务', () => {
       {
         path: '/tasks',
         Component: () => (
-          <CollabViewerProvider viewer={pageData}>
+          <PageProviders viewer={pageData}>
             <TasksView data={pageData} action="/tasks" />
-          </CollabViewerProvider>
+          </PageProviders>
         ),
         action: async ({ request }) => {
           received.push(Object.fromEntries(await request.formData()))
@@ -117,9 +126,9 @@ describe('按分组画多张甘特图', () => {
       {
         path: '/tasks',
         Component: () => (
-          <CollabViewerProvider viewer={pageData}>
+          <PageProviders viewer={pageData}>
             <TasksView data={pageData} action="/tasks" />
-          </CollabViewerProvider>
+          </PageProviders>
         ),
       },
     ])
@@ -174,9 +183,9 @@ describe('任务看板的两层筛选', () => {
       {
         path: '/tasks',
         Component: () => (
-          <CollabViewerProvider viewer={pageData}>
+          <PageProviders viewer={pageData}>
             <TasksView data={pageData} action="/tasks" />
-          </CollabViewerProvider>
+          </PageProviders>
         ),
       },
     ])

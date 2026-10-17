@@ -17,7 +17,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 另有 `./identity`：站点根的身份文件 `docsite.json`（站点类别与布局代号）的读写，插件靠它认出平台建的站、分出类别，见下面「站点身份文件」一节。
 
-本站的 `app/features/` 就是建站器建出来的样子：`code-pin`、`comments`、`explainer`、`trajectory` 四个功能目录，和「`createSite` → `addBaseFeatures` → 依次 `addFeature` code-pin、trajectory、explainer」得到的一字不差——`pnpm test:scaffold` 就是这么比对的。这一页的例子从头到尾都是本站自己。
+本站的 `app/features/` 就是建站器建出来的样子：`code-pin`、`comments`、`explainer`、`identity`、`trajectory` 五个功能目录，和「`createSite` → `addBaseFeatures` → 依次 `addFeature` code-pin、trajectory、explainer」得到的一字不差——`pnpm test:scaffold` 就是这么比对的。这一页的例子从头到尾都是本站自己。
 
 ## 接缝图
 
@@ -72,9 +72,9 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/node/scaffold/create-site.ts" lines="112-132" hash="78906872439f" blob="c32d8e1255e1" */}
 
-装好依赖之后 `addBaseFeatures` 补基础功能：模板 `package.json` 里写成 `{{version}}` 的包（平台包自己除外）里带 `template/` 的才算功能——基础站就是 comments；identity 没有 `template/`，跳过。`addFeature` 加一个功能：功能包要先装进站点的 `node_modules`，它把功能包的 `template/` 补进 `app/features/<包名去掉作用域>/`，已有的文件不覆盖，再重写汇总文件；对同一站点重复运行只补缺的。
+装好依赖之后 `addBaseFeatures` 补基础功能：模板 `package.json` 里写成 `{{version}}` 的包（平台包自己除外）里带 `template/` 的才算功能——基础站就是 comments（全站评论页兼评论写入路由、侧栏入口、样式）与 identity（头像写入路由）。`addFeature` 加一个功能：功能包要先装进站点的 `node_modules`，它把功能包的 `template/` 补进 `app/features/<包名去掉作用域>/`，已有的文件不覆盖，再重写汇总文件；对同一站点重复运行只补缺的。
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/add-feature.ts" lines="25-66" hash="dbd4cb465912" blob="99d25946e005" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/add-feature.ts" lines="25-66" hash="d9cf99c74551" blob="5274e23e10ca" */}
 
 功能目录固定在 `app/features/`；建站器只认目录里的四种文件——`routes.ts`、`feature.tsx`、`mdx.ts`、`styles.css`，含其中任一个的子目录才算功能；五份汇总文件是 `routes.generated.ts`、`runtime.generated.ts`、`mdx.generated.ts`、`collections.generated.ts`、`styles.generated.css`，都在 `app/features/` 下。
 

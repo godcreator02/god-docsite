@@ -41,9 +41,9 @@ export const steps = [
   {
     id: 'base',
     title: '补基础功能',
-    text: '补基础功能：模板 package.json 里写成 {{version}} 的包，除了平台包自己，就是 comments 与 identity。identity 没有 template/，不算功能、跳过；comments 的四个文件补进 comments/。其中 feature.tsx、routes.ts、styles.css 是建站器认的，各进一份汇总文件；comments.tsx 不是这四种，它由 comments/routes.ts 自己 import，汇总文件不管它。',
+    text: '补基础功能：模板 package.json 里写成 {{version}} 的包，除了平台包自己，就是 comments 与 identity，两个都带 template/。comments 的四个文件补进 comments/，其中 feature.tsx、routes.ts、styles.css 是建站器认的，各进一份汇总文件；comments.tsx 不是这四种，它由 comments/routes.ts 自己 import，汇总文件不管它。identity 的两个文件补进 identity/：routes.ts 进路由汇总，avatar.ts 是它 import 的头像写入路由。',
     call: 'addBaseFeatures({ siteDir })',
-    returns: 'comments：addedFiles 4 个，keptFiles 0 个；features：comments',
+    returns: 'comments：addedFiles 4 个；identity：addedFiles 2 个；keptFiles 都是 0 个；features：comments、identity',
     dirs: [
       {
         name: 'comments',
@@ -54,13 +54,26 @@ export const steps = [
         unrecognizedNote: '另有 comments.tsx，不是这四种，汇总文件不管它',
         keptNote: null,
       },
+      {
+        name: 'identity',
+        isNew: true,
+        files: ['avatar.ts', 'routes.ts'],
+        recognized: ['routes.ts'],
+        collections: [],
+        unrecognizedNote: '另有 avatar.ts，不是这四种，汇总文件不管它',
+        keptNote: null,
+      },
     ],
     generated: {
       routes: {
         status: 'changed',
-        lines: ["import * as commentsRoutes from './comments/routes.ts'", 'const featureRoutesModules: FeatureRoutesModule[] = [commentsRoutes]'],
-        added: [1],
-        changed: [2],
+        lines: [
+          "import * as commentsRoutes from './comments/routes.ts'",
+          "import * as identityRoutes from './identity/routes.ts'",
+          'const featureRoutesModules: FeatureRoutesModule[] = [commentsRoutes, identityRoutes]',
+        ],
+        added: [1, 2],
+        changed: [3],
       },
       runtime: {
         status: 'changed',
@@ -78,7 +91,7 @@ export const steps = [
     title: '加 code-pin',
     text: '加 code-pin：它只有 mdx.ts 与 styles.css，所以只有 mdx.generated.ts 与 styles.generated.css 变。目录名 code-pin 转成驼峰变量名 codePinMdx。样式的 @import 排到了 comments 前面：汇总文件按目录名排序，和加的先后无关。code-pin 的 package.json 没写 godDocsite，没有集合，collections.generated.ts 不变。',
     call: "addFeature({ siteDir, packageName: '@godcreator/code-pin' })",
-    returns: 'addedFiles 2 个，keptFiles 0 个；features：code-pin、comments',
+    returns: 'addedFiles 2 个，keptFiles 0 个；features：code-pin、comments、identity',
     dirs: [
       {
         name: 'code-pin',
@@ -96,6 +109,15 @@ export const steps = [
         recognized: ['feature.tsx', 'routes.ts', 'styles.css'],
         collections: [],
         unrecognizedNote: '另有 comments.tsx，不是这四种，汇总文件不管它',
+        keptNote: null,
+      },
+      {
+        name: 'identity',
+        isNew: false,
+        files: ['avatar.ts', 'routes.ts'],
+        recognized: ['routes.ts'],
+        collections: [],
+        unrecognizedNote: '另有 avatar.ts，不是这四种，汇总文件不管它',
         keptNote: null,
       },
     ],
@@ -121,7 +143,7 @@ export const steps = [
     title: '加 trajectory',
     text: '加 trajectory：四种文件都有，五份汇总文件全变。它的 package.json 写了 godDocsite.collections: ["trajectory"]，collections.generated.ts 第一次有内容：调 mdx.ts 里同名的集合工厂，把全站插件 sitePlugins 传进去，source.config.ts 用 export * 把它再导出。card.tsx、disk.tsx、href.ts、site.server.ts 不是这四种，汇总文件不管。',
     call: "addFeature({ siteDir, packageName: '@godcreator/trajectory' })",
-    returns: 'addedFiles 8 个，keptFiles 0 个；features：code-pin、comments、trajectory',
+    returns: 'addedFiles 8 个，keptFiles 0 个；features：code-pin、comments、identity、trajectory',
     dirs: [
       {
         name: 'code-pin',
@@ -142,6 +164,15 @@ export const steps = [
         keptNote: null,
       },
       {
+        name: 'identity',
+        isNew: false,
+        files: ['avatar.ts', 'routes.ts'],
+        recognized: ['routes.ts'],
+        collections: [],
+        unrecognizedNote: '另有 avatar.ts，不是这四种，汇总文件不管它',
+        keptNote: null,
+      },
+      {
         name: 'trajectory',
         isNew: true,
         files: ['card.tsx', 'disk.tsx', 'feature.tsx', 'href.ts', 'mdx.ts', 'routes.ts', 'site.server.ts', 'styles.css'],
@@ -156,11 +187,12 @@ export const steps = [
         status: 'changed',
         lines: [
           "import * as commentsRoutes from './comments/routes.ts'",
+          "import * as identityRoutes from './identity/routes.ts'",
           "import * as trajectoryRoutes from './trajectory/routes.ts'",
-          'const featureRoutesModules: FeatureRoutesModule[] = [commentsRoutes, trajectoryRoutes]',
+          'const featureRoutesModules: FeatureRoutesModule[] = [commentsRoutes, identityRoutes, trajectoryRoutes]',
         ],
-        added: [2],
-        changed: [3],
+        added: [3],
+        changed: [4],
       },
       runtime: {
         status: 'changed',
@@ -203,7 +235,7 @@ export const steps = [
     title: '加 explainer',
     text: '加 explainer：只有一份 styles.css，只进 styles.generated.css，按名字排在 comments 与 trajectory 之间。到这一步，五份汇总文件和本站 docs-site/app/features/ 里的一字不差。',
     call: "addFeature({ siteDir, packageName: '@godcreator/explainer' })",
-    returns: 'addedFiles 1 个，keptFiles 0 个；features：code-pin、comments、explainer、trajectory',
+    returns: 'addedFiles 1 个，keptFiles 0 个；features：code-pin、comments、explainer、identity、trajectory',
     dirs: [
       {
         name: 'code-pin',
@@ -230,6 +262,15 @@ export const steps = [
         recognized: ['styles.css'],
         collections: [],
         unrecognizedNote: null,
+        keptNote: null,
+      },
+      {
+        name: 'identity',
+        isNew: false,
+        files: ['avatar.ts', 'routes.ts'],
+        recognized: ['routes.ts'],
+        collections: [],
+        unrecognizedNote: '另有 avatar.ts，不是这四种，汇总文件不管它',
         keptNote: null,
       },
       {
@@ -293,6 +334,15 @@ export const steps = [
         recognized: ['styles.css'],
         collections: [],
         unrecognizedNote: null,
+        keptNote: null,
+      },
+      {
+        name: 'identity',
+        isNew: false,
+        files: ['avatar.ts', 'routes.ts'],
+        recognized: ['routes.ts'],
+        collections: [],
+        unrecognizedNote: '另有 avatar.ts，不是这四种，汇总文件不管它',
         keptNote: null,
       },
       {

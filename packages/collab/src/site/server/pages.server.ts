@@ -73,7 +73,7 @@ const recentJournalDayCount = 5
 export async function projectHomeLoader(_args: CollabRouteArgs, site: CollabSite): Promise<ProjectHomeData> {
   const { tasks, modules } = await collabStateOf(site)
   const recentJournalDates = [...journalDatesOf(site.siteDir)].sort().reverse().slice(0, recentJournalDayCount)
-  return { ...viewerOf(site), tasks, modules, recentJournalDates }
+  return { ...viewerOf(site), identity: site.identity(), tasks, modules, recentJournalDates }
 }
 
 /** /calendar/:date：那一天有没有日志、前后有日志的日子、模块（当天截止的要配色）、这一页的评论；日期不是真实的 YYYY-MM-DD 时抛 404 */

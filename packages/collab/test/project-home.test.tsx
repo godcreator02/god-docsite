@@ -8,7 +8,7 @@ import { ProjectHome } from '../src/site/index.js'
 
 const people = [
   { id: 'admin', name: '管理员' },
-  { id: 'bob', name: '鲍勃' },
+  { id: 'bob', name: '鲍勃', avatar: '/avatars/bob.webp?v=1' },
   { id: 'claude', name: 'Claude', agent: true },
 ]
 const tasks: ProjectHomeData['tasks'] = [
@@ -35,7 +35,8 @@ afterEach(() => {
 })
 
 async function renderHome(person: string | null) {
-  const data: ProjectHomeData = { people, person, projectLeads: null, tasks, modules, recentJournalDates: ['2026-10-14', '2026-10-12'] }
+  const identity: ProjectHomeData['identity'] = person === null ? { person: null, reason: '只读：测试' } : { person: people.find((candidate) => candidate.id === person)! }
+  const data: ProjectHomeData = { people, person, identity, projectLeads: null, tasks, modules, recentJournalDates: ['2026-10-14', '2026-10-12'] }
   const Stub = createRoutesStub([{ path: '/', Component: () => <ProjectHome siteName="测试项目" docsUrl="/about" data={data} /> }])
   await act(async () => root.render(<Stub initialEntries={['/']} />))
 }
@@ -55,6 +56,9 @@ describe('协作站的项目首页', () => {
     expect(sectionText('快到期的模块')).toContain('0/1')
     expect(sectionText('成员')).toContain('鲍勃')
     expect(sectionText('成员')).not.toContain('Claude')
+    // 首页在整站布局之外，自己包着 IdentityProvider：有头像文件的人画图，没有的画首字
+    const memberAvatars = [...[...container.querySelectorAll('section')].find((section) => section.querySelector('h2')?.textContent === '成员')!.querySelectorAll('.dc-avatar')]
+    expect(memberAvatars.map((avatar) => avatar.getAttribute('src') ?? avatar.textContent)).toEqual(['管', '/avatars/bob.webp?v=1'])
     expect(hrefs()).toEqual(expect.arrayContaining(['/about', '/tasks', '/calendar', '/calendar/2026-10-14', '/tasks/20261001090000-mine001', '/tasks/20261001090000-mod0001']))
   })
 

@@ -75,6 +75,15 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 已有这个 `id` 就把码加进它的 `codes`，没有就新加一项；码已在别人名下、`id` 是 agent 时拒绝。只写文件，要别人也看到得提交。
 换电脑时把旧电脑的码填进新电脑的设置 `identity-code`，之后启动的开发服务才用新的码。
 
+## 头像
+
+- 每人一个文件：站点根的 `public/avatars/<人员 id>.webp`，不写进 `people.json`；没有文件的人显示名字的第一个字
+- 人自己在网页上传：本机托管的开发服务里点侧栏底部自己的名字，「选图片」（浏览器里居中裁成正方形、缩到 128×128、转 webp 再上传，SVG 也行），「改回首字」删掉文件。只能改自己的，发布版没有入口
+- 服务端只收 128×128、不超过 64 KB 的 `image/webp`，不合格直接拒绝并写明原因
+- agent 没有身份码、不能在网页上传：人做好一张 128×128 的 webp，直接放成 `public/avatars/<agent 的 id>.webp`
+- 只写文件，要别人也看到得提交；协作仓里成员只能提交自己的头像，别人的与 agent 的由项目负责人提交
+- 早建的站没有上传入口：照平台包 `template/` 的 `app/routes/layout.tsx` 改用 `publicPeopleWithAvatars`，再 `docsite.feature.add` 身份包 `@godcreator/identity` 补上 `app/features/identity/`（见「升级已有站点」）
+
 ## 评论
 
 - 读：`docsite.comments {"dir":…,"page"?:…,"about"?:…}`，读文件，不要站点在运行。`page` 是页面在 `content/` 里的路径（如 `writing/collapse-test.mdx`），

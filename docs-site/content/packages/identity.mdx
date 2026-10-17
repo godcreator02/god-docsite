@@ -1,6 +1,6 @@
 ---
 title: identity：身份
-description: 站点的人员名单 people.json 与身份码：身份码由 gwb-docsite 生成、经环境变量交给站点，dev 按它在名单里认人，发布版一律只读；加进名单六种情况怎么改文件，写入前核对请求来源与身份，交给浏览器的人员只有公开字段
+description: 站点的人员名单 people.json 与身份码：身份码由 gwb-docsite 生成、经环境变量交给站点，dev 按它在名单里认人，发布版一律只读；加进名单六种情况怎么改文件，写入前核对请求来源与身份，交给浏览器的人员只有公开字段；头像按文件名约定放在 public/avatars/，在侧栏底部上传
 icon: IdCard
 ---
 
@@ -68,13 +68,41 @@ import { PublicShape } from './identity/public-shape'
 
 ## 交给浏览器的只有公开形状
 
-图上第 5 号。存在文件里的人带 `codes`（`StoredPerson`），交给浏览器前按白名单重造：`publicPersonOf` / `publicPeopleOf` 只抄 `id`、`name`、`gitea`、`agent` 四项，`PublicPerson` 的 `codes` 写成 `never`，`StoredPerson` 在类型上就不能直接当它用；凡是进 loader 数据的人员列表都只能是 `publicPeopleOf` 的结果：
+图上第 5 号。存在文件里的人带 `codes`（`StoredPerson`），交给浏览器前按白名单重造：`publicPersonOf` / `publicPeopleOf` 只抄 `id`、`name`、`gitea`、`agent` 四项，`PublicPerson` 的 `codes` 写成 `never`，`StoredPerson` 在类型上就不能直接当它用；凡是进 loader 数据的人员列表都只能是 `publicPeopleOf` 的结果，或在它上面补头像地址的 `publicPeopleWithAvatars`（见下一节）：
 
-{/* ref file="../packages/identity/src/core/public-people.ts" hash="7f2a0fd0e311" blob="ec5d2ba8b743" */}
+{/* ref file="../packages/identity/src/core/public-people.ts" hash="9427d3c772d6" blob="549e1217dda2" */}
 
 <PublicShape />
 
-类型挡不住 `as` 断言，所以 `IdentityProvider` 渲染时再查一次，人员列表里有谁带着 `codes` 就直接报错。页面里的组件用 `useSiteIdentity()` 取本机身份、`useSitePeople()` 取名单。侧栏底部的 `IdentityBadge` 有人显示头像与名字，只读显示「只读」、鼠标停上去看原因；头像 `Avatar` 是名字第一个字加一个由 id 算出的底色（改名不变色），不联网取图。
+类型挡不住 `as` 断言，所以 `IdentityProvider` 渲染时再查一次，人员列表里有谁带着 `codes` 就直接报错。页面里的组件用 `useSiteIdentity()` 取本机身份、`useSitePeople()` 取名单。侧栏底部的 `IdentityBadge` 有人显示头像与名字、点开是头像面板，只读显示「只读」、鼠标停上去看原因。
+
+## 头像：一人一个文件
+
+头像不进 `people.json`，按文件名约定放：站点根的 `public/avatars/<人员 id>.webp`，小周的就是 `public/avatars/zhou.webp`。`public/` 下是静态文件，dev 与只读的发布版都按 `/avatars/zhou.webp` 取，和页面一起进 git。服务端只收边长 128 的正方形 webp、不超过 64 KB；裁剪、缩放、转格式都在浏览器里做，服务端不带图片处理的依赖。
+
+{/* ref file="../packages/identity/src/core/avatar.ts" lines="1-26" hash="aef65c1a20d9" blob="c3b06500619c" */}
+
+**显示**。布局路由交给 `IdentityProvider` 的名单用 node 层的 `publicPeopleWithAvatars`：在公开形状上给有头像文件的人补一项 `avatar`，地址后面带文件修改时间（`/avatars/zhou.webp?v=1760680000000`），换了图地址就变，浏览器不拿缓存里的旧图。`Avatar` 照旧只收 `{ id, name }`，按 id 在 `IdentityProvider` 的名单里查 `avatar`：有就画图，没有就画名字的第一个字加一个由 id 算出的底色（改名不变色），所以评论、任务这些调用方不用管头像从哪来。`Avatar` 要在 `IdentityProvider` 里面用，外面用直接报错；协作站首页在整站布局之外，`ProjectHome` 自己在最外面放一个 `IdentityProvider`（见 collab 的页）。
+
+{/* ref file="../packages/identity/src/node/avatar-file.ts" lines="10-22" hash="a304ad6b8842" blob="56e43e8f9bbc" */}
+
+**上传**。小周在自己电脑上的 dev 里点侧栏底部的「小周」，弹出头像面板：
+
+| 一步 | 在哪 | 做什么 |
+| --- | --- | --- |
+| 选图 | 头像面板（`IdentityBadge` 点开） | 只有认出本机身份时身份标记才是按钮；只读（含发布版）没有面板 |
+| 处理 | 浏览器里的 `avatarWebpOf` | 居中裁成正方形、缩到 128×128、转 webp（SVG 也在这里画成位图），质量从高往低试到不超过 64 KB；浏览器转不出 webp 就报错 |
+| 提交 | `PUT /identity/avatar`，正文是图本身 | 这个路由由本包的 `template/` 写进站点 `app/features/identity/`，交给 `handleAvatarWrite` |
+| 核对 | `handleAvatarWrite` | 先 `authorizeWrite`（Origin 与本机身份，不收 `as`），再 `assertAvatarImage`：类型不是 `image/webp` 回 415，超过 64 KB 回 413，不是 webp 或不是 128×128 回 400，原因写在响应里，不替它修正 |
+| 写入 | 站点目录 | 存成 `public/avatars/<本机身份的 id>.webp`，回 `{ avatar }` 新地址；面板记下新地址，页面上各处的 `Avatar` 跟着换 |
+
+「改回首字」是 `DELETE /identity/avatar`，删掉自己的文件；没有文件回 404。只能改自己的：路由只认本机身份，没有 `as`。agent 没有身份码，它的头像由人做好一张 128×128 的 webp，直接放成 `public/avatars/<agent 的 id>.webp` 再提交；协作仓里谁能提交这些文件由合并检查管（见 collab 的页）。
+
+{/* ref file="../packages/identity/src/core/avatar.ts" lines="62-68" hash="9176eb534a4b" blob="c3b06500619c" */}
+
+{/* ref file="../packages/identity/src/node/avatar-file.ts" lines="51-65" hash="ceb0188f67f9" blob="56e43e8f9bbc" */}
+
+为什么按文件名约定、不给名单加字段，见轨迹卡 [头像按文件名放在 public/avatars/，浏览器里裁好再上传](/trajectory/2026-10-17-avatar-files)。
 
 ## 在正文里 @ 人
 
@@ -88,10 +116,11 @@ import { PublicShape } from './identity/public-shape'
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
-| `core/` | `@godcreator/identity` | 名单的校验与加入规则、按码认人、公开投影、写入前核对、@ 的认法；不碰磁盘、不 import React |
-| `node/` | `@godcreator/identity/node` | 读写站点的 `people.json`、按运行方式与环境变量认本机身份 |
-| `site/` | `@godcreator/identity/site` | `IdentityProvider` 与两个 hook、`Avatar`、`IdentityBadge`；样式在包的 `styles.css` |
+| `core/` | `@godcreator/identity` | 名单的校验与加入规则、按码认人、公开投影、写入前核对、@ 的认法、头像的存放约定与核对；不碰磁盘、不 import React |
+| `node/` | `@godcreator/identity/node` | 读写站点的 `people.json`、按运行方式与环境变量认本机身份、带头像的公开名单、头像写入路由的处理 |
+| `site/` | `@godcreator/identity/site` | `IdentityProvider` 与两个 hook、`Avatar`、`IdentityBadge` 与它点开的头像面板、浏览器里的头像处理；样式在包的 `styles.css` |
+| `template/` | （建站器复制进站点） | 头像写入路由 `/identity/avatar`，建站时由 `addBaseFeatures` 补进站点 `app/features/identity/` |
 
 层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；identity 不依赖任何别的功能包。
 
-用它的三方就是图上的 gwb-docsite 与右列两方，图上画过的调用不再逐条列，另列几个图上没画的：gwb-docsite 另用 `identityCodeEnvName`、`identityCodePattern`、`mentionsOf`（评论命令里认 @）；comments 另用 `personOf` 与类型 `SiteIdentity`；collab 另用 `publicPeopleOf`、`mentionsOf`、`Avatar`，平台模板的正文页也用 `Avatar`。
+用它的三方就是图上的 gwb-docsite 与右列两方，图上画过的调用不再逐条列，另列几个图上没画的：gwb-docsite 另用 `identityCodeEnvName`、`identityCodePattern`、`mentionsOf`（评论命令里认 @）；comments 另用 `personOf` 与类型 `SiteIdentity`；collab 另用 `publicPeopleWithAvatars`、`mentionsOf`、`IdentityProvider`、`Avatar` 与头像文件夹的位置 `avatarsDirInSite`（合并检查用），平台模板的正文页也用 `Avatar`。

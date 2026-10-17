@@ -1,5 +1,5 @@
 import type { CommentsAccess, PageThreadSummary } from '@godcreator/comments/site'
-import type { PublicPerson } from '@godcreator/identity'
+import type { PublicPerson, SiteIdentity } from '@godcreator/identity'
 import type { JournalMention } from '../core/journal-mentions.js'
 import type { ModuleGroup } from '../core/module-groups.js'
 import type { DueState } from '../core/modules.js'
@@ -54,8 +54,11 @@ export type RecordPageData = CollabViewer & {
 
 export type CalendarPageData = { siteName: string; tasks: TaskState[]; modules: ModuleState[]; journalDates: string[] }
 
-/** 项目首页：全部任务与模块（没做完的、快到期的由页面挑）、最近有日志的几天（新的在前） */
-export type ProjectHomeData = CollabViewer & { tasks: TaskState[]; modules: ModuleState[]; recentJournalDates: string[] }
+/**
+ * 项目首页：全部任务与模块（没做完的、快到期的由页面挑）、最近有日志的几天（新的在前）。
+ * 首页在整站布局之外，没有布局给的 IdentityProvider：identity 与 people 由首页自己交给它，头像才查得到
+ */
+export type ProjectHomeData = CollabViewer & { identity: SiteIdentity; tasks: TaskState[]; modules: ModuleState[]; recentJournalDates: string[] }
 
 export type JournalPageData = {
   siteName: string

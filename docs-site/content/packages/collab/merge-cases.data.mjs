@@ -25,7 +25,7 @@ export const repo = {
 export const checkNames = ['和 main 没有冲突', '没改只有负责人能改的内容'];
 
 /** lead-scripts 被打回时的原话：按 merge-check.ts 的拼法写出；authorIsLead 是 true 时这里直接回空 */
-/* ref file="../packages/collab/src/node/merge-check.ts" lines="161-166" hash="a452f45d2489" blob="9b414afa970e" */
+/* ref file="../packages/collab/src/node/merge-check.ts" lines="176-181" hash="a452f45d2489" blob="904f2aaf81e1" */
 const leadScriptsProblem = '改了只有负责人能改的内容：site/package.json 的 scripts；这类改动交给负责人（协作仓的协作者）提交';
 
 /**
@@ -130,7 +130,7 @@ export const cases = [
       { verdict: 'needs-review', exitCode: 1, problems: ['改了只有负责人能改的内容：site/people.json；这类改动交给负责人（协作仓的协作者）提交'] },
     ],
   },
-  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="81-102" hash="88a5199f0c5c" blob="703f49e59dce" */
+  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="109-130" hash="88a5199f0c5c" blob="de6fd6562b5d" */
   {
     id: 'other-libs',
     label: '升级 react、加 three',
@@ -173,7 +173,7 @@ export const cases = [
       },
     ],
   },
-  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="104-109" hash="736f11cdce34" blob="703f49e59dce" */
+  /* ref file="../packages/collab/test/merge-check-lead-only.slow.test.ts" lines="132-137" hash="736f11cdce34" blob="de6fd6562b5d" */
   {
     id: 'lead-scripts',
     label: '负责人改 scripts',

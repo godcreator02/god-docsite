@@ -18,7 +18,7 @@ export const storedLines = [
 ];
 
 /** publicPersonOf 的函数体：按白名单重造一个对象，只抄这四项 */
-/* ref file="../packages/identity/src/core/public-people.ts" lines="10-15" hash="3b2ac8620c84" blob="ec5d2ba8b743" */
+/* ref file="../packages/identity/src/core/public-people.ts" lines="11-16" hash="3b2ac8620c84" blob="549e1217dda2" */
 export const copyLines = [
   'const publicPerson = { id: person.id, name: person.name }',
   'if (person.gitea !== undefined) publicPerson.gitea = person.gitea',
@@ -26,10 +26,10 @@ export const copyLines = [
   'return publicPerson',
 ];
 
-/** 浏览器拿到的形状：codes 不会跟着交给浏览器；小周带 gitea，publicPersonOf 会把它抄过去 */
-/* ref file="../packages/identity/src/core/public-people.ts" lines="3-7" hash="afe219d6d326" blob="ec5d2ba8b743" */
+/** 浏览器拿到的形状：codes 不会跟着交给浏览器；小周带 gitea，publicPersonOf 会把它抄过去；小周没有头像文件，不带 avatar */
+/* ref file="../packages/identity/src/core/public-people.ts" lines="3-8" hash="5a755f13cf78" blob="549e1217dda2" */
 export const publicLines = ['{', '  "id": "zhou",', '  "name": "小周",', '  "gitea": "zhou"', '}'];
 
 /** 带着 codes 的对象直接交给 IdentityProvider 时，渲染时报的错（原话照源码抄，id 展开成 zhou） */
-/* ref file="../packages/identity/src/site/identity-provider.tsx" lines="13-17" hash="7a360b23ca1b" blob="c4b70e217558" */
+/* ref file="../packages/identity/src/site/identity-provider.tsx" lines="22-24" hash="4e7a181aa6a2" blob="faa7d8e42dca" */
 export const providerError = '交给浏览器的人员列表带着身份码（zhou）：先经 publicPeopleOf 投影';

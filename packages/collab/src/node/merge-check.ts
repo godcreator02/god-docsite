@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
-import { moduleGroupsPathInRepo, peoplePathInRepo, siteIdentityPathInRepo, sitePathInRepo } from '../core/layout.js'
+import { avatarsPathInRepo, moduleGroupsPathInRepo, peoplePathInRepo, siteIdentityPathInRepo, sitePathInRepo } from '../core/layout.js'
 
 /** mergeable 能合并；conflict 和 base 有冲突；needs-review 改了只有负责人能改的内容、提交的人又不是负责人 */
 export type MergeVerdict = 'mergeable' | 'conflict' | 'needs-review'
@@ -37,9 +37,9 @@ export async function git(repo: string, args: string[]): Promise<string> {
   return output.stdout
 }
 
-/** base 与 head（提交或树）之间改了的文件，相对仓根 */
+/** base 与 head（提交或树）之间改了的文件，相对仓根。不认改名：改名的文件新旧两个路径都列出来，挪走只有负责人能改的文件也查得到 */
 export async function changedFilesBetween(repo: string, base: string, head: string): Promise<string[]> {
-  return (await git(repo, ['diff', '--name-only', '-z', base, head])).split('\0').filter((file) => file !== '')
+  return (await git(repo, ['diff', '--name-only', '--no-renames', '-z', base, head])).split('\0').filter((file) => file !== '')
 }
 
 /** 站点依赖里本仓发的包（平台、身份、评论、协作等）：它们决定每个人电脑上运行的网站代码，也决定站点和插件之间的约定对不对得上 */
@@ -56,7 +56,7 @@ const isVersionRange = (spec: unknown) => typeof spec === 'string' && spec.trim(
  * 只看改了的文件名就能判定的：执行器工作流（改了能绕过检查、拿到组织密钥）、
  * 站点的装包设置（从哪个源装 @godcreator 的包、哪些包能运行安装脚本）、站点的身份文件（插件靠它认出协作仓）、
  * 模块的分组列表（项目分几块由负责人定）、站点根目录下 Node 会执行的配置文件。
- * 人员列表 site/people.json 另由 peopleChangeIsOwnCodesOnly 判断
+ * 人员列表 site/people.json 另由 peopleChangeIsOwnCodesOnly 判断，头像 site/public/avatars/ 下的文件另由 avatarChangeIsOwn 判断
  */
 function isLeadOnlyFile(file: string): boolean {
   if (file.startsWith('.gitea/') || file.startsWith('.github/')) return true
@@ -140,6 +140,19 @@ async function peopleChangeIsOwnCodesOnly(repo: string, base: string, head: stri
   })
 }
 
+const avatarFileNamePattern = /^([\w-]+)\.webp$/
+
+/**
+ * 头像文件的改动（加、换、删）是 author 改自己的：文件名是 <人员 id>.webp，base 上的人员列表里这个 id 的 gitea 是 author。
+ * 按 base 的人员列表认人，同一次合并里改人员列表认不了；agent 没有 gitea，它的头像只有负责人能改；别的文件名也只有负责人能改
+ */
+async function avatarChangeIsOwn(repo: string, base: string, file: string, author: string): Promise<boolean> {
+  const personId = avatarFileNamePattern.exec(path.posix.relative(avatarsPathInRepo, file))?.[1]
+  if (personId === undefined) return false
+  const people = await jsonAt(repo, base, peoplePathInRepo)
+  return Array.isArray(people) && people.some((person: unknown) => isPlainObject(person) && person.id === personId && person.gitea === author)
+}
+
 /** base 到 head（提交或树）之间只有负责人能改的改动，每条是给人看的一处；没有为空。changedFiles 是 base 与 head 之间改了的文件（相对仓根），调用方已算好 */
 async function leadOnlyChangesBetween(request: MergeCheckRequest & { changedFiles: readonly string[] }): Promise<string[]> {
   const { repo, base, head, author, changedFiles } = request
@@ -148,6 +161,8 @@ async function leadOnlyChangesBetween(request: MergeCheckRequest & { changedFile
     if (file === `${sitePathInRepo}/package.json`) changes.push(...(await packageJsonChanges(repo, base, head, file)))
     else if (file === peoplePathInRepo) {
       if (author === undefined || !(await peopleChangeIsOwnCodesOnly(repo, base, head, file, author))) changes.push(file)
+    } else if (file.startsWith(`${avatarsPathInRepo}/`)) {
+      if (author === undefined || !(await avatarChangeIsOwn(repo, base, file, author))) changes.push(file)
     } else if (isLeadOnlyFile(file)) changes.push(file)
   }
   return changes

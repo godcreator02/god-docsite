@@ -73,7 +73,7 @@ describe('真的在临时目录建站', () => {
       { packageName: '@godcreator/trajectory', specifier: `link:${path.join(repoDir, 'packages', 'trajectory').replaceAll('\\', '/')}` },
       { ...stopAfterCheck, scaffold, pnpm: runPnpm, isRunning: (dir) => host.statusOf(dir).state === 'running', versionsFrom: pluginDir },
     )
-    expect(added.features).toEqual(['comments', 'trajectory'])
+    expect(added.features).toEqual(['comments', 'identity', 'trajectory'])
     expect(host.statusOf(siteDir).state).toBe('stopped')
 
     await runPnpm(siteDir, ['build'], `${siteDir} 里 pnpm build`)

@@ -35,7 +35,7 @@ describe('addSiteFeature：给已有站点加功能', () => {
     expect(added.specifier).toBe(linkOf('trajectory'))
     expect(added.addedFiles).toContain('routes.ts')
     expect(added.keptFiles).toEqual([])
-    expect(added.features).toEqual(['comments', 'trajectory'])
+    expect(added.features).toEqual(['comments', 'identity', 'trajectory'])
     expect(readFileSync(path.join(siteDir, 'app', 'features', 'routes.generated.ts'), 'utf8')).toContain("from './trajectory/routes.ts'")
     expect(readFileSync(path.join(siteDir, 'app', 'features', 'collections.generated.ts'), 'utf8')).toContain('export const trajectory')
   })
@@ -55,8 +55,9 @@ describe('addSiteFeature：给已有站点加功能', () => {
   it('不给依赖说明：取插件旁边装着的那一版写 ^<版本>；插件没装就拒绝', async () => {
     const events: string[] = []
     const version = readJson(path.join(repoDir, 'packages', 'identity', 'package.json'))['version'] as string
-    await expect(addSiteFeature(siteDir, { packageName: '@godcreator/identity' }, depsWith(events))).rejects.toThrow('@godcreator/identity 已经装进站点，补功能文件时出错')
-    expect(events).toEqual([`pnpm add @godcreator/identity@^${version}`])
+    const added = await addSiteFeature(siteDir, { packageName: '@godcreator/identity' }, depsWith(events))
+    expect(added.specifier).toBe(`^${version}`)
+    expect(events).toEqual([`pnpm add @godcreator/identity@^${version}`, 'start', 'page-status', 'stop'])
     await expect(addSiteFeature(siteDir, { packageName: '@godcreator/collab' }, depsWith([]))).rejects.toThrow('gwb-docsite 旁边没装 @godcreator/collab，不知道该装哪一版：给 version')
   })
 

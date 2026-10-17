@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { peoplePathInRepo } from '../src/core/layout.js'
+import { avatarsPathInRepo, peoplePathInRepo } from '../src/core/layout.js'
 import { check, commit, git, people, write, writePeople } from './merge-check-repo.js'
 
 describe('合并检查：只有负责人能改的内容', () => {
@@ -67,6 +67,34 @@ describe('合并检查：只有负责人能改的内容', () => {
     commit('乙在 collab/ 下放了一份 people.json')
     expect(await check('topic')).toEqual({ verdict: 'mergeable', problems: [] })
   })
+
+  it('头像 site/public/avatars/<id>.webp：成员加、换、删自己的放行；改别人的、agent 的、不认得的文件名、不说提交的人是谁都要负责人', async () => {
+    expect(avatarsPathInRepo).toBe('site/public/avatars')
+    write('site/public/avatars/bob.webp', 'RIFF乙的头像')
+    commit('乙传了头像')
+    expect(await check('topic')).toEqual({ verdict: 'mergeable', problems: [] })
+    git('checkout', '-q', 'main')
+    write('site/public/avatars/alice.webp', 'RIFF甲的头像')
+    write('site/public/avatars/bob.webp', 'RIFF乙的头像')
+    commit('甲放好两人的头像')
+    const attempts: Array<[string, () => void, string | null, string[]]> = [
+      ['乙换自己的', () => write('site/public/avatars/bob.webp', 'RIFF乙的新头像'), 'bob', []],
+      ['乙删自己的', () => git('rm', '-q', 'site/public/avatars/bob.webp'), 'bob', []],
+      ['乙换甲的', () => write('site/public/avatars/alice.webp', 'RIFF乙画的'), 'bob', ['site/public/avatars/alice.webp']],
+      ['乙放 agent 的', () => write('site/public/avatars/claude.webp', 'RIFFagent'), 'bob', ['site/public/avatars/claude.webp']],
+      ['乙放了 png', () => write('site/public/avatars/bob.png', 'png'), 'bob', ['site/public/avatars/bob.png']],
+      ['乙把甲的改名成自己的', () => (git('rm', '-q', 'site/public/avatars/bob.webp'), git('mv', 'site/public/avatars/alice.webp', 'site/public/avatars/bob.webp')), 'bob', ['site/public/avatars/alice.webp']],
+      ['不说提交的人是谁', () => write('site/public/avatars/bob.webp', 'RIFF乙的新头像'), null, ['site/public/avatars/bob.webp']],
+    ]
+    for (const [message, change, author, leadOnly] of attempts) {
+      git('checkout', '-q', '-B', 'topic', 'main')
+      change()
+      commit(message)
+      const expected = leadOnly.length === 0 ? [] : [`改了只有负责人能改的内容：${leadOnly.join('、')}；这类改动交给负责人（协作仓的协作者）提交`]
+      expect((await check('topic', false, author)).problems, message).toEqual(expected)
+    }
+    expect(await check('topic', true)).toEqual({ verdict: 'mergeable', problems: [] })
+  }, 30_000)
 
   it('site/package.json 里 @godcreator/ 下的包都只有负责人能改：平台、身份、评论加进来逐个写明，两段依赖都看', async () => {
     const dependencies = { react: '^19.3.0', '@godcreator/identity': '^0.1.0', '@godcreator/god-docsite': '^0.1.0' }

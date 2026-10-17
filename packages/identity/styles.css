@@ -1,4 +1,4 @@
-/* 身份包 React 组件的样式：宿主的 app.css 引入这一份，Avatar 与 IdentityBadge 不依赖宿主的 Tailwind 或主题 */
+/* 身份包 React 组件的样式：宿主的 app.css 引入这一份，Avatar、IdentityBadge 与头像面板不依赖宿主的 Tailwind；面板颜色取 fumadocs 的主题变量，变量后面是宿主没有它时的颜色 */
 
 .dc-avatar {
   display: inline-flex;
@@ -34,4 +34,109 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.dc-identity-button {
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.dc-identity-button:hover {
+  background-color: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+img.dc-avatar {
+  object-fit: cover;
+}
+
+/* 头像面板：IdentityBadge 点开的模态框，颜色取 fumadocs 的主题变量 */
+.dc-avatar-dialog {
+  width: min(22rem, calc(100vw - 2rem));
+  /* 宿主的 Tailwind 基础样式把所有元素的 margin 清成 0，模态框靠 margin: auto 居中 */
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--color-fd-border, #e5e5e5);
+  border-radius: 0.75rem;
+  background: var(--color-fd-popover, #fff);
+  color: var(--color-fd-popover-foreground, inherit);
+}
+
+.dc-avatar-dialog::backdrop {
+  background: rgb(0 0 0 / 0.35);
+}
+
+.dc-avatar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.dc-avatar-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.dc-avatar-panel-close {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dc-avatar-panel-current {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.dc-avatar-panel-hint {
+  margin: 0;
+  color: var(--color-fd-muted-foreground, #737373);
+  overflow-wrap: anywhere;
+}
+
+.dc-avatar-panel-error {
+  margin: 0;
+  color: #dc2626;
+  overflow-wrap: anywhere;
+}
+
+.dc-avatar-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dc-avatar-button {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--color-fd-border, #e5e5e5);
+  border-radius: 0.5rem;
+  background: var(--color-fd-secondary, transparent);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dc-avatar-button:hover {
+  background: var(--color-fd-accent, #f5f5f5);
+}
+
+.dc-avatar-button[aria-disabled='true'],
+.dc-avatar-button:disabled {
+  cursor: default;
+  opacity: 0.6;
 }

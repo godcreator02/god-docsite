@@ -3,3 +3,16 @@ export { publicPeopleOf, publicPersonOf, type PublicPerson } from './public-peop
 export { identityOf, type SiteIdentity } from './identity.js'
 export { mentionBeingTyped, mentionsOf, peopleMatching } from './mentions.js'
 export { authorizeWrite, writeAccessResponse, WriteAccessError, type WriteAccessOptions } from './write-access.js'
+export {
+  assertAvatarImage,
+  avatarContentType,
+  avatarFileInSite,
+  avatarMaxBytes,
+  AvatarRejected,
+  avatarsDirInSite,
+  avatarSize,
+  avatarUrlOf,
+  avatarWriteUrl,
+  webpDimensionsOf,
+  type AvatarWriteResult,
+} from './avatar.js'

@@ -1,7 +1,9 @@
-import { readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { avatarContentType, avatarFileInSite, avatarMaxBytes, avatarSize, avatarWriteUrl, webpDimensionsOf } from '../../../packages/identity/dist/core/index.mjs'
 import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, openCommentsInbox, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
 import { addedPageOf, strayContentFileOf, titlePageOf } from '../lib/run-scratch.mjs'
+import { testerPersonId } from '../lib/site.mjs'
 
 /** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
 const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'
@@ -62,6 +64,134 @@ async function waitForThreadStatus(page, { threadId, headFile, status }) {
     await new Promise((resolve) => setTimeout(resolve, 300))
   }
   throw new Error(`串 ${threadId} 在页面上等不到 data-thread-status="${status}"`)
+}
+
+/** 上传用的图：300×200 的 SVG，红底中间一个黄圆；居中裁成正方形以后四角是红的、中心是黄的 */
+const avatarSourceSvg =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#dc2626"/><circle cx="150" cy="100" r="80" fill="#facc15"/></svg>'
+
+/** 头像在页面上画成的 img：src 以这个人的头像地址开头 */
+const avatarImageOf = (personId) => `img.dc-avatar[src^="/avatars/${personId}.webp?v="]`
+
+/** 上传以后本页各处的头像：刚传那张图的本地地址 */
+const uploadedImage = 'img.dc-avatar[src^="blob:"]'
+
+/** 服务端给出的头像：dev 服务认出 public/ 里的新文件要几十毫秒，按条件等它回 200（这个请求不经浏览器，不进控制台记录） */
+async function servedAvatarOf(baseUrl, personId) {
+  const deadline = Date.now() + stepTimeoutMs
+  for (;;) {
+    const response = await fetch(`${baseUrl}/avatars/${personId}.webp`)
+    if (response.status === 200 || Date.now() > deadline) return { status: response.status, contentType: response.headers.get('content-type') }
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+}
+
+/** 浏览器里把头像图画到画布上，取左上角与中心两个点的颜色 */
+async function avatarPixelsOf(page, src) {
+  return page.evaluate(async (url) => {
+    const image = new Image()
+    image.src = url
+    await image.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = image.naturalWidth
+    canvas.height = image.naturalHeight
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    context.drawImage(image, 0, 0)
+    const pixel = (x, y) => [...context.getImageData(x, y, 1, 1).data.slice(0, 3)]
+    return { width: image.naturalWidth, height: image.naturalHeight, corner: pixel(4, 4), center: pixel(64, 64) }
+  }, src)
+}
+
+const isRed = ([r, g, b]) => r > 180 && g < 80 && b < 80
+const isYellow = ([r, g, b]) => r > 200 && g > 160 && b < 90
+
+/** 在站点自己的页面里直接往头像写入路由 PUT（带着站点的 Origin）：故意被拒，用不记控制台的单独页面，免得「无 4xx」那一项把它算成问题 */
+async function avatarPutFromPage(page, baseUrl, body) {
+  const probe = await page.context().newPage()
+  try {
+    await probe.goto(`${baseUrl}/about`, { waitUntil: 'load' })
+    return await probe.evaluate(
+      async ({ url, contentType, bytes }) => {
+        const response = await fetch(url, { method: 'PUT', headers: { 'content-type': contentType }, body: new Uint8Array(bytes) })
+        return { status: response.status, text: await response.text() }
+      },
+      { url: avatarWriteUrl, contentType: avatarContentType, bytes: body },
+    )
+  } finally {
+    await probe.close()
+  }
+}
+
+/**
+ * dev 下换一次测试员的头像再改回首字。头像文件名是人员 id、不带运行编号：跑之前它在就不动它、直接失败；
+ * 这一项自己新建的文件与文件夹在结束时删掉（不管过没过），跑完 git status 照旧
+ */
+async function checkAvatarUpload({ page, baseUrl, siteDir, runTag }) {
+  const avatarFile = path.join(siteDir, avatarFileInSite(testerPersonId))
+  const createdDirs = ['public', path.join('public', 'avatars')].map((relative) => path.join(siteDir, relative)).filter((dir) => !existsSync(dir))
+  if (existsSync(avatarFile)) throw new Error(`${avatarFile} 已经在了：e2e 不覆盖仓里的头像，先挪走它`)
+  try {
+    await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
+    await page.waitForLoadState('networkidle')
+    await waitForHydrated(page, '[data-identity-badge]')
+    await page.click('[data-identity-badge]')
+    await page.locator('[data-avatar-panel]').waitFor({ timeout: stepTimeoutMs })
+    await page.setInputFiles('[data-avatar-file]', { name: `e2e-avatar-${runTag}.svg`, mimeType: 'image/svg+xml', buffer: Buffer.from(avatarSourceSvg) })
+    // 本页先显示刚传的那张（blob: 本地地址），换页以后才用服务端的 /avatars/<id>.webp?v=…
+    const badgeImage = page.locator(`[data-identity-badge] ${uploadedImage}`)
+    await badgeImage.waitFor({ timeout: stepTimeoutMs })
+    const bytes = new Uint8Array(readFileSync(avatarFile))
+    const stored = webpDimensionsOf(bytes)
+    const served = await servedAvatarOf(baseUrl, testerPersonId)
+    const pixels = await avatarPixelsOf(page, await badgeImage.getAttribute('src'))
+    await page.keyboard.press('Escape')
+
+    await openCommentsInbox(page)
+    const inboxImages = await page.locator(`[data-comments-inbox] ${uploadedImage}`).count()
+    await page.goto(`${baseUrl}/`, { waitUntil: 'load' })
+    const memberImages = await page.locator('main section', { has: page.locator('h2', { hasText: '成员' }) }).locator(avatarImageOf(testerPersonId)).count()
+    await page.goto(`${baseUrl}/tasks`, { waitUntil: 'load' })
+    const taskPageImages = await page.locator(`main ${avatarImageOf(testerPersonId)}`).count()
+
+    const modifiedBefore = statSync(avatarFile).mtimeMs
+    const rejectedInPage = await avatarPutFromPage(page, baseUrl, [82, 73, 70, 70, 0, 0, 0, 0])
+    const rejectedForeign = await fetch(`${baseUrl}${avatarWriteUrl}`, { method: 'PUT', headers: { 'content-type': avatarContentType }, body: bytes })
+    const unchanged = statSync(avatarFile).mtimeMs === modifiedBefore
+
+    await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
+    await page.waitForLoadState('networkidle')
+    await waitForHydrated(page, '[data-identity-badge]')
+    await page.click('[data-identity-badge]')
+    await page.click('[data-avatar-remove]')
+    await page.locator(`[data-identity-badge] span.dc-avatar`).waitFor({ timeout: stepTimeoutMs })
+    const removed = !existsSync(avatarFile)
+    await page.keyboard.press('Escape')
+
+    const pass =
+      stored.width === avatarSize &&
+      stored.height === avatarSize &&
+      bytes.length <= avatarMaxBytes &&
+      served.status === 200 &&
+      served.contentType === avatarContentType &&
+      isRed(pixels.corner) &&
+      isYellow(pixels.center) &&
+      inboxImages >= 1 &&
+      memberImages === 1 &&
+      taskPageImages >= 1 &&
+      rejectedInPage.status === 400 &&
+      rejectedForeign.status === 403 &&
+      unchanged &&
+      removed
+    return {
+      pass,
+      detail:
+        `存下 ${stored.width}×${stored.height}、${(bytes.length / 1024).toFixed(1)} KB，/avatars/${testerPersonId}.webp → ${served.status} ${served.contentType}；左上角 rgb(${pixels.corner}) 中心 rgb(${pixels.center})；` +
+        `收件箱里 ${inboxImages} 张、首页成员里 ${memberImages} 张、任务页 ${taskPageImages} 张；不是 webp → ${rejectedInPage.status}（${rejectedInPage.text.trim()}），不带 Origin → ${rejectedForeign.status}，文件${unchanged ? '没变' : '变了'}；改回首字后文件${removed ? '删掉了' : '还在'}`,
+    }
+  } finally {
+    rmSync(avatarFile, { force: true })
+    for (const dir of createdDirs.reverse()) if (existsSync(dir) && readdirSync(dir).length === 0) rmSync(dir, { recursive: true })
+  }
 }
 
 /**
@@ -340,7 +470,23 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
             `黄条和那一块顶边差 ${barFit.topGap.toFixed(1)}px、高度差 ${barFit.heightGap.toFixed(1)}px、在正文栏外 ${barFit.outside}、宽 ${barFit.width}px、打开时加粗 ${barFit.active}、收起后 ${barActiveAfterClose ? '还加粗' : '变回'}；点那一块收起浮窗，再点那一块打开了 ${openedByBlock} 串，点黄条打开、再点收起；收件箱 ${inboxes} 个`,
         }
       })
+
+      await check('换头像（dev）：侧栏底部点开身份标记，选一张 300×200 的 SVG，浏览器居中裁成 128×128 的 webp 存进 public/avatars/<本人>.webp；侧栏、评论收件箱、项目首页成员都换成这张图；不合格的图与外来请求被拒；改回首字删掉文件', async () =>
+        checkAvatarUpload({ page, baseUrl, siteDir, runTag }),
+      )
     } else {
+      await check('start 只读：侧栏底部是「只读」、没有头像面板；直接上传头像被拒，不写文件', async () => {
+        const avatarFile = path.join(siteDir, avatarFileInSite(testerPersonId))
+        const existedBefore = existsSync(avatarFile)
+        await page.goto(`${baseUrl}/about`, { waitUntil: 'load' })
+        await waitForHydrated(page, `${sidebarRow} a[href="/comments"]`)
+        const badges = await page.locator('[data-identity-badge]').count()
+        const readonlyText = ((await page.locator('#nd-sidebar .dc-identity-readonly').textContent()) ?? '').trim()
+        const rejected = await avatarPutFromPage(page, baseUrl, [82, 73, 70, 70])
+        const pass = badges === 0 && readonlyText === '只读' && rejected.status === 403 && existsSync(avatarFile) === existedBefore
+        return { pass, detail: `身份标记按钮 ${badges} 个，侧栏底部写着「${readonlyText}」；直接上传 → ${rejected.status}，${avatarFileInSite(testerPersonId)} ${existsSync(avatarFile) === existedBefore ? '没变' : '变了'}` }
+      })
+
       await check('start 只读：收件箱没有写入口、写明原因，直接提交被拒且不写文件（服务有身份码也不认）', async () => {
         const before = filesUnder(commentsDir).length
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })

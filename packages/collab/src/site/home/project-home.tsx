@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
+import { IdentityProvider } from '@godcreator/identity/site'
 import { calendarUrl, journalUrlOf, recordPageUrlOf, tasksPageUrl } from '../../core/layout.js'
 import { byDue, dueStateOf, moduleColorSlotsOf } from '../../core/modules.js'
 import type { ModuleState, TaskState } from '../../core/state.js'
@@ -154,36 +155,39 @@ function Members({ tasks }: { tasks: TaskState[] }) {
 
 /**
  * 协作站的首页正文：项目名、一句话与两个按钮，下面四栏——没做完的任务（有本机身份时只列我的）、快到期的模块、最近的日志、成员。
- * 放在站点 app/routes/home.tsx 的 SiteHomeLayout 里；数据由 projectHomeLoader 给，docsUrl 是平台 siteHomeData 的「文档」地址
+ * 放在站点 app/routes/home.tsx 的 SiteHomeLayout 里；数据由 projectHomeLoader 给，docsUrl 是平台 siteHomeData 的「文档」地址。
+ * 首页在整站布局之外，自己在最外面放一个 IdentityProvider，成员与任务的头像才查得到
  */
 export function ProjectHome({ siteName, docsUrl, data }: { siteName: string; docsUrl: string; data: ProjectHomeData }) {
   const today = todayDay()
   const openCount = data.tasks.filter((task) => task.status !== 'done').length
   const unfinishedModules = data.modules.filter((module) => dueStateOf(module, data.tasks, today) !== 'finished').length
   return (
-    <CollabViewerProvider viewer={data}>
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-14">
-        <section className="flex flex-col items-center gap-4 text-center">
-          <h1 className="m-0 text-4xl font-bold">{siteName}</h1>
-          <p className="m-0 text-fd-muted-foreground tabular-nums">
-            {openCount} 个任务没做完 · {unfinishedModules} 个模块进行中
-          </p>
-          <div className="flex gap-3">
-            <Link to={docsUrl} className={`${buttonClassName} bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/90`}>
-              看文档
-            </Link>
-            <Link to={tasksPageUrl} className={`${buttonClassName} border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent`}>
-              看任务
-            </Link>
+    <IdentityProvider identity={data.identity} people={data.people}>
+      <CollabViewerProvider viewer={data}>
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4 py-14">
+          <section className="flex flex-col items-center gap-4 text-center">
+            <h1 className="m-0 text-4xl font-bold">{siteName}</h1>
+            <p className="m-0 text-fd-muted-foreground tabular-nums">
+              {openCount} 个任务没做完 · {unfinishedModules} 个模块进行中
+            </p>
+            <div className="flex gap-3">
+              <Link to={docsUrl} className={`${buttonClassName} bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/90`}>
+                看文档
+              </Link>
+              <Link to={tasksPageUrl} className={`${buttonClassName} border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent`}>
+                看任务
+              </Link>
+            </div>
+          </section>
+          <div className="grid gap-4 md:grid-cols-2">
+            <OpenTasks tasks={data.tasks} today={today} />
+            <UpcomingModules tasks={data.tasks} modules={data.modules} today={today} />
+            <RecentJournals dates={data.recentJournalDates} />
+            <Members tasks={data.tasks} />
           </div>
-        </section>
-        <div className="grid gap-4 md:grid-cols-2">
-          <OpenTasks tasks={data.tasks} today={today} />
-          <UpcomingModules tasks={data.tasks} modules={data.modules} today={today} />
-          <RecentJournals dates={data.recentJournalDates} />
-          <Members tasks={data.tasks} />
         </div>
-      </div>
-    </CollabViewerProvider>
+      </CollabViewerProvider>
+    </IdentityProvider>
   )
 }

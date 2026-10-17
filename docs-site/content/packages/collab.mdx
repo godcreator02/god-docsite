@@ -142,14 +142,21 @@ import { SiteRoutes } from './collab/site-routes'
 - 整个文件算的：`.gitea/`、`.github/` 下的一切（工作流改了能绕过检查、拿到组织密钥）；`site/.npmrc`、`site/pnpm-workspace.yaml`（从哪个源装包、哪些包能跑安装脚本）；站点身份文件 `site/docsite.json`（gwb-collab 靠它认出协作仓）；模块的分组列表 `collab/groups.json`（项目分几条线由负责人定）；`site/` 根目录下 Node 会执行的 `*.config.*` 与 `.postcssrc*`
 - `site/package.json` 逐处算：依赖两段以外的键（如 `scripts`）、`@godcreator/` 下的包（加、删、改版本都算）、写成网址或本地路径的依赖；别的库加、升级、删都放开；文件新建、删掉或读不懂时整个文件算
 - `site/people.json` 只放行一种改动：提交人只给 `gitea` 是自己的那一项加减 `codes`，项数、先后、别的字段、别人的项都不变
+- 头像文件夹 `site/public/avatars/`（身份包的头像约定）只放行一种改动：加、换、删 `<人员 id>.webp`，而 main 上的人员列表里这个 id 的 `gitea` 是提交人。别人的、agent 的（agent 没有 `gitea`）、别的文件名都只有负责人能改
 
-{/* ref file="../packages/collab/src/node/merge-check.ts" lines="55-67" hash="ff5c3ef783f4" blob="9b414afa970e" */}
+改了哪些文件用 `git diff --no-renames` 算：改名的文件新旧两个路径都列出来，把只有负责人能改的文件挪走（比如把甲的头像改名成自己的）也查得到。
+
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="55-67" hash="d88cc46945d6" blob="904f2aaf81e1" */}
 
 {/* ref file="../packages/collab/src/node/merge-check.ts" lines="88-112" hash="ca76b212458b" blob="9b414afa970e" */}
 
 {/* ref file="../packages/collab/src/node/merge-check.ts" lines="128-141" hash="844140d748f0" blob="9b414afa970e" */}
 
-{/* ref file="../packages/collab/src/node/merge-check.ts" lines="168-194" hash="d593d67d273a" blob="9b414afa970e" */}
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="143-154" hash="6756202942d4" blob="904f2aaf81e1" */}
+
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="40-43" hash="cf93f0ea9f11" blob="904f2aaf81e1" */}
+
+{/* ref file="../packages/collab/src/node/merge-check.ts" lines="183-209" hash="d593d67d273a" blob="904f2aaf81e1" */}
 
 提交人是负责人时第二条直接放行。命令行收 `--author` 与 `--leads`，「是不是负责人」就是 `--leads` 里有没有 `--author`。记录格式、站点会不会打不开、谁改了谁的记录、有没有删记录，这里都不查：格式由成员提交前在本机查，谁能改谁的记录由网站的写入规则管。退出码：0 能合并；1 不能合并，输出每条一行；2 是检查自己出错（参数不对、git 失败），和「不能合并」分开。
 
@@ -175,7 +182,7 @@ gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能�
 
 <SiteRoutes />
 
-写任务与模块的表单约定是三种 `intent`（`create-record`、`update-record`、`delete-record`）；任务页与记录页的 action 同时收评论包的 intent，转给评论包。项目首页 `templates/home.tsx` 不经建站器：gwb-collab 的 `collab.site.init` 建站后把它写成站点的 `app/routes/home.tsx`，之后归站点自己改。
+写任务与模块的表单约定是三种 `intent`（`create-record`、`update-record`、`delete-record`）；任务页与记录页的 action 同时收评论包的 intent，转给评论包。项目首页 `templates/home.tsx` 不经建站器：gwb-collab 的 `collab.site.init` 建站后把它写成站点的 `app/routes/home.tsx`，之后归站点自己改。首页在整站布局之外，没有布局给的 `IdentityProvider`：`projectHomeLoader` 多交一份本机身份 `identity`，`ProjectHome` 自己在最外面放一个 `IdentityProvider`，成员与任务的头像才查得到；协作页的人员列表都经 `publicPeopleWithAvatars`，有头像文件的人带着头像地址。
 
 通知那条链里推过来的整份数据是 `SiteFeed`：通知、把通知交给 AI 的提示词、项目负责人。站点由 gwb-docsite 托管，gwb-collab 经推送通道的频道 `collab`（`siteFeedChannel`）整份推过来；站点只收不发，网站自己不跑 git。推来的是外部输入：`siteFeedOf` 按形状逐项查，多了、少了、不对都抛 `InvalidSiteFeed`。包和插件同仓发版，形状对不对得上由发版顺序保证（collab 先发、插件后发）。
 
