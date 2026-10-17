@@ -67,12 +67,14 @@ describe('MDX 块与行内', () => {
       { type: 'text', text: '。' }, { type: 'break' }, { type: 'text', text: '下一行' },
     ]);
   });
-  it('<WordPlainMath> 编译成带 plainText 的行内公式：tex 给网页，子内容给 Word', () => {
-    const content = (firstSection(chapter('# 章\n\n电容 <WordPlainMath tex="V_{C1}=1.6\\,\\mathrm{kV}">*V*<sub>C1</sub> = 1.6 kV</WordPlainMath> 与 $\\sqrt{2}$。')).children[0] as { content: unknown[] }).content;
+  it('<WordPlainMath> 编译成带 plainText 的行内公式：标签里的 $…$ 给网页，word 属性给 Word', () => {
+    const content = (firstSection(chapter('# 章\n\n电容 <WordPlainMath word="*V*<sub>C1</sub> = 1.6 kV">$V_{C1}=1.6\\,\\mathrm{kV}$</WordPlainMath> 与 $\\sqrt{2}$，<WordPlainMath word="0 \\< *m*<sub>*a*</sub><sub>1</sub>">$0<m_{a1}$</WordPlainMath>。')).children[0] as { content: unknown[] }).content;
     expect(withoutIds(content)).toEqual([
       { type: 'text', text: '电容 ' },
       { type: 'math', latex: 'V_{C1}=1.6\\,\\mathrm{kV}', plainText: [{ text: 'V', marks: ['em'] }, { text: 'C1', marks: ['sub'] }, { text: ' = 1.6 kV' }] },
-      { type: 'text', text: ' 与 ' }, { type: 'math', latex: '\\sqrt{2}' }, { type: 'text', text: '。' },
+      { type: 'text', text: ' 与 ' }, { type: 'math', latex: '\\sqrt{2}' }, { type: 'text', text: '，' },
+      { type: 'math', latex: '0<m_{a1}', plainText: [{ text: '0 < ' }, { text: 'm', marks: ['em'] }, { text: 'a', marks: ['em', 'sub'] }, { text: '1', marks: ['sub'] }] },
+      { type: 'text', text: '。' },
     ]);
   });
   it('软换行两侧都是中文时直接连上，否则换成空格；嵌套的标记取并集', () => {
@@ -135,10 +137,15 @@ describe('MDX 写错时报错，带文件与行列', () => {
     ['不带 Word 前缀的行内组件', '# 章\n\n见 <Ref to="a" />', '报告里的组件都以 Word 开头，<Ref> 不认'],
     ['Word 开头但认不出的组件', '# 章\n\n<WordChart />', '认不出组件 <WordChart>'],
     ['认不出的小写标签', '# 章\n\n文字 <span>x</span>', '认不出组件 <span>'],
-    ['WordPlainMath 没写 tex', '# 章\n\n电压 <WordPlainMath>*V*</WordPlainMath>', '缺少属性 tex'],
-    ['WordPlainMath 里是空的', '# 章\n\n电压 <WordPlainMath tex="V"></WordPlainMath>', '这里是空的'],
-    ['WordPlainMath 里加粗', '# 章\n\n电压 <WordPlainMath tex="V">**V**</WordPlainMath>', '这里出现了 strong'],
-    ['WordPlainMath 里套公式', '# 章\n\n电压 <WordPlainMath tex="V">$V$</WordPlainMath>', '这里出现了 math'],
+    ['WordPlainMath 没写 word', '# 章\n\n电压 <WordPlainMath>$V$</WordPlainMath>', '缺少属性 word'],
+    ['WordPlainMath 还写着旧的 tex', '# 章\n\n电压 <WordPlainMath tex="V">*V*</WordPlainMath>', '没有属性 tex'],
+    ['WordPlainMath 的标签里不是公式', '# 章\n\n电压 <WordPlainMath word="*V*">V</WordPlainMath>', '只写一个行内公式'],
+    ['WordPlainMath 的标签里多写了字', '# 章\n\n电压 <WordPlainMath word="*V*">$V$ 伏</WordPlainMath>', '只写一个行内公式'],
+    ['word 属性是空的', '# 章\n\n电压 <WordPlainMath word="">$V$</WordPlainMath>', '这里是空的'],
+    ['word 属性里加粗', '# 章\n\n电压 <WordPlainMath word="**V**">$V$</WordPlainMath>', '这里出现了 strong'],
+    ['word 属性里套公式', '# 章\n\n电压 <WordPlainMath word="$V$">$V$</WordPlainMath>', '这里出现了 inlineMath'],
+    ['word 属性里下标套上标', '# 章\n\n电压 <WordPlainMath word="V<sub>a<sup>2</sup></sub>">$V_{a^2}$</WordPlainMath>', '既是下标又是上标'],
+    ['word 属性语法错', '# 章\n\n电压 <WordPlainMath word="V<sub>1">$V_1$</WordPlainMath>', 'word 属性解析不了'],
     ['引用块', '# 章\n\n> 引用', '不支持引用块'],
     ['认不出的组件', '# 章\n\n<Chart />', '报告里的组件都以 Word 开头，<Chart> 不认'],
     ['组件属性写成表达式', '# 章\n\n<WordFigure src={x}>图</WordFigure>', '要写成字符串'],

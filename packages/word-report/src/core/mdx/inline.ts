@@ -2,7 +2,7 @@ import type { PlainMathRun, ReportInline } from '../types.ts';
 import { failAt, isCommentOnlyExpression, located, type CompileContext, type MdastNode } from './context.ts';
 import { explicitIdOf } from './ids.ts';
 import { attributesOf } from './jsx.ts';
-import { positionOf } from './parse.ts';
+import { parseMdx, positionOf } from './parse.ts';
 
 type Mark = 'strong' | 'em' | 'sub' | 'sup' | 'code';
 type TextInline = Extract<ReportInline, { type: 'text' }>;
@@ -87,9 +87,10 @@ function collectElement(context: CompileContext, element: MdastNode, marks: read
       return;
     }
     case 'WordPlainMath': {
-      const attributes = attributesOf(context, element, { tex: 'required' });
-      const plainText = plainMathRunsOf(context, element);
-      out.push(located(context, context.ids.request({ type: 'math' as const, id: '', latex: attributes['tex']!, plainText }, 'm'), element));
+      const attributes = attributesOf(context, element, { word: 'required' });
+      const latex = plainMathFormulaOf(context, element);
+      const plainText = plainMathRunsOf(context, element, attributes['word']!);
+      out.push(located(context, context.ids.request({ type: 'math' as const, id: '', latex, plainText }, 'm'), element));
       return;
     }
     case 'br':
@@ -109,21 +110,49 @@ export function unknownComponentMessage(name: string, allowed: string): string {
   return `认不出组件 <${name}>：${allowed}`;
 }
 
-const PLAIN_MATH_MARKS: readonly Mark[] = ['em', 'sub', 'sup'];
+/** <WordPlainMath> 标签里的公式：只能是一个 $…$ */
+function plainMathFormulaOf(context: CompileContext, element: MdastNode): string {
+  const children = (element.children as MdastNode[]).filter((child) => !isCommentOnlyExpression(child));
+  const only = children.length === 1 ? children[0]! : undefined;
+  if (only?.type !== 'inlineMath') failAt(context, element, '<WordPlainMath word="…"> 的标签里只写一个行内公式 $…$，别的都不放');
+  return only.value as string;
+}
 
-/** <WordPlainMath> 里写给 Word 的文字：只收文字、斜体、下标、上标 */
-function plainMathRunsOf(context: CompileContext, element: MdastNode): PlainMathRun[] {
-  const usage = '<WordPlainMath tex="…"> 里写 Word 用的文字，只能用文字、*斜体*、<sub>、<sup>';
-  const inlines = inlinesOf(context, element.children);
-  if (!inlines.length) failAt(context, element, `${usage}，这里是空的`);
-  return inlines.map((inline) => {
-    if (inline.type !== 'text') failAt(context, element, `${usage}，这里出现了 ${inline.type}`);
-    const marks = inline.marks ?? [];
-    const unsupported = marks.find((mark) => !PLAIN_MATH_MARKS.includes(mark));
-    if (unsupported !== undefined) failAt(context, element, `${usage}，这里出现了 ${unsupported}`);
-    if (marks.includes('sub') && marks.includes('sup')) failAt(context, element, '<WordPlainMath> 里同一段文字不能既是下标又是上标');
-    return marks.length ? { text: inline.text, marks: marks as NonNullable<PlainMathRun['marks']> } : { text: inline.text };
-  });
+type PlainMathMark = NonNullable<PlainMathRun['marks']>[number];
+const PLAIN_MATH_MARK_ORDER: readonly PlainMathMark[] = ['em', 'sub', 'sup'];
+
+/** word 属性：Word 里写的文字，按正文的规则解析，只收文字、*斜体*、<sub>、<sup>；相邻同样式的文字合并 */
+function plainMathRunsOf(context: CompileContext, element: MdastNode, word: string): PlainMathRun[] {
+  const usage = '<WordPlainMath> 的 word 属性写 Word 用的文字，只能用文字、*斜体*、<sub>、<sup>';
+  if (/[\r\n]/.test(word)) failAt(context, element, `${usage}，不能换行`);
+  let root: MdastNode;
+  try {
+    root = parseMdx(word, '');
+  } catch (error) {
+    return failAt(context, element, `<WordPlainMath> 的 word 属性解析不了（位置从属性开头算）：${(error as Error).message}`);
+  }
+  const blocks = root.children as MdastNode[];
+  if (blocks.length !== 1 || blocks[0]!.type !== 'paragraph') failAt(context, element, `${usage}，这里${blocks.length ? '不是一段文字' : '是空的'}`);
+  const runs: PlainMathRun[] = [];
+  const collect = (nodes: MdastNode[], marks: ReadonlySet<PlainMathMark>) => {
+    for (const node of nodes) {
+      if (node.type === 'text') {
+        const sorted = PLAIN_MATH_MARK_ORDER.filter((mark) => marks.has(mark));
+        const previous = runs.at(-1);
+        if (previous && (previous.marks ?? []).join() === sorted.join()) previous.text += node.value;
+        else runs.push(sorted.length ? { text: node.value, marks: sorted } : { text: node.value });
+      } else if (node.type === 'emphasis') collect(node.children, new Set([...marks, 'em']));
+      else if (node.type === 'mdxJsxTextElement' && (node.name === 'sub' || node.name === 'sup')) {
+        if ((node.attributes as unknown[]).length) failAt(context, element, `${usage}，<${node.name}> 不带属性`);
+        const script: PlainMathMark = node.name;
+        if (marks.has(script === 'sub' ? 'sup' : 'sub')) failAt(context, element, '<WordPlainMath> 的 word 属性里同一段文字不能既是下标又是上标');
+        collect(node.children, new Set([...marks, script]));
+      } else failAt(context, element, `${usage}，这里出现了 ${node.type === 'mdxJsxTextElement' ? `<${node.name}>` : node.type}`);
+    }
+  };
+  collect(blocks[0]!.children, new Set());
+  if (!runs.some((run) => run.text)) failAt(context, element, `${usage}，这里是空的`);
+  return runs.filter((run) => run.text);
 }
 
 function linkTextOf(context: CompileContext, link: MdastNode): string {

@@ -1,0 +1,29 @@
+---
+born-at: 2026-10-17T16:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: WordPlainMath 改成标签里放公式
+domain: 页面
+---
+
+## 背景
+
+pivots-from:: [行内公式写成文字改由源文件标注](2026-10-17-word-plain-math-component.md)
+
+0.5.0 的写法是 `<WordPlainMath tex="\Delta V">Δ*V*</WordPlainMath>`：公式放在属性里，Word 用的文字放在标签里。用户在 VS Code 里看了迁移后的报告说：
+
+> 还有这个我觉得内外写反了啊，应该被包裹的是tex，然后wordplain写标签里
+
+## 结论与边界
+
+- 0.6.0 起写成 `<WordPlainMath word="Δ*V*">$\Delta V$</WordPlainMath>`：标签里只放一个 `$…$`，Word 用的文字放在 `word` 属性里。公式是主体，外面这层只说明它在 Word 里怎么写；去掉这层，剩下的 `$…$` 就回到插 MathType，两种写法对称，编辑器里公式照常高亮
+- `word` 属性是普通字符串，编译器把它按正文的规则再解析一次，仍然只收文字、`*斜体*`、`<sub>`、`<sup>`；正文里要转义的字符在属性里同样要转义。属性里写错时，报错只能指到这个组件所在的行列，属性内部的位置从属性开头算
+- SST 初步设计报告的 760 个 `<WordPlainMath>` 机械改成新写法，同一次把 14 处 `<strong>（1）…</strong>` 改成 `**`：它们都在行首，`**` 能认，`<strong>` 是早上 JSON 转 MDX 时转换器一律用 HTML 标签留下的
+
+## 否掉的候选
+
+- **Word 文字仍放标签里、公式改放属性以外的位置（比如另写一个子组件）**：多一层组件，写一个符号要四个标签
+
+## 依据
+
+无实验。迁移脚本与核对在 `probes/2610171630_word-plain-math-attribute/`。

@@ -69,7 +69,7 @@ chapters: [c1.mdx]
 # 主电路设计 [#c1]
 
 单元额定功率见<WordRef to="tab-unit" />，由<WordRef to="eq-pcell" />算出<WordCite to="ref-iec" />；
-单元直流电容 <WordPlainMath tex="C_1">*C*<sub>1</sub></WordPlainMath> 的电压纹波取 $\Delta V/\sqrt{2}$。
+单元直流电容 <WordPlainMath word="*C*<sub>1</sub>">$C_1$</WordPlainMath> 的电压纹波取 $\Delta V/\sqrt{2}$。
 
 ```math eq-pcell
 P_{cell} = \frac{P_N}{3N_{on}}
@@ -116,9 +116,9 @@ P_{cell} = \frac{P_N}{3N_{on}}
 
 | 写法 | 是什么 |
 | --- | --- |
-| `**加粗**`、`*斜体*`、`` `代码` ``、`<sub>`、`<sup>` | 文字的样式，可以嵌套；加粗或斜体的内容以标点开头或结尾时（如 `**（1）方案**`），`**` 在中文旁边读不出来，改写 `<strong>…</strong>`、`<em>…</em>` |
+| `**加粗**`、`*斜体*`、`` `代码` ``、`<sub>`、`<sup>` | 文字的样式，可以嵌套。`**` 紧挨着内容的一侧是标点时，外面一侧要是空格、标点或行首行尾才认：`**（1）方案**。` 在行首能认，`前文**（1）方案**后文` 不认，这时改写 `<strong>…</strong>`（斜体同理用 `<em>`） |
 | `$…$` | 行内公式，Word 里插成 MathType 对象 |
-| `<WordPlainMath tex="C_1">*C*<sub>1</sub></WordPlainMath>` | 在 Word 里写成文字的行内公式：网页按 `tex` 显示，Word 照组件里的文字写；组件里只能写文字、`*斜体*`、`<sub>`、`<sup>` |
+| `<WordPlainMath word="*C*<sub>1</sub>">$C_1$</WordPlainMath>` | 在 Word 里写成文字的行内公式：标签里只写一个 `$…$`，网页照它显示；Word 照 `word` 属性写。`word` 按正文的规则解析，只能写文字、`*斜体*`、`<sub>`、`<sup>`，要转义的字符和正文一样（如 `0 \< *m*`） |
 | `<WordRef to="id" />` | 交叉引用，显示「图 3-2」「表 1-1」「式（2-3）」「第 2.1 节」；加 `show="number"` 只显示编号，`show="title"` 显示标题 |
 | `<WordCite to="ref-a ref-b" />` | 文献引用，几个 id 用空格隔开 |
 | `[文字](https://…)` | 链接 |
@@ -194,7 +194,7 @@ pnpm exec report-docx status <报告 id>
 
 公式在 Word 里分两种，由源文件决定，引擎不自己判断：
 
-- `<WordPlainMath>` 写成文字，照组件里写的斜体、上标、下标，字体 Times New Roman，应用字符样式「DR Inline Math」。只有字母、数字、一层上标或下标、单位和简单运算符的行内公式适合这样写，插 MathType 对象是导出里最慢的一步
+- `<WordPlainMath>` 写成文字，照 `word` 属性里写的斜体、上标、下标，字体 Times New Roman，应用字符样式「DR Inline Math」。只有字母、数字、一层上标或下标、单位和简单运算符的行内公式适合这样写，插 MathType 对象是导出里最慢的一步
 - `$…$` 和全部行间公式插成 MathType 对象
 
-网页上两种都由 KaTeX 按 TeX 显示。`<WordPlainMath>` 的 `tex` 与组件里的文字是两份，改公式时两边一起改，编译器不比对它们。
+网页上两种都由 KaTeX 按 TeX 显示。`<WordPlainMath>` 标签里的公式与 `word` 属性是两份，改公式时两边一起改，编译器不比对它们；去掉外面这层组件，剩下的 `$…$` 就改成插 MathType。
