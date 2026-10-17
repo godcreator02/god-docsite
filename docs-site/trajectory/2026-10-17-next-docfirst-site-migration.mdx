@@ -1,0 +1,34 @@
+---
+born-at: 2026-10-17T10:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: Next docfirst 站迁到平台：骨架换进旧站，正文不动
+domain: 骨架
+---
+
+## 背景
+
+本机约 25 个文档站还是 Next + `@godcreator/docfirst-workflow`（0.3.1～0.5.6）。平台这边 god-docsite 0.1.3、docfirst 0.1.0、gwb-docsite 0.6.1 都已发版，
+`docfirst.create` 能建新站，但没有升级命令，Next 站迁过来还没人做过。先挑小而干净的 gwb-vscode 的 docs-site
+（Next 16 + docfirst-workflow 0.5.2，14 个 mdx、`src/components/` 下一个讲解组件）做试点，摸清步骤再批量。
+
+pivots-from:: [docs-site 从模板重建](2026-10-15-docs-site-rebuilt-from-template.md)
+
+## 结论与边界
+
+- 走得通，做法照本站自己的重建：空目录里 `docfirst.create` 生成骨架，`app/` 与根配置、身份文件整份换进旧站，`package.json` 只换依赖与脚本，`content/` 正文不动
+- 旧站要处理的差异有六类：分区的 `meta.json`（加站名与 `"root": true`）、轨迹卡挪到站点根、讲解组件挪进页面同名文件夹并由页面 import、`docfirst.config.mjs` 改成新写法、
+  `Note` 组件新站没有、生成物的 Markdown 写法变了。逐条怎么改写在维护页「Next docfirst 站迁到平台」
+- 生成物的差异有一处是缺陷不是写法：裸网址后面紧跟全角标点，GFM 自动链接认不出网址在哪结束，整段连标点带后文转成链接。旧渲染器没有这个问题；迁移时把网址放进反引号
+- 试点结果：`pnpm doc` 全绿，`pnpm typecheck`、`pnpm build` 通过，`docsite.site.start` 后首页、各区首页、卡页、`/llms.txt` 都是 200
+
+边界：只迁过一个站。它没用到讲解组件包、没有 `src/glossary.mjs`、没有评论与自定义路由，这几类别的站会碰到，步骤里只按先例写了怎么改，没在试点里实际做过。
+
+## 否掉的候选
+
+- 写一条升级命令自动迁：各站在 Next 侧改过的地方不一样（自定义路由、组件表、术语表、inbox），一条命令覆盖不全，又容易悄悄丢东西；先照步骤人工迁几个，差异稳定了再定要不要写
+- 在旧站上逐个文件把 Next 改成 React Router：路由、页面 loader、功能包接线全都不同，从骨架换进来再核对差异更可靠
+
+## 代价与遗留
+
+每个站都要人工看一遍生成物的 `git diff`。自动链接那处缺陷要不要在渲染器里修（比如关掉 GFM 自动链接，或在全角标点处断开），交给 doc-export 那一路定。

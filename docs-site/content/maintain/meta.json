@@ -1,5 +1,5 @@
 {
   "title": "维护",
   "root": true,
-  "pages": ["index", "collab-regression"]
+  "pages": ["index", "collab-regression", "migrate-next-docfirst"]
 }

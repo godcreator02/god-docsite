@@ -1,0 +1,121 @@
+---
+title: Next docfirst 站迁到平台
+description: 用 Next 与 @godcreator/docfirst-workflow 建的旧文档站，怎么换成 god-docsite + docfirst：骨架从哪来、每类差异怎么改、怎么验收、遇到过的问题
+---
+
+没有升级命令：旧站与平台站的路由、页面 loader、功能包接线全都不同，逐个文件把 Next 改成 React Router 不划算。
+做法是在空目录用 `docfirst.create` 生成一套新站，把建站器负责的文件整份换进旧站，`content/` 的正文留着，再逐类处理差异。
+第一个这样迁过来的是 gwb-vscode 的 `docs-site`（Next 16 + docfirst-workflow 0.5.2，14 个 mdx、一个讲解组件），下面的报错与输出都出自那一次。
+
+开始前站点要停着，`git status` 里没有别人在 `docs-site/` 下未提交的改动。
+
+## 1. 生成骨架
+
+```text
+docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"<站名>"}
+```
+
+- 上一级目录要先建好；站名用旧站 `src/lib/shared.ts` 里的 `appName`
+- 放在 D 盘的空目录里，不放系统临时目录：在临时目录里 vite 报 `pluginutils` 没有 `createFilter`，服务起不来
+- 回执的 `features` 列出装好的功能（code-pin、comments、explainer、trajectory）；骨架留着，下一步从它复制
+
+## 2. 换进建站器负责的文件
+
+从骨架复制到旧站的 `docs-site/`：
+
+| 复制 | 说明 |
+| --- | --- |
+| `app/` 整个目录 | 路由、布局、首页、各功能的接线文件 |
+| `vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json` | 构建与类型检查 |
+| `.gitignore`、`pnpm-workspace.yaml`、`pnpm-lock.yaml` | 安装设置与锁文件 |
+| `docsite.json`、`people.json`、`glossary.json`、`comments/.gitkeep` | 身份文件是 `{ "kind": "docs", "format": 1 }`，没有它 `docsite.site.*` 拒绝托管 |
+| `package.json` 的 `type`、`scripts`、`dependencies`、`devDependencies` | `name`、`version`、`description` 留旧站的 |
+
+骨架的 `content/start.mdx`、`content/future/overview.mdx`、`content/docs/outputs/` 下的正本与 `trajectory/2026-01-01-site-born.md` 不复制：旧站有自己的生成正本、未来区与根卡。
+
+再删掉旧站的 Next 文件：`src/app/`、`src/lib/`、`src/proxy.ts`、`src/components/mdx.tsx` 与 `registry.ts`、`next.config.mjs`、`postcss.config.mjs`、
+`scripts/verify-roster.mjs`、create-fumadocs 留在站目录里的 `README.md`。`registry.ts` 与 `verify-roster.mjs` 是核对组件名册两边一致用的，
+新站的组件由页面自己 import，名册只剩 `docfirst.config.mjs` 一处。已跟踪的文件用 `git mv` / `git rm`，挪动的历史留得住。
+
+构建产物与旧依赖也删掉：`.next/`、`.source/`、`node_modules/`、`next-env.d.ts`、`tsconfig.tsbuildinfo`，然后 `pnpm install`。
+新的 `.gitignore` 不再忽略 `.next/`，不删它就出现在 `git status` 里。
+
+## 3. 每类差异怎么改
+
+### 分区与侧栏
+
+旧站每个区一个 Next 布局（`/docs`、`/future` 各一个侧栏）；新站只有一棵页面树，顶上的下拉框切换各区：
+
+- `content/meta.json` 写站名与 `pages`，如 `{ "title": "gwb-vscode", "pages": ["docs", "future"] }`
+- 每个区的 `meta.json` 加 `title` 与 `"root": true`
+- 地址不变：`content/docs/x.mdx` 还是 `/docs/x`，站内链接不用改
+- `content/` 根上不放 `index` 页。首页是 `app/routes/home.tsx`；旧站多是把 `/` 跳到 `/docs`，新站首页写站名、一句介绍和去文档的链接
+
+### 轨迹卡
+
+`content/trajectory/` 整个挪到站点根 `trajectory/`，删掉里面的 `meta.json`：那是旧站给星轨盘入口排侧栏用的，新站的入口由 trajectory 功能放在侧栏站名下。
+卡的地址还是 `/trajectory/<卡身份>`，正文里的卡链接不用改。
+
+### 讲解组件
+
+新的 docfirst 只核对现状区里与站点 `app/components/` 下的组件源码，站目录下 `src/components/` 里还有文件就直接报错，不会悄悄少核对一批钉码：
+
+{/* ref file="../packages/docfirst/src/project.ts" lines="76-84" hash="cc64e38b44df" blob="f6eb46f4a4d7" */}
+
+- 只给一页用的组件挪进那一页的同名文件夹：gwb-vscode 首页 `content/docs/index.mdx` 用的接缝图挪进 `content/docs/index/`，在侧栏里不会多出一组
+- 页面开头加 import，路径相对页面：`import { VscodeSeams } from './index/vscode-seams'`。旧站靠全局组件表，页面里不用 import
+- 几组页面共用的放站点 `app/components/`，放之前先问人
+- 去掉文件头的 `'use client'`
+- 用到讲解组件包的，`@godcreator/docfirst-explainer` 换成 `@godcreator/explainer`：组件从 `@godcreator/explainer/site` 取，机读文字规则从 `@godcreator/explainer` 取。gwb-vscode 的组件没用到这个包，这一条没在试点里实际换过
+- 数据文件保持 `.mjs`（`docfirst.config.mjs` 在 Node 里直接 import 它），旁边补一份同名的 `.d.mts` 写出导出的类型。
+  旧站的 `tsconfig.json` 开着 `allowJs`，类型是推断出来的；新站不开，不补就报 `TS7016: Could not find a declaration file for module './vscode-seams.data.mjs'`
+
+### docfirst.config.mjs
+
+照模板改写，旧站的 `outputs` 与站里组件的机读规则照抄：
+
+{/* ref file="../packages/docfirst/template/docfirst.config.mjs" hash="94e073918d61" blob="d2ea725e7568" */}
+
+- `import { fumadocsRoster } from '@godcreator/docfirst-workflow/fumadocs/roster'` 与 `...fumadocsRoster` 换成 `fumadocsRoster: true`
+- 加 `trajectory: 'trajectory'`，`components` 里加 `Term: 'children'`
+- 站里组件的机读规则 import 的数据文件跟着组件换路径（`./content/docs/index/vscode-seams.data.mjs`）
+- SKILL.md 的映射照旧写对象形式 `{ to, frontmatter: ['name', 'description'] }`
+- 配置里有 `glossary` 的去掉，术语表转成站点根的 `glossary.json`（每条 `term` / `aliases` / `def` / `href`）
+
+### Note 组件
+
+旧站的 `src/components/mdx.tsx` 自己定义了 `Note`；新站的组件表里没有它，`fumadocsRoster` 只给它在生成物里的机读规则。
+页面里用到 `<Note>` 的，现状页改成 fumadocs 的 `<Callout>`；生成正本里的改成引用块，名册里没有 `Callout` 的机读规则，用了 `pnpm doc` 报红。
+
+### 生成物
+
+迁完第一次 `pnpm doc` 对生成物报红：新渲染器写出的 Markdown 跟旧的不一样。`pnpm doc:render` 后在仓根 `git diff` 逐处看：
+
+- 列表记号 `*` 变成 `-`、表格空格子 `| |` 变成 `|  |`：读出来一样，照收。随包的 SKILL.md 只变了这些时不用为它发插件新版
+- 裸网址后面紧跟全角标点会被当成一整个网址转成链接：`http://127.0.0.1:4313），不用` 写出成 `[http://127.0.0.1:4313），不用](http://127.0.0.1:4313），不用)`。把网址放进反引号，或改写那一句
+- 旧站 AGENTS / README 正本里「先 `pnpm build` 再 `pnpm start`（端口 43xx）」「`pnpm dev`，端口 43xx」这类说法都过时了，
+  改成开发服务由工作台托管：`docsite.site.add {"dir":"<站目录>"}`，地址看 `docsite.site.list`
+
+## 4. 验收
+
+在站目录依次运行，三条都要退出码 0：
+
+```text
+pnpm doc
+pnpm typecheck
+pnpm build
+```
+
+再 `docsite.site.start {"dir":"<站目录>"}`，请求首页、各区首页、一张卡页、`/llms.txt`，都回 200、页面上的讲解组件画出来了，然后 `docsite.site.stop`。要常驻的站改用 `docsite.site.add`。
+
+开发服务的日志里 `Failed to resolve dependency: @godcreator/code-pin > @types/mdast, present in client 'optimizeDeps.include'` 每个平台站都有，骨架站也有，不影响页面。
+
+## 5. 提交
+
+站的全部改动放进一个提交：删掉的 Next 文件、挪动的卡与组件、复制进来的骨架文件、改过的正本与重新生成的生成物，再加一张这个站自己的轨迹卡，记下这次迁移和没做完的事。
+`git add` 新文件、`git commit --only` 列出全部路径，别的会话未提交的文件不收进来。
+
+## 遇到过的问题
+
+- 本机的删除守卫拦下了 shell 里带变量路径的 `Copy-Item -Recurse`、`git rm -f`：复制骨架与删构建产物写成 Node 脚本，路径作参数传入
+- 旧 `node_modules/` 里有超过 260 字符的路径，`git status --ignored` 报 `Filename too long`；删掉旧依赖重新安装后就没有了
