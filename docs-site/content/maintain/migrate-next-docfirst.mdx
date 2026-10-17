@@ -7,6 +7,7 @@ description: 用 Next 与 @godcreator/docfirst-workflow 建的旧文档站，怎
 做法是在空目录用 `docfirst.create` 生成一套新站，把建站器负责的文件整份换进旧站，`content/` 的正文留着，再逐类处理差异。
 第一个这样迁过来的是 gwb-vscode 的 `docs-site`（Next 16 + docfirst-workflow 0.5.2，14 个 mdx、一个讲解组件）；
 第二个是 gwb-windows-backup 的 `docs-site`（docfirst-workflow 0.5.2 + docfirst-explainer 0.1.1，29 个 mdx、六个用讲解组件包画的组件），讲解组件包怎么换出自这一次。
+之后 gwb-gitea、gwb-unit-folder、gwb-nas-suite、gwb-mineru、gwb-agents 五个站照这页迁过，组件样式写在全站 CSS 里、组件没有数据文件这几条出自它们。
 
 开始前站点要停着，`git status` 里没有别人在 `docs-site/` 下未提交的改动。
 站是仓根 pnpm 工作区的成员时（仓根 `pnpm-workspace.yaml` 的 `packages` 里列着 `docs-site`），先从那里去掉：平台站自带 `pnpm-workspace.yaml`，留在里面就是工作区里嵌套工作区。
@@ -18,7 +19,7 @@ description: 用 Next 与 @godcreator/docfirst-workflow 建的旧文档站，怎
 docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"<站名>"}
 ```
 
-- 上一级目录要先建好；站名用旧站 `src/lib/shared.ts` 里的 `appName`
+- 上一级目录要先建好；站名用旧站 `src/lib/shared.ts` 里的 `appName`，没有这个文件的（gwb-unit-folder）在 `src/lib/tree.ts` 的 `zoneTree()` 里
 - 放在 D 盘的空目录里，不放系统临时目录：在临时目录里 vite 报 `pluginutils` 没有 `createFilter`，服务起不来
 - 回执的 `features` 列出装好的功能（code-pin、comments、explainer、trajectory）；骨架留着，下一步从它复制
 
@@ -32,7 +33,7 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 | `vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json` | 构建与类型检查 |
 | `.gitignore`、`pnpm-workspace.yaml`、`pnpm-lock.yaml` | 安装设置与锁文件 |
 | `docsite.json`、`people.json`、`glossary.json`、`comments/.gitkeep` | 身份文件是 `{ "kind": "docs", "format": 1 }`，没有它 `docsite.site.*` 拒绝托管 |
-| `package.json` 的 `type`、`scripts`、`dependencies`、`devDependencies` | `name`、`version`、`description` 留旧站的 |
+| `package.json` 的 `type`、`scripts`、`dependencies`、`devDependencies` | `name`、`version`、`description` 留旧站的；旧站的 `"docfirst": "docfirst"` 脚本骨架没有，不用留，`pnpm exec docfirst …` 照样能用 |
 
 骨架的 `content/start.mdx`、`content/future/overview.mdx`、`content/docs/outputs/` 下的正本与 `trajectory/2026-01-01-site-born.md` 不复制：旧站有自己的生成正本、未来区与根卡。
 
@@ -74,7 +75,10 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - 页面开头加 import，路径相对页面：`import { VscodeSeams } from './index/vscode-seams'`、`import { SeamMap } from '../_shared/seam-map/seam-map'`。旧站靠全局组件表，页面里不用 import
 - 去掉文件头的 `'use client'`：React Router 站没有服务端组件
 - 站自己的组件样式：旧站在 `src/app/global.css` 里统一引（gwb-windows-backup 是 `@import '../components/backup.css'`），新站的 `app/app.css` 是骨架的，不再引它们；
-  改成每个组件开头 `import` 自己用到的样式文件，几个组件共用的那份放进上面的 `_` 文件夹、各自 import
+  改成每个组件开头 `import` 自己用到的样式文件，几个组件共用的那份放进上面的 `_` 文件夹、各自 import。
+  组件的颜色变量与类直接写在 `global.css` 里的（gwb-gitea 的 `--gitea-seam-accent`、gwb-unit-folder 的 `.uf-seams`、gwb-nas-suite 的 `--seam-*`），
+  删 `src/app/` 之前先把这几段挪成组件旁的 `.css`：三条验收命令都不会因为它们丢了报错，组件只是悄悄没了颜色
+- 组件没有 `.data.mjs`、机读文字直接写在 `docfirst.config.mjs` 里的，规则照抄，只改注释里的组件路径，不用补下面的 `.d.mts`
 - 数据文件保持 `.mjs`（`docfirst.config.mjs` 在 Node 里直接 import 它），旁边补一份同名的 `.d.mts` 写出导出的类型。
   旧站的 `tsconfig.json` 开着 `allowJs`，类型是推断出来的；新站不开，不补就报 `TS7016: Could not find a declaration file for module './vscode-seams.data.mjs'`。
   数据文件里写了 JSDoc 的，让 tsc 生成草稿再整理：
@@ -143,7 +147,8 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - 裸写的网址：doc-export 0.1.0 会把它写成 `[网址](网址)`，后面紧跟全角标点时连标点带后文一起写进链接（`http://127.0.0.1:4313），不用` 写出成
   `[http://127.0.0.1:4313），不用](http://127.0.0.1:4313），不用)`）。之后的版本照原文写出；站里装的还是 0.1.0 时，把网址放进反引号，或改写那一句
 - 旧站 AGENTS / README 正本里「先 `pnpm build` 再 `pnpm start`（端口 43xx）」「`pnpm dev`，端口 43xx」这类说法都过时了，
-  改成开发服务由工作台托管：`docsite.site.add {"dir":"<站目录>"}`，地址看 `docsite.site.list`
+  改成开发服务由工作台托管：`docsite.site.add {"dir":"<站目录>"}`，地址看 `docsite.site.list`；正本里说说明书属于 `@godcreator/gwb-docfirst-workflow` 的，改成 `@godcreator/gwb-docsite`
+- 未来区 `inbox/` 里要求升级 docfirst-workflow 的反馈，迁完站里已经没有这个包，删掉
 
 ## 4. 验收
 
