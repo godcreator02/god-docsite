@@ -166,9 +166,9 @@ gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能�
 
 ## 站点上：读、写、通知
 
-图上第 1、2、6 号。站点交给协作功能的是一个 `CollabSite`：站名、站点目录、协作仓仓根、评论目录、可信 origin，加四个每次请求现调的函数（人员、本机身份、站里的页面、推送来的 `SiteFeed`）。人员、页面、推送来的数据改了不用重启服务。
+图上第 1、2、6 号。站点交给协作功能的是一个 `CollabSite`：站名、站点目录、协作仓仓根、评论目录、可信 origin，加四个每次请求现调的函数（人员、本机身份、站里的页面、推送来的 `SiteFeed`），以及一键提交用的频道 `submit`（见下面「一键提交」）。人员、页面、推送来的数据改了不用重启服务。
 
-{/* ref file="../packages/collab/src/site/collab-site.ts" lines="6-29" hash="67955db1e71d" blob="c06f0efc84b8" */}
+{/* ref file="../packages/collab/src/site/collab-site.ts" lines="7-42" hash="4eae1bc241cc" blob="d0f8a607a3d4" */}
 
 建站器把 `template/` 下的接线文件写进站点的 `app/features/collab/`，路由表登记 `/tasks`、`/tasks/:recordId`、`/calendar`、`/calendar/:date` 与三个接口路由：
 
@@ -182,11 +182,27 @@ gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能�
 
 <SiteRoutes />
 
-写任务与模块的表单约定是三种 `intent`（`create-record`、`update-record`、`delete-record`）；任务页与记录页的 action 同时收评论包的 intent，转给评论包。项目首页 `templates/home.tsx` 不经建站器：gwb-collab 的 `collab.site.init` 建站后把它写成站点的 `app/routes/home.tsx`，之后归站点自己改。首页在整站布局之外，没有布局给的 `IdentityProvider`：`projectHomeLoader` 多交一份本机身份 `identity`，`ProjectHome` 自己在最外面放一个 `IdentityProvider`，成员与任务的头像才查得到；协作页的人员列表都经 `publicPeopleWithAvatars`，有头像文件的人带着头像地址。
+写任务与模块的表单约定是三种 `intent`（`create-record`、`update-record`、`delete-record`）；任务页与记录页的 action 同时收评论包的 intent，转给评论包，还收一键提交的 `request-submit`。项目首页 `templates/home.tsx` 不经建站器：gwb-collab 的 `collab.site.init` 建站后把它写成站点的 `app/routes/home.tsx`，之后归站点自己改。首页在整站布局之外，没有布局给的 `IdentityProvider`：`projectHomeLoader` 多交一份本机身份 `identity`，`ProjectHome` 自己在最外面放一个 `IdentityProvider`，成员与任务的头像才查得到；协作页的人员列表都经 `publicPeopleWithAvatars`，有头像文件的人带着头像地址。
 
-通知那条链里推过来的整份数据是 `SiteFeed`：通知、把通知交给 AI 的提示词、项目负责人。站点由 gwb-docsite 托管，gwb-collab 经推送通道的频道 `collab`（`siteFeedChannel`）整份推过来；站点只收不发，网站自己不跑 git。推来的是外部输入：`siteFeedOf` 按形状逐项查，多了、少了、不对都抛 `InvalidSiteFeed`。包和插件同仓发版，形状对不对得上由发版顺序保证（collab 先发、插件后发）。
+通知那条链里推过来的整份数据是 `SiteFeed`：通知、把通知交给 AI 的提示词、项目负责人。站点由 gwb-docsite 托管，gwb-collab 经推送通道的频道 `collab`（`siteFeedChannel`）整份推过来，网站自己不跑 git。推来的是外部输入：`siteFeedOf` 按形状逐项查，多了、少了、不对都抛 `InvalidSiteFeed`。包和插件同仓发版，形状对不对得上由发版顺序保证（collab 先发、插件后发）。
 
-{/* ref file="../packages/collab/src/core/notifications/site-feed.ts" lines="12-33" hash="36be22eafd4e" blob="4e6fee0582e9" */}
+{/* ref file="../packages/collab/src/core/notifications/site-feed.ts" lines="12-33" hash="eebc7969779a" blob="45f39a6eaa97" */}
+
+### 一键提交
+
+平时的提交审核不用叫 AI：通知栏点开后的「要处理的事」里有「一键提交」，有本机还没提交审核的改动（`unsubmitted` 通知）时出现。有冲突、不在 main、`collab/` 里有读不对的记录时提交审核一定被拒，按钮不能点，旁边写明先处理什么（`submitBlockersOf`），这时用「复制给 AI」。
+
+按钮和 gwb-collab 之间来回写推送通道的另一个频道 `collab-submit`（`submitChannel`），里面只有一份状态 `SubmitState`：
+
+1. 按钮提交到任务页的 action（`intent=request-submit`）。核对过本机身份后，先问 gwb-collab 在不在听这个频道：不在听回 503，不写请求；已经在提交回 409；都没问题就写 `{ state: 'requested', by, at }`
+2. gwb-collab 经 gwb-docsite 带着令牌订阅着这个频道，收到 `requested` 就跑提交审核，先写回 `running`
+3. 合并了写 `merged`，带上合并请求的编号，提示栏显示 15 秒；被拒写回 null，原话照旧成为一条 `submit-failure` 通知，在频道 `collab` 里
+
+AI 调 `collab.submit` 时 gwb-collab 也写 `running` 与结果，网页上同样看得到进度；一个项目同一时刻只跑一次。站点怎么接这个频道写在 `template/site.server.ts`：读、写用平台的 `siteFeedValue`、`publishSiteFeed`，「在不在听」用 `siteFeedHasLauncher`（机制见 god-docsite 包页的「推送通道」）。`CollabSite.submit` 是可选的：接线文件还是旧的站点没有这个按钮，action 回 501。
+
+{/* ref file="../packages/collab/src/core/notifications/submit-state.ts" lines="1-15" hash="f58038fca5cb" blob="a8e56192ed32" */}
+
+{/* ref file="../packages/collab/src/site/server/submit.server.ts" lines="17-28" hash="ef591ca03f68" blob="d94a2a28d74f" */}
 
 ## 正文里的三种链接
 

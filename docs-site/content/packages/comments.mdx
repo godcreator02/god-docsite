@@ -26,7 +26,7 @@ import { WhereItLands } from './comments/where-it-lands'
 
 评论目录下一串一个文件夹，文件夹名就是串 id；串头是 `index.mdx`，回复各一个 `<回复 id>.mdx`，同目录还能放附件。串 id 与回复 id 同一个形状：`20261012t153000-ab12`（本机时刻到秒，加几位随机的小写字母数字）。id 先过形状校验再拼路径，不会被拼出评论目录以外的路径。
 
-{/* ref file="../packages/comments/src/core/comment-file.ts" lines="3-10" hash="1ba19392edd4" blob="77cca07d6e1d" */}
+{/* ref file="../packages/comments/src/core/comment-file.ts" lines="4-11" hash="1ba19392edd4" blob="b7004ae5ad12" */}
 
 每个文件是 frontmatter 加 MDX 正文；作者只存人员 id（`author`），名字显示时再按名单换。
 
@@ -54,9 +54,25 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 串头 frontmatter 的 `status` 是 `open` 或 `resolved`（不写等于 `open`）；`resolved` 时 `resolvedBy`（人员 id）与 `resolvedAt`（ISO 时刻）都要有，`open` 时两项都不能有；回复不能带这三项。标为已解决、重新打开只改串头的这三项，别的字段与正文原样写回；已经是这个状态再标一次拒绝（409），写明是谁在什么时候标的：
 
-{/* ref file="../packages/comments/src/core/comment-file.ts" lines="64-82" hash="baea6782a133" blob="77cca07d6e1d" */}
+{/* ref file="../packages/comments/src/core/comment-file.ts" lines="66-84" hash="baea6782a133" blob="b7004ae5ad12" */}
 
 <StatusCases />
+
+## 表情回应记在被点的那条评论上
+
+每条评论（串头或回复）下面可以点表情回应，只收固定的八个：👍 👎 😄 🎉 😕 ❤️ 🚀 👀，界面按这个顺序摆。别的表情只能写进正文：输入框右边的表情按钮列出一组常用的，点了插在光标处，存进去就是正文里的字。
+
+{/* ref file="../packages/comments/src/core/reactions.ts" lines="1-9" hash="809dd760f5ef" blob="7a93044886c3" */}
+
+回应存在被点的那个文件的 frontmatter 字段 `reactions` 里，值照样是一个 JSON 字符串：表情对点了它的人员 id，按点的先后排，没人点的表情不写，一个都没有时整个字段去掉。小王和小周都点了 👍、小周点了 🎉 的串头多出这一行：
+
+```mdx
+reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
+```
+
+加上、撤掉都只改这一个字段，别的字段与正文原样写回；已经点过还加、没点过还撤都拒绝（409）：网页上的按钮按它看到的状态发「加」或「撤」，状态过时了就告诉它，不会把别人刚点的撤掉。读的时候不认识的表情、空列表、同一个人点了两次都直接报错并点名文件。
+
+{/* ref file="../packages/comments/src/node/store.ts" lines="127-155" hash="15a8e0eb5218" blob="95aabef1afe4" */}
 
 ## 写入：唯一一份 action
 
@@ -64,13 +80,13 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 {/* ref file="../packages/comments/template/comments.tsx" lines="14-17" hash="8ea0ded43bb4" blob="391d3c0bb103" */}
 
-表单字段是界面与 action 之间的外部契约：六种 `intent`（建串、回复、删回复、删串、标为已解决、重新打开），每种只收自己那几个字段，多写一个字段就拒绝；`as` 只给 agent 经命令用，网页界面里不出现。返回 `{ ok: true, intent, threadId?, replyId? }` 或 `{ ok: false, error }`。
+表单字段是界面与 action 之间的外部契约：八种 `intent`（建串、回复、删回复、删串、标为已解决、重新打开、加表情、撤表情），每种只收自己那几个字段，多写一个字段就拒绝；`as` 只给 agent 经命令用，网页界面里不出现。返回 `{ ok: true, intent, threadId?, replyId? }` 或 `{ ok: false, error }`。
 
-{/* ref file="../packages/comments/src/site/action.server.ts" lines="6-34" hash="37e92900c927" blob="6d59e89ad160" */}
+{/* ref file="../packages/comments/src/site/action.server.ts" lines="7-37" hash="5928a9c4a996" blob="9272f5e66da8" */}
 
 先核对来源与身份（identity 包的 `authorizeWrite`，细节归 identity 页），再写；来源或身份不对、字段不对、目标评论不存在，都回 `{ ok: false, error }` 带 4xx 状态码；别的错原样抛出，不吞。
 
-{/* ref file="../packages/comments/src/site/action.server.ts" lines="109-126" hash="fc96782d15a7" blob="6d59e89ad160" */}
+{/* ref file="../packages/comments/src/site/action.server.ts" lines="126-143" hash="afdd150dbaa0" blob="9272f5e66da8" */}
 
 建串时串头写 `page`、`author`、`createdAt`、`status: open`，批了东西再加 `anchor`；站点的第一条评论连评论目录一起建。`createdAt` 是 UTC 的 ISO 时刻，id 里的时刻是本机时间，两者在 UTC+8 的机器上差 8 小时（测试站的预置评论 `20261001t120000-seed1` 的 `createdAt` 是 `2026-10-01T04:00:00.000Z`）。回复只写 `author`、`createdAt`；删回复删一个文件，删串删整个文件夹（含附件）。写完不编译：评论是 fumadocs-mdx 集合里的文件，集合自己的文件监视会重新生成入口。
 
@@ -78,11 +94,11 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 图上第 3 号。平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组，再用 `commentsTableRowsOf` 排成表格的行：内容页的串写那一页的标题，功能包页面（报告页、协作页）的串标题写地址，归属的内容页已经不在站里的串不列。
 
-{/* ref file="../packages/comments/src/site/threads.server.ts" lines="82-88" hash="9f4b7ea77281" blob="6e6db6348ac9" */}
+{/* ref file="../packages/comments/src/site/threads.server.ts" lines="98-104" hash="9f4b7ea77281" blob="010d1168f315" */}
 
 按文件夹分串：串按创建时间排，回复按文件名排（文件名就是带时刻的 id）。数据不完整就直接报错并点名文件：回复没有串头、串头缺 `page`、一个文件夹两个串头、回复带了已解决状态。
 
-{/* ref file="../packages/comments/src/core/threads.ts" lines="44-79" hash="277e303a7a37" blob="036a6a68be13" */}
+{/* ref file="../packages/comments/src/core/threads.ts" lines="52-94" hash="f867c2391e1b" blob="05c994a44769" */}
 
 串头的 `page` 有两种写法：内容页写页面在 docs 集合里的路径（`plan/index.mdx`），功能包页面写地址（`/tasks`）。站点之外要拿它拼链接的（gwb-collab 的通知），用 `pageAddressOf` 换成站内地址：`/` 开头的原样返回，路径照 fumadocs 的 `getSlugs` 去掉扩展名、`index` 落到所在目录、括号分组目录不进地址，再逐段 `encodeURI`。
 
@@ -127,6 +143,7 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 - 右下角工具条：可写时有「批注」开关；「评论」按钮弹出本页评论收件箱，按「正文里」「整页」「找不到原文」筛，可写时底部能批整页
 - 点黄条、点高亮的字、或在收件箱点一行：被批的那一块正下方浮出这一串，不挤动正文；Esc 或点别处收起
 - 地址带 `?comment=<评论串 id>` 时（gwb-collab 通知里评论的链接就是这样拼的），打开页面就浮出这一串，和在收件箱点那一行一样；这一页上没有那一串就不管
+- 每条评论正文下面是它的表情回应，悬停能看到是谁点的；可写时自己点过的高亮，点一下撤掉，点别人的跟上，悬停一条评论露出的工具条里有「加表情」
 - 被批的元素不铺底色，正文栏左边外侧画一道和它上下对齐的竖黄条；划的字用浏览器的 CSS Custom Highlight API 高亮（注册名 `docsite-comment`）
 - 全站评论页 `/comments` 是只读表格，一行一串，按最近有人说话排，内容页与功能包页面的评论都列；那里不量落点，位置只按锚点的种类写
 
@@ -136,12 +153,12 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 {/* ref file="../packages/comments/template/styles.css" lines="3-5" hash="45c5688bc0d3" blob="2df3d9654916" */}
 
-{/* tree dir="../packages/comments/src" depth="2" hash="a7f513982ddb" */}
+{/* tree dir="../packages/comments/src" depth="2" hash="66367156efdb" */}
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
-| `core/` | `@godcreator/comments` | 评论文件的格式（读、写、状态）、锚点的三种写法、按文件夹分串、`page` 换成站内地址（`pageAddressOf`）；不碰磁盘 |
-| `node/` | `@godcreator/comments/node` | 评论目录的读写：建串、回复、删除、改状态，直接读整个目录（`readCommentThreads`，站点不在运行也能读） |
+| `core/` | `@godcreator/comments` | 评论文件的格式（读、写、状态、表情回应）、锚点的三种写法、按文件夹分串、`page` 换成站内地址（`pageAddressOf`）；不碰磁盘 |
+| `node/` | `@godcreator/comments/node` | 评论目录的读写：建串、回复、删除、改状态、加撤表情，直接读整个目录（`readCommentThreads`，站点不在运行也能读） |
 | `site/` | `@godcreator/comments/site` | `CommentsDock`、`CommentThread`、`CommentsTable`、`commentsAccessOf`、`commentScopeProps`；浏览器里的页面文字、稳定 id、落点推算在 `site/browser/`，不单独导出 |
 | `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`threadsByPageOf`、`commentsTableRowsOf`、`commentIntents` |
 

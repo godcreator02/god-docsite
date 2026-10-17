@@ -23,7 +23,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令、说明书与站点窗格。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="58-138" hash="f9ff506daf1a" blob="964c15024fa6" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="58-139" hash="4c175ab5d3d3" blob="772fa2bc2a36" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。每次启动开发服务时现读，所以改了设置只影响之后启动的开发服务。
 
@@ -89,7 +89,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 开发服务的输出一块一条写进 gwb 日志，日志名 `gwb-docsite-dev`，开头是站点目录：stderr 记 warn，Vite 的「Internal server error」、服务端渲染的报错都从这里出来，页面打开是「Error」时用 `logger.query` 按这个名字查；stdout 记 debug，默认不写进 gwb.log，改一个文件就刷一行的「page reload」不会把日志刷满。插件另在内存里留最后 4000 字，启动失败、退出时的报错原话从那里取。
 
-{/* ref file="../plugins/docsite/src/dev-server.ts" lines="111-124" hash="60e364b8c09a" blob="3b8dc007fd85" */}
+{/* ref file="../plugins/docsite/src/dev-server.ts" lines="155-168" hash="60e364b8c09a" blob="48bea96ae7d0" */}
 
 跑起来以后记下这次的端口；几个站同时记时排队写，后写的不覆盖先写的。记不下来只报一行警告，照样运行，下次重新挑（有意设计的降级）。选一种情况看看：
 
@@ -101,19 +101,23 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 `start` 的复用、核对、定端口、启动、记端口、崩溃后排重启，完整算法在一段里：
 
-{/* ref file="../plugins/docsite/src/site-host.ts" lines="99-202" hash="c44d8f3ec630" blob="f5da6e52445e" */}
+{/* ref file="../plugins/docsite/src/site-host.ts" lines="107-211" hash="088c11447d64" blob="7e3fcf6a0b05" */}
 
 ## 推送与评论：经运行中的站点
 
 图上第 7、8 号。推送：`push(dir, 频道, 数据)` 把一份 JSON POST 到站点的 `/__docsite/feed/<频道>`，请求头 `x-docsite-token` 带这次启动的令牌；频道只用字母、数字、`_`、`-`。站点没在运行就报错。协议定在平台包，插件照它推。站点每个频道只留最新一份、重启就没了，所以用推送的插件要在站点转成 running 时重推一次——这就是服务里有 `onStatus` 的原因。
 
-评论：读评论（`docsite.comments`）直接读站点目录的评论文件，不要站点在运行；写评论（`docsite.comment.*`）不自己写文件，而是把表单 POST 到运行中站点的评论写入路由 `/comments.data`，`Origin` 头写站点地址，和网页评论面板走同一套规则。评论文件的格式与写入规则归 [comments](/packages/comments) 包的页，人员与身份码归 [identity](/packages/identity) 包的页。
+订阅：`subscribe(dir, 频道, 收到时调的函数)` 反过来听站点的一个频道（GET 同一地址、要事件流、请求头带同一个令牌），站点由此知道启动方在听，网页上要插件做的事（gwb-collab 的一键提交）就写进这个频道。站点在运行就马上连上，先收到频道现在的值；之后站点每次启动（包括崩溃后自动重启）都重新连，站点还在运行时连接断了过 1 秒再连；调返回的函数撤掉订阅。
+
+{/* ref file="../plugins/docsite/src/site-host.ts" lines="242-282" hash="db9d13099698" blob="7e3fcf6a0b05" */}
+
+评论：读评论（`docsite.comments`）直接读站点目录的评论文件，不要站点在运行，网页上点的表情回应也一并列出；写评论（`docsite.comment.*`）不自己写文件，而是把表单 POST 到运行中站点的评论写入路由 `/comments.data`，`Origin` 头写站点地址，和网页评论面板走同一套规则。评论文件的格式与写入规则归 [comments](/packages/comments) 包的页，人员与身份码归 [identity](/packages/identity) 包的页。
 
 ## 服务 gwbDocsite
 
-图上第 2、3 号。别的插件 `inject: ['gwbDocsite']` 后调用。接口分四组：建站（`init`、`addFeature`）、托管（`add`、`remove`、`start`、`stop`、`status`、`onStatus`）、推送（`push`）、身份（`join`、`identityCode`）。命令 `docsite.*` 是同一份实现外面包一层参数校验，所以命令与服务的行为不会分叉；每个方法的参数与回执表在说明书 `docsite` 的「服务 gwbDocsite」一节。
+图上第 2、3 号。别的插件 `inject: ['gwbDocsite']` 后调用。接口分四组：建站（`init`、`addFeature`）、托管（`add`、`remove`、`start`、`stop`、`status`、`onStatus`）、推送与订阅（`push`、`subscribe`）、身份（`join`、`identityCode`）。命令 `docsite.*` 是同一份实现外面包一层参数校验，所以命令与服务的行为不会分叉；每个方法的参数与回执表在说明书 `docsite` 的「服务 gwbDocsite」一节。
 
-{/* ref file="../plugins/docsite/src/service.ts" lines="7-43" hash="f71bb3228839" blob="40f95dc41bd1" */}
+{/* ref file="../plugins/docsite/src/service.ts" lines="7-48" hash="0ff9c07d4506" blob="2fce4a7e78d6" */}
 
 服务对象只存闭包：cordis 读服务属性时会把属性里存的服务重新绑到调用方的上下文。`declare module 'cordis'` 写在包入口 `index.ts`：发版工具只读类型入口 `dist/index.d.ts` 认这个服务由谁提供。改方法签名就是改给别的插件 inject 的服务，要先问人、照 gwb-release 定版本号。
 

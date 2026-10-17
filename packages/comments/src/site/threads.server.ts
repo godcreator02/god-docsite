@@ -1,7 +1,8 @@
 import { personOf, type Person } from '@godcreator/identity'
 import { threadResolutionOf } from '../core/comment-file.js'
+import { reactionEmojis, reactionsField, reactionsOf, type Reactions } from '../core/reactions.js'
 import { threadsByPage, threadsForPage, type CommentEntryLike, type ThreadSummary } from '../core/threads.js'
-import type { CommentWriter, PageThreadSummary } from './comment-model.js'
+import type { CommentReaction, CommentWriter, PageThreadSummary } from './comment-model.js'
 import type { CommentsTableRow } from './comments-table.js'
 
 /** 站点评论集合里的一条（fumadocs-mdx 集合条目）：info.path 相对评论目录，frontmatter 字段直接在条目上 */
@@ -25,6 +26,7 @@ function commentEntryOf(entry: CommentCollectionEntry): CommentEntryLike {
   const page = frontmatterStringOf(entry, 'page')
   const anchor = frontmatterStringOf(entry, 'anchor')
   const resolved = threadResolutionOf(`评论 ${entry.info.path}`, entry as unknown as Record<string, unknown>)
+  const reactions = reactionsOf(`评论 ${entry.info.path}`, (entry as unknown as Record<string, unknown>)[reactionsField])
   return {
     path: entry.info.path,
     authorId: requiredFrontmatterStringOf(entry, 'author'),
@@ -32,7 +34,14 @@ function commentEntryOf(entry: CommentCollectionEntry): CommentEntryLike {
     ...(page !== undefined ? { page } : {}),
     ...(anchor !== undefined && anchor !== '' ? { anchor } : {}),
     ...(resolved !== undefined ? { resolved } : {}),
+    ...(Object.keys(reactions).length > 0 ? { reactions } : {}),
   }
+}
+
+/** 表情回应换成界面要的形状：按 reactionEmojis 的顺序，人从 id 换成 {id, name} */
+function commentReactionsOf(reactions: Reactions | undefined, writerOf: (personId: string) => CommentWriter): { reactions?: CommentReaction[] } {
+  if (reactions === undefined) return {}
+  return { reactions: reactionEmojis.flatMap((emoji) => (reactions[emoji] === undefined ? [] : [{ emoji, people: reactions[emoji].map(writerOf) }])) }
 }
 
 /** 评论界面要的一串：作者 id 换成人员列表里的 {id, name}（只取这两项，身份码不会带出去） */
@@ -49,7 +58,14 @@ function pageThreadOf(thread: ThreadSummary, people: readonly Person[]): PageThr
     author: writerOf(thread.authorId),
     createdAt: thread.createdAt,
     ...(thread.resolved !== undefined ? { resolved: { by: writerOf(thread.resolved.by), at: thread.resolved.at } } : {}),
-    replies: thread.replies.map((reply) => ({ id: reply.id, path: reply.path, author: writerOf(reply.authorId), createdAt: reply.createdAt })),
+    ...commentReactionsOf(thread.reactions, writerOf),
+    replies: thread.replies.map((reply) => ({
+      id: reply.id,
+      path: reply.path,
+      author: writerOf(reply.authorId),
+      createdAt: reply.createdAt,
+      ...commentReactionsOf(reply.reactions, writerOf),
+    })),
   }
 }
 

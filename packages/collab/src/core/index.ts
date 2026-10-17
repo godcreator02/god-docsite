@@ -21,6 +21,8 @@ export { projectFileApiUrl, repoLinkPrefix, repoLinksApiUrl } from './repo-links
 export type { RepoLinkCheck, RepoLinkOpen } from './repo-links.js'
 export { InvalidSiteFeed, pushedSiteFeedOf, siteFeedChannel, siteFeedOf } from './notifications/site-feed.js'
 export type { SiteFeed } from './notifications/site-feed.js'
+export { hasUnsubmittedChanges, isSubmitInProgress, submitBlockersOf, submitChannel, submitStateOf } from './notifications/submit-state.js'
+export type { SubmitState } from './notifications/submit-state.js'
 export {
   mentionPlaces,
   notificationCountsOf,

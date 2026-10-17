@@ -206,7 +206,7 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
       name: 'docsite.comments',
       description: '列出站点上的评论（只读，读文件，不要站点在运行）',
       usage:
-        '{ dir, page?, about? }：page 是页面在内容目录 content/ 里的路径（如 writing/collapse-test.mdx），给了只列批那一页的；about 是人员 id，给了只列和他有关的（他发起的、正文或回复里 @ 了他的）。回 { threads }：每串 { id, page, anchor?, author, createdAt, status, resolvedBy?, resolvedAt?, body, mentions, replies }，anchor 是锚定的页面元素 id，页面级评论没有；author 是 people.json 里的 id；status 是 open 或 resolved，resolved 时带 resolvedBy（人员 id）与 resolvedAt；body 是 MDX 原文；mentions 是正文与回复里 @ 了的人员 id，去重；replies 每条 { author, createdAt, body, mentions }，按时间排。文件在站点目录的 comments/<id>/ 里：index.mdx 是发起的那条，回复各一个 .mdx',
+        '{ dir, page?, about? }：page 是页面在内容目录 content/ 里的路径（如 writing/collapse-test.mdx），给了只列批那一页的；about 是人员 id，给了只列和他有关的（他发起的、正文或回复里 @ 了他的）。回 { threads }：每串 { id, page, anchor?, author, createdAt, status, resolvedBy?, resolvedAt?, body, mentions, reactions?, replies }，anchor 是锚定的页面元素 id，页面级评论没有；author 是 people.json 里的 id；status 是 open 或 resolved，resolved 时带 resolvedBy（人员 id）与 resolvedAt；body 是 MDX 原文；mentions 是正文与回复里 @ 了的人员 id，去重；reactions 是网页上点的表情回应 { "<表情>": [人员 id…] }，没人点过就没有；replies 每条 { author, createdAt, body, mentions, reactions? }，按时间排。文件在站点目录的 comments/<id>/ 里：index.mdx 是发起的那条，回复各一个 .mdx',
       effect: 'read',
     },
     async (args) => {

@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
+import { feedUrlOf } from '@godcreator/god-docsite'
 import type { DevServer, LaunchDevServer } from './dev-server.js'
 import { DocsiteRejected, messageOf } from './errors.js'
 import { checkDevScript, checkPlatformInstalled, checkSiteIdentity } from './site-contract.js'
@@ -33,6 +34,12 @@ type HostedSite = {
   /** 上一次运行的地址：取消等着的重启时 stop 回它 */
   lastUrl: string | null
 }
+
+/** 一个频道的订阅：站点每次运行起来都连上；disconnect 是这一次连接的断开函数，没连着为 null */
+type FeedSubscription = { channel: string; listener: (data: unknown) => void; disconnect: (() => void) | null; reconnectTimer: ReturnType<typeof setTimeout> | null }
+
+/** 站点还在运行、订阅的连接却断了：等这么久再连 */
+const resubscribeDelayMilliseconds = 1000
 
 /** 崩溃后自动重启的规矩：第 k 次连续崩溃后等 delaysMs[k-1] 再启动，次数用完就停在 failed；一次运行超过 stableAfterMs 才退出的重新计数 */
 export type CrashRestartPolicy = { delaysMs: readonly number[]; stableAfterMs: number }
@@ -71,6 +78,7 @@ function checkSiteBeforeLaunch(dir: string): void {
  */
 export class SiteHost {
   private readonly sites = new Map<string, HostedSite>()
+  private readonly subscriptions = new Map<string, Set<FeedSubscription>>()
   private readonly statusListeners = new Set<(dir: string) => void>()
   private readonly crashRestart: CrashRestartPolicy
   private disposed = false
@@ -195,6 +203,7 @@ export class SiteHost {
       this.afterCrash(site, reason)
     })
     this.options.log.info(`${site.dir} 的开发服务已启动：${server.url}`)
+    for (const subscription of this.subscriptions.get(siteKeyOf(site.dir)) ?? []) this.connect(site, subscription)
     // 记端口只为下次沿用：记不下来照样运行，下次重新随机挑
     await this.options.ports.remember(site.dir, Number(new URL(server.url).port)).catch((error: unknown) => this.options.log.warn(`${site.dir} 这次的端口没记下来，下次启动会重新挑：${messageOf(error)}`))
     this.changed(site)
@@ -228,6 +237,48 @@ export class SiteHost {
     const server = this.sites.get(siteKeyOf(dir))?.running ?? null
     if (server === null) throw new DocsiteRejected(`${dir} 的站点没在运行：先 docsite.site.start`)
     await server.push(channel, data)
+  }
+
+  /**
+   * 订阅站点推送通道的一个频道：站点在运行就马上连上，之后每次启动（包括崩溃后自动重启）都重新连；站点还在运行时连接断了，过一会儿再连。
+   * 连上时先收到频道现在的值。返回撤掉订阅的函数
+   */
+  subscribe(dir: string, channel: string, listener: (data: unknown) => void): () => void {
+    try {
+      feedUrlOf(channel)
+    } catch (error) {
+      throw new DocsiteRejected(messageOf(error))
+    }
+    const key = siteKeyOf(dir)
+    const subscription: FeedSubscription = { channel, listener, disconnect: null, reconnectTimer: null }
+    const ofSite = this.subscriptions.get(key) ?? new Set()
+    this.subscriptions.set(key, ofSite)
+    ofSite.add(subscription)
+    const site = this.sites.get(key)
+    if (site?.running) this.connect(site, subscription)
+    return () => {
+      ofSite.delete(subscription)
+      if (subscription.reconnectTimer !== null) clearTimeout(subscription.reconnectTimer)
+      subscription.disconnect?.()
+      subscription.disconnect = null
+    }
+  }
+
+  /** 连上这一次运行的开发服务；断了且同一个开发服务还在运行、订阅还在，就排一次重连 */
+  private connect(site: HostedSite, subscription: FeedSubscription): void {
+    const server = site.running
+    if (server === null) return
+    subscription.disconnect?.()
+    subscription.disconnect = server.subscribe(subscription.channel, subscription.listener, (reason) => {
+      subscription.disconnect = null
+      const stillSubscribed = this.subscriptions.get(siteKeyOf(site.dir))?.has(subscription) ?? false
+      if (this.disposed || site.running !== server || !stillSubscribed) return
+      this.options.log.warn(`${site.dir} 的频道 ${subscription.channel} 订阅断了，${resubscribeDelayMilliseconds / 1000} 秒后重连：${reason}`)
+      subscription.reconnectTimer = setTimeout(() => {
+        subscription.reconnectTimer = null
+        if (site.running === server && this.subscriptions.get(siteKeyOf(site.dir))?.has(subscription)) this.connect(site, subscription)
+      }, resubscribeDelayMilliseconds)
+    })
   }
 
   /** 工作台退出：同步停掉全部，返回时整棵进程树都已停掉 */

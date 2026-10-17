@@ -9,7 +9,7 @@ import { CollabPluginSeams } from './gwb-collab/seams'
 import { SyncCases } from './gwb-collab/sync-cases'
 import { QqTiming } from './gwb-collab/qq-timing'
 
-gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：管 git 与 Gitea（克隆、取回、同步、提交审核、读合并请求与 issue、核对仓的配置），把要人处理的事算成通知，再交给站点、协作窗格与 QQ。站点不跑 git、也不向插件发请求，只收插件推来的数据。
+gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：管 git 与 Gitea（克隆、取回、同步、提交审核、读合并请求与 issue、核对仓的配置），把要人处理的事算成通知，再交给站点、协作窗格与 QQ。站点不跑 git，要插件做的只有一件：网页上点「一键提交」时，经推送通道的频道 `collab-submit` 写一份请求，由插件提交审核。
 
 和别处的分工：记录格式、写入规则、合并检查判什么、`SiteFeed` 的形状在 [collab 包](/packages/collab)；ntfy 推送、执行器、权限在 [Gitea 与 NAS](/gitea) 分区；每条命令怎么用、每条通知怎么处理在说明书 [collab](/docs/outputs/skills/collab)。这一页只讲插件这一层。
 
@@ -42,7 +42,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 顶层注入的服务是 `gwbCommands`、`gwbSettings`、`gwbData`、`gwbDocsite`、`timer`：站点与身份码都归 gwb-docsite，所以它是必需的。`gwbGitea`、`gwbQqBot`、`gwbSkills`、`gwbShell` 局部注入：没装 gwb-gitea 时插件照常加载，用到 Gitea 的命令再报；没装外壳只是没有窗格。设置只有两项：`qq-notifications`（布尔，默认关）与 `projects`（项目仓根，一行一个绝对路径）。仓里文件接连变化时，停下 300 毫秒没有新变化才重算，两套的监视都用这个数：
 
-{/* ref file="../plugins/collab/src/index.ts" lines="44-69" hash="56067a9b51dc" blob="3ff0ea6b6bfe" */}
+{/* ref file="../plugins/collab/src/index.ts" lines="47-72" hash="56067a9b51dc" blob="a07d2cf740d9" */}
 
 同仓的 `@godcreator/collab`、`comments`、`identity` 打包进插件产物，不是 peer；平台包只打包身份文件那一个出口 `@godcreator/god-docsite/identity`（认协作仓用）。打包时还把 collab 包的版本、自动合并工作流模板、项目首页模板作为常量带进来：`collab.site.init` 写进 `site/package.json` 的功能包范围与工作流里的 `MERGE_CHECK_RANGE` 都是 `^<这一版>`，推送前在本机查「只有负责人能改的内容」用的也是这一版的 `leadOnlyProblems`。所以改了 collab 包要先构建它，再构建插件：
 
@@ -94,15 +94,27 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 {/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" hash="71168057df02" blob="31d511b1c156" */}
 
-拒绝时命令回 `{ ok: false, error }`，原话同时记成这个项目的「上次提交审核没成功」，经下文的通知推到网站提示栏；提交审核成功一次就清掉：
+命令与网页上的一键提交都经 `CollabSubmits.submit`：一个项目同一时刻只跑一次，正在跑时再提交就拒绝。拒绝时命令回 `{ ok: false, error }`，原话同时记成这个项目的「上次提交审核没成功」，经下文的通知推到网站提示栏；提交审核成功一次就清掉。跑的时候往站点的频道 `collab-submit` 写 `running`，合并了写 `merged`（带合并请求），失败写 null：
 
-{/* ref file="../plugins/collab/src/collab-repo/submit/commands.ts" lines="17-28" hash="e04db6cc3273" blob="a187f085c6f3" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/collab-submits.ts" lines="28-51" hash="29625fa7b89a" blob="845ea5cfc047" */}
 
 选一种情况看看提交审核停在哪、仓里留下什么、网站提示栏里出现什么：
 
 <SubmitStops />
 
 停下后仓的样子只有四种，记住哪一种对应哪几步就够了：前三步不过——没提交；合 main 有冲突——提交了、合并停在半路，下次提交审核完成这次合并；合进来以后的检查、负责人检查、推送失败、被打回、等不到结论——`git reset --mixed` 回推送时的 `origin/main`，这次的提交撤掉、改动变回没提交，改好再提交审核。等不到结论时插件自己关掉合并请求再退回：执行器恢复以后看到合并请求已关就不处理，不会出现「本机退回了、服务器上又合并了」。
+
+### 网页上的一键提交
+
+平时的提交审核不用叫 AI。项目加进列表、站点交给 gwb-docsite 常驻时，`CollabSites` 经 gwb-docsite 的服务 `subscribe` 订阅站点的频道 `collab-submit`（带着这次启动的推送令牌，站点由此知道插件在听；站点每次重新启动 gwb-docsite 都重新连上）。网页上点「一键提交」，站点往这个频道写 `requested`，订阅收到后交给 `CollabSubmits.onSiteState`：
+
+- `requested`：用网页上点的那个人的身份跑一次提交审核，和命令走同一条路
+- `running`、`merged`：多半是自己刚写的，不动；但 `running` 而这里并没有在跑（工作台重新加载前留下的），写回 null 清掉
+- 形状不对：记一行警告，写回 null
+
+站点没在运行时不写状态（没人看）；写不上只记日志，提交审核照常，结果照旧经通知交给网页。站点那一半（按钮什么时候能点、请求怎么写）见 [collab 包](/packages/collab) 的「一键提交」。
+
+{/* ref file="../plugins/collab/src/collab-repo/submit/collab-submits.ts" lines="53-74" hash="d040db8afd50" blob="845ea5cfc047" */}
 
 ## 通知：每次从此刻的状态现算
 
@@ -143,7 +155,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 推送频道 `collab`、没运行不推、按项目排队：
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="121-139" hash="ddd0ca64baaa" blob="04e52fcfb1e0" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="157-175" hash="ddd0ca64baaa" blob="ad1249f005d0" */}
 
 QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-command`）的，经 gwb-qq-bot 登记成一个任务组，工作区是项目文件夹，由 gwb-qq-bot 交给 claude-agent 做（见说明书附件 [organization](/docs/outputs/skills/collab/organization)）。
 
@@ -161,7 +173,7 @@ QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-com
 6. 把平台模板的首页 `site/app/routes/home.tsx` 换成打包进来的项目首页（它 import 协作功能的接线文件，所以要等加完功能再写）
 7. 项目在列表里就交给 gwb-docsite 常驻（这时才再启动）；不在就等 `collab.project.add` 时登记
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="84-102" hash="caa907e3c89e" blob="7d68452147a2" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="120-138" hash="caa907e3c89e" blob="ad1249f005d0" */}
 
 它只写文件、不提交：新站点里 `.gitea/`、`site/package.json`、`site/docsite.json`、站点根的配置文件都是只有负责人能改的内容，由负责人提交。用到的 gwb-docsite 服务方法就是 `add`、`remove`、`start`、`stop`、`status`、`onStatus`、`push`、`init`、`addFeature`，另有身份码 `identityCode` 与加入项目时的 `join`。
 

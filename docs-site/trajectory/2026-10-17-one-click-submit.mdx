@@ -1,0 +1,36 @@
+---
+born-at: 2026-10-17T20:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 网站提示栏加「一键提交」，站点经推送通道的频道 collab-submit 请 gwb-collab 提交审核；评论加表情
+domain: 协作
+---
+
+## 背景
+
+提示栏里只有「复制给 AI」：哪怕只是把写好的页面、点完的评论提交审核，也要把提示词粘贴给 AI、等它列计划、再同意。用户提出：
+
+> 给评论功能增加emoji，然后顶部的弹窗内增加一键提交按钮，协作站平时的提交如果没问题就不叫ai来帮忙了
+
+确认时定了：表情两样都要（每条评论下的表情回应、输入框里插表情）；按钮只在有没提交审核的改动时出现，有冲突、不在 main 这类一定被拒的事时变灰。
+
+这推翻了之前「网页按钮不直接触发 git 或 Gitea 操作，操作只有插件自动做与 agent 调命令两种」的约定：一键提交是人在网页上点、插件去跑。
+
+## 结论与边界
+
+- 站点到插件没有别的通道，复用推送通道反过来用：gwb-docsite 带着启动时给站点的推送令牌订阅频道 `collab-submit`，平台包按令牌认出这是启动方（`siteFeedHasLauncher`）；网页点了按钮，站点的 action 往这个频道写 `requested`，gwb-collab 收到就跑 `collab.submit` 那一套，进度写回同一个频道（`running`、`merged`，失败写 null、原话照旧成为通知）
+- gwb-collab 没在听时站点直接回 503、不写请求，免得留下一份没人接的；`running` 留在频道里而插件并没在跑（工作台重新加载前留下的）时插件清掉
+- 命令与按钮经同一个 `CollabSubmits`，一个项目同一时刻只跑一次提交审核
+- 状态不放进频道 `collab` 的 `SiteFeed`：`siteFeedOf` 多一个字段就拒收，先升插件、站点还是旧包时通知栏会整个出错；单开一个频道，旧站点不订阅它就什么都不受影响
+- `CollabSite.submit` 与布局数据的 `submit` 都是可选的：接线文件还是旧的站点没有按钮，action 回 501，所以 collab 只升 y。新的接线文件要平台包 0.1.8 的 `publishSiteFeed` 与 `siteFeedHasLauncher`
+- 表情回应只收固定八个，存在被点的那条评论文件的 frontmatter `reactions`（JSON 字符串，人员 id 按点的先后），加撤都只改这一个字段，状态过时回 409；正文里的表情不限，就是正文的字
+
+## 否掉的候选
+
+- **插件开一个本机 HTTP 端口给站点调**：要再发一份凭据给站点进程、管端口；推送通道已经有令牌和连接
+- **站点往协作仓的 `.git/` 里写一个请求文件，插件监视它**：插件的文件监视不看 `.git/`，而且请求和结果分走两条路，网页上看不到进度
+- **把提交状态加进 `SiteFeed`**：见上面，旧站点会拒收整份通知
+
+## 依据
+
+无实验。单元测试覆盖频道两端（`packages/god-docsite/test/feed.test.ts`、`plugins/docsite/tests/site-host.test.ts`、`packages/collab/test/site-server.test.ts`、`plugins/collab/tests/collab-repo/submit/collab-submits.test.ts`）与表情的读写（`packages/comments/test/reactions.test.ts`、`emoji-ui.test.tsx`）。

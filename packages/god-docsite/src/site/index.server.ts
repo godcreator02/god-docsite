@@ -5,7 +5,7 @@ export { markdownLoader, markdownOfPage, sitePageData, sitePageRefs } from './pa
 export { searchLoader, searchServerOf } from './search.server.js'
 export { llmsFullLoader, llmsIndexLoader } from './llms.server.js'
 export { contentFileLoader } from './content-file.server.js'
-export { feedAction, feedLoader, publishSiteFeed, siteFeedValue } from './feed.server.js'
+export { feedAction, feedLoader, publishSiteFeed, siteFeedHasLauncher, siteFeedValue } from './feed.server.js'
 export { siteOrigin, siteOriginEnvName } from './origin.server.js'
 export { withFeatureLayoutData, type FeatureLayoutDataOptions } from './feature-layout.server.js'
 export type {

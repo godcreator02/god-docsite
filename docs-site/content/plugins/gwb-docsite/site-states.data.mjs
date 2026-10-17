@@ -5,21 +5,21 @@
  */
 
 /** 三种状态的定义：running 进程在；stopped 没有进程；failed 退出了或没能启动（error 记原因） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="7-13" hash="df7ebb7f1f35" blob="c6df7cdcd9ac" */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="8-14" hash="df7ebb7f1f35" blob="7e3fcf6a0b05" */
 
 /** stop 对没在运行、也没有等着重启的站报错，原话逐字照抄（模板里的 dir 换成例子的站点目录） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="204-224" hash="1f716b537790" blob="f5da6e52445e" */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="213-233" hash="1f716b537790" blob="7e3fcf6a0b05" */
 export const stopNotRunningMessage = '/projects/demo/site 的站点没在运行'
 
 /** 启动前核对不过的报错原话（五条里的第一条，模板里的 dir 换成例子的站点目录） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="59-65" hash="110ea7049332" blob="f5da6e52445e" */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="66-72" hash="110ea7049332" blob="7e3fcf6a0b05" */
 export const refusedMessage = '/projects/demo/site 下没有 package.json，不是站点目录'
 
 /** 进程退出记下的原因（fake 服务退出的 reason 与 dev-server 生成的格式相同） */
 export const exitMessage = '开发服务退出了（退出码 1），最后的输出：\nError: boom'
 
 /** 崩溃后 error 末尾补的那一行：照默认的重启规矩（2、10、60 秒，三次用完不再重启）逐字照抄 */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="99-114" hash="d68d67d2e099" blob="f5da6e52445e" */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="107-122" hash="d68d67d2e099" blob="7e3fcf6a0b05" */
 export const restartPendingMessage = `${exitMessage}\n（2 秒后自动重启，第 1 次）`
 export const gaveUpMessage = `${exitMessage}\n（连续崩溃 4 次，不再自动重启：查明原因后用 docsite.site.start 启动）`
 

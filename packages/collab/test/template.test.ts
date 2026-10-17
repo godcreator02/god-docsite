@@ -106,21 +106,27 @@ describe('feature.tsx（运行时，浏览器侧也加载）', () => {
     expect(sidebarLinks.every(({ icon }) => icon !== null && icon !== undefined)).toBe(true)
   })
 
-  it('layoutData：公开人员（不带身份码）、本机身份、推送通道交来的通知；还没推过为 null，推来的形状不对就报错', async () => {
+  it('layoutData：公开人员（不带身份码）、本机身份、推送通道交来的通知与一键提交的状态；还没推过为 null，推来的形状不对就报错', async () => {
     const { layoutData } = await import('../template/feature.tsx')
     const notification = notificationOf({ kind: 'task', recordId: '20261001090000-aaaaaaa', title: '画采样板', due: null, detail: null })
     let pushed: unknown
+    let submitPushed: unknown
     // layoutData 只用基础站点上下文的这三项
     const base = {
       people: () => [{ id: 'bob', name: '鲍勃', codes: ['bobcode2345'] }],
       identity: () => ({ person: { id: 'bob', name: '鲍勃' } }),
-      feedValue: (channel: string) => (channel === 'collab' ? pushed : undefined),
+      feedValue: (channel: string) => (channel === 'collab' ? pushed : channel === 'collab-submit' ? submitPushed : undefined),
     } as unknown as Parameters<typeof layoutData>[1]
     const args = { request: new Request('http://collab.test/'), params: {}, context: {} } as Parameters<typeof layoutData>[0]
-    expect(layoutData(args, base)).toEqual({ people: [{ id: 'bob', name: '鲍勃' }], person: 'bob', notifications: null, aiPrompt: null })
+    expect(layoutData(args, base)).toEqual({ people: [{ id: 'bob', name: '鲍勃' }], person: 'bob', notifications: null, aiPrompt: null, submit: null })
     pushed = JSON.parse(JSON.stringify({ notifications: [notification], aiPrompt: '提示词', projectLeads: null }))
     expect(layoutData(args, base).notifications).toEqual([notification])
     expect(layoutData(args, base).aiPrompt).toBe('提示词')
+    submitPushed = { state: 'running', by: 'bob', at: '2026-10-17T08:00:00.000Z' }
+    expect(layoutData(args, base).submit).toEqual(submitPushed)
+    submitPushed = { state: 'nope' }
+    expect(() => layoutData(args, base)).toThrow(InvalidSiteFeed)
+    submitPushed = null
     pushed = { notifications: 'none' }
     expect(() => layoutData(args, base)).toThrow(InvalidSiteFeed)
   })

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { commentFormOf, decodeFlatTurboStream } from '../src/comments.js'
-import { devOutputEntryOf, localUrlOf, type DevServer } from '../src/dev-server.js'
+import { devOutputEntryOf, feedEventsOf, localUrlOf, type DevServer } from '../src/dev-server.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from '../src/people-file.js'
 import { devScriptHasFixedPort } from '../src/site-contract.js'
 import { SiteHost, type CrashRestartPolicy, type SitePortMemory } from '../src/site-host.js'
@@ -31,11 +31,21 @@ async function installPackage(name: string, version: string): Promise<void> {
   await writeFile(path.join(dir, 'package.json'), JSON.stringify({ name, version }))
 }
 
-/** 假的开发服务：记下推来的数据，能让它退出 */
+type FakeSubscription = { channel: string; listener: (data: unknown) => void; onEnd: (reason: string) => void; disconnected: boolean }
+
+/** 假的开发服务：记下推来的数据与订阅，能让它退出 */
 function fakeServers() {
-  const launched: Array<{ code: string; port: number | null; pushed: Array<[string, unknown]>; exit: (reason: string) => void; stopped: boolean; stoppedNow: boolean }> = []
+  const launched: Array<{
+    code: string
+    port: number | null
+    pushed: Array<[string, unknown]>
+    subscriptions: FakeSubscription[]
+    exit: (reason: string) => void
+    stopped: boolean
+    stoppedNow: boolean
+  }> = []
   const launch = async (_dir: string, code: string, port: number | null): Promise<DevServer> => {
-    const record = { code, port, pushed: [] as Array<[string, unknown]>, exit: (_reason: string) => {}, stopped: false, stoppedNow: false }
+    const record = { code, port, pushed: [] as Array<[string, unknown]>, subscriptions: [] as FakeSubscription[], exit: (_reason: string) => {}, stopped: false, stoppedNow: false }
     launched.push(record)
     return {
       url: `http://127.0.0.1:${port ?? 14000 + launched.length}`,
@@ -49,6 +59,13 @@ function fakeServers() {
       },
       push: async (channel, data) => {
         record.pushed.push([channel, data])
+      },
+      subscribe: (channel, listener, onEnd) => {
+        const subscription: FakeSubscription = { channel, listener, onEnd, disconnected: false }
+        record.subscriptions.push(subscription)
+        return () => {
+          subscription.disconnected = true
+        }
       },
     }
   }
@@ -310,6 +327,49 @@ describe('站点状态机', () => {
     expect(launched[0]!.stoppedNow).toBe(true)
     expect(host.statusOf(siteDir).state).toBe('stopped')
     await expect(host.start(siteDir)).rejects.toThrow('插件正在卸载')
+  })
+})
+
+describe('订阅站点的频道', () => {
+  it('先订阅后启动也连上；每次运行起来都重新连；站点还在运行时断了过一会儿重连；撤掉订阅就断开、不再重连', async () => {
+    await siteWithSupportedKit()
+    const { launched, launch } = fakeServers()
+    const { host, logs } = hostWith(launch, fakePorts(), { delaysMs: [20], stableAfterMs: 60_000 })
+    const received: unknown[] = []
+    const unsubscribe = host.subscribe(siteDir, 'collab-submit', (data) => received.push(data))
+    await host.start(siteDir)
+    expect(launched[0]!.subscriptions.map(({ channel }) => channel)).toEqual(['collab-submit'])
+    launched[0]!.subscriptions[0]!.listener({ state: 'requested' })
+    expect(received).toEqual([{ state: 'requested' }])
+
+    launched[0]!.subscriptions[0]!.onEnd('站点关掉了事件流')
+    await waitMs(1_100)
+    expect(launched[0]!.subscriptions).toHaveLength(2)
+    expect(logs.some((line) => line.includes('订阅断了'))).toBe(true)
+
+    launched[0]!.exit('boom')
+    launched[0]!.subscriptions[1]!.onEnd('连接断了')
+    await waitMs(50)
+    expect(launched[0]!.subscriptions).toHaveLength(2)
+    expect(launched[1]!.subscriptions).toHaveLength(1)
+
+    unsubscribe()
+    expect(launched[1]!.subscriptions[0]!.disconnected).toBe(true)
+    await host.stop(siteDir)
+    await host.start(siteDir)
+    expect(launched[2]!.subscriptions).toHaveLength(0)
+    await host.stop(siteDir)
+  })
+
+  it('频道名不对直接拒绝', () => {
+    const { launch } = fakeServers()
+    const { host } = hostWith(launch)
+    expect(() => host.subscribe(siteDir, 'a b', () => {})).toThrow('频道名')
+  })
+
+  it('事件流切成事件：data 行的 JSON，注释行不算，没收完的留着', () => {
+    expect(feedEventsOf(': connected\n\ndata: {"n":1}\n\ndata: {"n"')).toEqual({ events: [{ n: 1 }], rest: 'data: {"n"' })
+    expect(feedEventsOf('data: null\r\n\r\n')).toEqual({ events: [null], rest: '' })
   })
 })
 

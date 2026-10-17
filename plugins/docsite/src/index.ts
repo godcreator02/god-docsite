@@ -105,6 +105,7 @@ export function apply(ctx: GwbContext): void {
     stop: (dir) => host.stop(dir),
     status: (dir) => host.statusOf(dir),
     push: (dir, channel, data) => host.push(dir, channel, data),
+    subscribe: (dir, channel, listener) => host.subscribe(dir, channel, listener),
     join: (dir, person) => joinPeople(dir, identityCode(), person),
     onStatus: (listener) => host.onStatus(listener),
     init: (dir, options) => createDocsite(dir, options, { ...homePageCheck, scaffold, pnpm: runPnpm, packageSource: { kind: 'registry', resolveFrom: pluginDir } }),

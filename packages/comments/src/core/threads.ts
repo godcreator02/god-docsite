@@ -1,6 +1,10 @@
 import { COMMENT_ID_PATTERN, THREAD_HEAD_FILE, type ThreadResolution } from './comment-file.js'
+import type { Reactions } from './reactions.js'
 
-/** 整理评论串要的一条评论：path 相对评论目录（如 `20261012t080000-seed1/index.mdx`），page、anchor 与 resolved 只有串头有 */
+/**
+ * 整理评论串要的一条评论：path 相对评论目录（如 `20261012t080000-seed1/index.mdx`），page、anchor 与 resolved 只有串头有，
+ * reactions 只在有人点过表情时有
+ */
 export interface CommentEntryLike {
   path: string
   authorId: string
@@ -8,6 +12,7 @@ export interface CommentEntryLike {
   page?: string
   anchor?: string
   resolved?: ThreadResolution
+  reactions?: Reactions
 }
 
 export interface ReplySummary {
@@ -15,6 +20,7 @@ export interface ReplySummary {
   path: string
   authorId: string
   createdAt: string
+  reactions?: Reactions
 }
 
 export interface ThreadSummary {
@@ -26,6 +32,8 @@ export interface ThreadSummary {
   anchor?: string
   /** 标为已解决的记录；没有就是未解决 */
   resolved?: ThreadResolution
+  /** 串头的表情回应；没人点过就没有 */
+  reactions?: Reactions
   replies: ReplySummary[]
 }
 
@@ -66,13 +74,20 @@ export function threadsOf(entries: readonly CommentEntryLike[]): ThreadSummary[]
       createdAt: entry.createdAt,
       ...(entry.anchor !== undefined && entry.anchor !== '' ? { anchor: entry.anchor } : {}),
       ...(entry.resolved !== undefined ? { resolved: entry.resolved } : {}),
+      ...(entry.reactions !== undefined ? { reactions: entry.reactions } : {}),
       replies: [],
     })
   }
   for (const { threadId, fileName, entry } of replyEntries) {
     const thread = threadsById.get(threadId)
     if (!thread) throw new Error(`回复所在的串没有串头 index.mdx：${entry.path}`)
-    thread.replies.push({ id: fileName.replace(/\.mdx$/, ''), path: entry.path, authorId: entry.authorId, createdAt: entry.createdAt })
+    thread.replies.push({
+      id: fileName.replace(/\.mdx$/, ''),
+      path: entry.path,
+      authorId: entry.authorId,
+      createdAt: entry.createdAt,
+      ...(entry.reactions !== undefined ? { reactions: entry.reactions } : {}),
+    })
   }
   for (const thread of threadsById.values()) thread.replies.sort((a, b) => compareText(a.id, b.id))
   return [...threadsById.values()].sort((a, b) => compareText(a.createdAt, b.createdAt) || compareText(a.id, b.id))

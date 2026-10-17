@@ -22,7 +22,7 @@ import {
 /** 窗格看得见时多久重读一次列表：只读本机，很快；取回远端由 node 侧的检查做 */
 const refreshMilliseconds = 15_000
 
-/** 窗格只显示状态：读 collab.projects，点站点链接调 docsite.site.start；克隆、提交这些操作都由人让自己的 AI 调命令 */
+/** 窗格只显示状态：读 collab.projects，点站点链接调 docsite.site.start；克隆、处理冲突这些操作由人让自己的 AI 调命令，平时的提交审核在网页提示栏一键提交 */
 function useProjectList(host: HostBridge, shell: ShellBridge): { list: Receipt<ProjectList> | undefined; refresh: () => Promise<void> } {
   const [list, setList] = useState<Receipt<ProjectList> | undefined>(undefined)
   const mounted = useRef(true)
@@ -140,12 +140,15 @@ function Help(): ReactElement {
         插件和 NAS 上的推送服务连着，Gitea 一有推送或合并请求的事件，几秒内就取回一次，别人合进 main 的改动快进进来。提交审核时，NAS 上的执行器十几秒内当场定论：合并，或者留言写明原因并打回。
       </p>
       <p className="collab:m-0">
-        这个窗格只显示状态。克隆、提交审核、更新别的仓这些事都让你的 AI 做：它会读 gwb-collab 的说明书 <code>collab</code>，调对应的命令。可以这样说：
+        平时的提交审核不用叫 AI：网页顶部提示栏点开，点「一键提交」，插件直接提交审核，合并了提示栏上会写出来。有冲突、不在 main 这类事时按钮不能点，没成功的原因也会成为一条通知，这时再「复制给 AI」。
+      </p>
+      <p className="collab:m-0">
+        这个窗格只显示状态。克隆、处理冲突、更新别的仓这些事都让你的 AI 做：它会读 gwb-collab 的说明书 <code>collab</code>，调对应的命令。可以这样说：
       </p>
       <ul className="collab:m-0 collab:flex collab:flex-col collab:gap-0.5 collab:pl-4">
         <li>「加入 https://…/&lt;组织&gt; 这个项目，放在 D:\projects 下」</li>
         <li>「看看我有什么待办」「站点没起来，看看为什么」</li>
-        <li>「提交审核」「把资料库更新一下」</li>
+        <li>「把冲突改好再提交审核」「把资料库更新一下」</li>
       </ul>
       <p className="collab:m-0">
         第一次用之前：在 gwb 的设置里给 gwb-gitea 填 Gitea 令牌（权限勾仓库读写、组织读写、工单读、用户读），装好 Git LFS。你自己在终端或 VS Code 里用 git 联网时，第一次会弹出 Gitea 登录，登录和令牌同一个账号。

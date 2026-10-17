@@ -149,6 +149,10 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 同一地址 GET 回这个频道现在的值（还没推过是 null）；协议的常量两边都从平台包的 `.` 出口取。
 
+反过来，站点要启动方替它做事时也走这条通道：启动方（gwb-docsite）带着同一个令牌订阅事件流，站点就知道有人在听这个频道（`siteFeedHasLauncher`）；站点自己的服务端代码用 `publishSiteFeed` 往频道里写一份请求，在听的启动方收到后去做，做到哪一步再推回同一个频道。浏览器订阅不带令牌，不算启动方；令牌不对 403。协作站的一键提交就是这样：网页写 `requested`，gwb-collab 接手提交审核，再推回 `running`、`merged`（见 collab 包页）。
+
+{/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="98-111" hash="90e8090a4811" blob="18a760bcfa2d" */}
+
 ## vite 插件、端口与可信来源
 
 站点 `vite.config.ts` 里 `godDocsite({ collections })` 排在 `fumadocsMdx()`、`tailwindcss()` 之后、`reactRouter()` 之前；参数是 `source.config.ts` 的全部导出，插件从中认出内容目录。它由八个插件组成：
@@ -208,5 +212,5 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 - **gwb-docsite**：`./scaffold` 的 `createSite`、`addBaseFeatures`、`addFeature`、`isPortFree`（`docsite.site.init`、`docsite.feature.add`）；`./identity` 的 `writeSiteIdentity`、`siteIdentityOf`（建站时写身份文件、托管前核对、站点列表的类别）；`.` 的 `feedTokenEnvName`、`feedTokenHeader`、`feedUrlOf`（托管开发服务、往推送通道推数据）
 - **gwb-collab**：`./identity` 的 `siteIdentityOf`（`site/docsite.json` 写着 `collab` 的仓才是协作仓）；`./content-layout` 的 `misplacedContentFilesOf`（提交审核前的站点检查）
-- **功能包的 `template/`**（写进站点后才 import 平台包，包本身不依赖它）：comments 的全站评论页调 `sitePageRefs`；trajectory 调 `routeLinkKind`、`SiteLinksProvider`、`sitePageTitles`；collab 调 `useSiteFeed`、`sitePageRefs`，它的首页模板 `templates/home.tsx` 调 `siteHomeData`、`SiteHomeLayout`
+- **功能包的 `template/`**（写进站点后才 import 平台包，包本身不依赖它）：comments 的全站评论页调 `sitePageRefs`；trajectory 调 `routeLinkKind`、`SiteLinksProvider`、`sitePageTitles`；collab 调 `useSiteFeed`、`sitePageRefs`、`publishSiteFeed`、`siteFeedHasLauncher`，它的首页模板 `templates/home.tsx` 调 `siteHomeData`、`SiteHomeLayout`
 - **站点**：上面各节的模板文件

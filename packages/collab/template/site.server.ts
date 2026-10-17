@@ -1,6 +1,6 @@
 import path from 'node:path'
-import { sitePageRefs } from '@godcreator/god-docsite/server'
-import { pushedSiteFeedOf, siteFeedChannel } from '@godcreator/collab'
+import { publishSiteFeed, siteFeedHasLauncher, sitePageRefs } from '@godcreator/god-docsite/server'
+import { pushedSiteFeedOf, siteFeedChannel, submitChannel, submitStateOf } from '@godcreator/collab'
 import type { CollabSite } from '@godcreator/collab/site/server'
 import { site } from '@/lib/site.server'
 
@@ -27,5 +27,10 @@ export function collabSite(): CollabSite {
     identity: site.identity,
     pages: () => sitePageRefs(site).map(({ url, title }) => ({ url, title })),
     feed: () => pushedSiteFeedOf(site.feedValue(siteFeedChannel)),
+    submit: {
+      state: () => submitStateOf(site.feedValue(submitChannel) ?? null),
+      publish: (state) => publishSiteFeed(submitChannel, state),
+      workbenchListening: () => siteFeedHasLauncher(submitChannel),
+    },
   }
 }

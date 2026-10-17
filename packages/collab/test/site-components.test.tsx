@@ -242,6 +242,51 @@ describe('通知栏', () => {
   })
 })
 
+describe('通知栏的一键提交', () => {
+  const unsubmitted = notificationOf({ kind: 'unsubmitted', records: ['records/a.json'], siteFiles: [] })
+  const conflicts = notificationOf({ kind: 'conflicts', files: ['site/content/a.mdx'] })
+
+  async function renderBar(notifications: Parameters<typeof NotificationBar>[0]['notifications'], submit: Parameters<typeof NotificationBar>[0]['submit']) {
+    const Stub = createRoutesStub([{ path: '/', Component: () => <NotificationBar notifications={notifications} aiPrompt="提示词" people={people} submit={submit} /> }])
+    await act(async () => root.render(<Stub initialEntries={['/']} />))
+    const toggle = container.querySelector<HTMLButtonElement>('button[aria-expanded]')
+    if (toggle !== null) await act(async () => toggle.click())
+  }
+  const submitButton = () => container.querySelector<HTMLButtonElement>('[data-submit-button]')
+
+  it('有没提交审核的改动才出现，提交到任务页的 action；站点没接一键提交就没有按钮', async () => {
+    await renderBar([unsubmitted], null)
+    expect(submitButton()!.disabled).toBe(false)
+    expect(submitButton()!.textContent).toBe('一键提交')
+    const form = submitButton()!.closest('form')!
+    expect(new URL(form.action).pathname).toBe('/tasks')
+    expect(new FormData(form).get('intent')).toBe('request-submit')
+    await renderBar([unsubmitted], undefined)
+    expect(submitButton()).toBeNull()
+    await renderBar([notificationOf({ kind: 'mention', comment: 't/index.mdx', author: 'admin', page: '/tasks?comment=t', text: '@bob 看看', in: 'comment' })], null)
+    expect(submitButton()).toBeNull()
+  })
+
+  it('有冲突时不能点，写明先处理什么；正在提交时不能点，收起的提示栏上写着进度', async () => {
+    await renderBar([unsubmitted, conflicts], null)
+    expect(submitButton()!.disabled).toBe(true)
+    expect(container.textContent).toContain('先处理：合 main 的冲突还没改好')
+    await renderBar([unsubmitted], { state: 'running', by: 'bob', at: new Date().toISOString() })
+    expect(submitButton()!.disabled).toBe(true)
+    expect(submitButton()!.textContent).toBe('提交中…')
+    expect(container.querySelector('button[aria-expanded]')!.textContent).toContain('正在提交审核…')
+  })
+
+  it('没有通知时：正在提交、刚合并的显示一条状态，合并得久了就不显示', async () => {
+    await renderBar([], { state: 'requested', by: 'bob', at: new Date().toISOString() })
+    expect(container.querySelector('[role="status"]')!.textContent).toBe('等工作台接手提交…')
+    await renderBar([], { state: 'merged', by: 'bob', at: new Date().toISOString(), pull: { number: 12, url: 'https://git.test/pulls/12' } })
+    expect(container.querySelector('[role="status"]')!.textContent).toBe('已提交审核并合并 #12')
+    await renderBar([], { state: 'merged', by: 'bob', at: '2026-01-01T00:00:00.000Z', pull: { number: 12, url: 'https://git.test/pulls/12' } })
+    expect(container.textContent).toBe('')
+  })
+})
+
 describe('正文里的记录链接', () => {
   it('经资源路由取记录当前的标题；删掉的记录写「已删除的记录」', async () => {
     const asked: string[] = []

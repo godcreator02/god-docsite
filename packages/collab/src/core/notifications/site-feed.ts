@@ -11,7 +11,7 @@ export { InvalidSiteFeed } from './shape-checks.js'
 
 /*
  * 站点由 gwb-docsite 托管：gwb-collab 经它的服务 gwbDocsite.push 把整份 SiteFeed 推到站点推送通道的这个频道，
- * 每当通知或项目负责人变了就再推一次。站点只收不发：不向插件发任何请求，网站自己不跑 git
+ * 每当通知或项目负责人变了就再推一次。网站自己不跑 git：一键提交只在频道 collab-submit 上写一份请求，由 gwb-collab 提交审核（见 submit-state.ts）
  */
 export const siteFeedChannel = 'collab'
 

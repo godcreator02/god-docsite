@@ -14,6 +14,7 @@ import {
   type CommentFileOnDisk,
   type ThreadResolution,
 } from '../core/comment-file.js'
+import { reactionsField, reactionsOf, serializeReactions, withReaction, type ReactionEmoji, type Reactions } from '../core/reactions.js'
 
 /*
  * 站点评论目录的读写。评论是 fumadocs-mdx 集合里的文件：写完由集合自己的 watcher 重新生成入口，这里不编译。
@@ -111,6 +112,46 @@ export async function setThreadStatus(commentsDir: string, threadId: string, sta
   }
   await writeFile(headFile, serializeCommentFile(withThreadResolution(fields, resolved), body), 'utf-8')
   return resolved === undefined ? {} : { resolved }
+}
+
+export interface SetReactionInput {
+  /** 点在哪条回复上；不给是串头 */
+  replyId?: string
+  emoji: ReactionEmoji
+  /** 点的人（人员 id） */
+  by: string
+  /** true 是加上，false 是撤掉 */
+  on: boolean
+}
+
+/**
+ * 给串头或一条回复加上、撤掉一个人的一个表情：只改那个文件 frontmatter 里的 reactions（没人点了就去掉这个字段），别的字段与正文原样写回。
+ * 已经点过还要加、没点过还要撤都拒绝（409）：网页上的按钮按它看到的状态发，状态过时了就告诉它
+ */
+export async function setReaction(commentsDir: string, threadId: string, input: SetReactionInput): Promise<{ reactions: Reactions }> {
+  const { replyId, emoji, by, on } = input
+  if (by.length === 0) throw new CommentWriteRejected(400, '点表情缺少点的人（by）')
+  if (replyId !== undefined) assertCommentId(replyId, 'replyId')
+  const fileName = replyId === undefined ? THREAD_HEAD_FILE : `${replyId}.mdx`
+  const file = path.join(threadDirOf(commentsDir, threadId), fileName)
+  const relativePath = `${threadId}/${fileName}`
+  let text: string
+  try {
+    text = await readFile(file, 'utf-8')
+  } catch (error) {
+    if (isMissingFileError(error)) throw new CommentWriteRejected(404, `要点表情的评论不存在：${relativePath}`)
+    throw error
+  }
+  const { fields, body } = parseCommentFileForRewrite(relativePath, text)
+  const current = reactionsOf(relativePath, fields[reactionsField])
+  const has = (current[emoji] ?? []).includes(by)
+  if (on && has) throw new CommentWriteRejected(409, `${by} 已经点过 ${emoji}`)
+  if (!on && !has) throw new CommentWriteRejected(409, `${by} 没点过 ${emoji}，没有可撤的`)
+  const reactions = withReaction(current, emoji, by, on)
+  const serialized = serializeReactions(reactions)
+  const { [reactionsField]: _old, ...otherFields } = fields
+  await writeFile(file, serializeCommentFile(serialized === undefined ? otherFields : { ...otherFields, [reactionsField]: serialized }, body), 'utf-8')
+  return { reactions }
 }
 
 /** 删一条回复，返回它相对评论目录的路径 */

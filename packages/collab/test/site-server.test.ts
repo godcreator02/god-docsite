@@ -6,6 +6,7 @@ import { readCommentThreads } from '@godcreator/comments/node'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { notificationOf } from '../src/core/notifications/notifications.js'
 import type { SiteFeed } from '../src/core/notifications/site-feed.js'
+import type { SubmitState } from '../src/core/notifications/submit-state.js'
 import type { CollabSite } from '../src/site/collab-site.js'
 import { collabLayoutData } from '../src/site/layout-data.js'
 import {
@@ -144,6 +145,46 @@ describe('页面的 loader', () => {
     expect((await calendarLoader(args('http://collab.test:5173/calendar'), site)).journalDates).toEqual(['2026-10-10'])
     expect(await journalLoader(args('http://collab.test:5173/calendar/2026-10-10', { date: '2026-10-10' }), site)).toMatchObject({ date: '2026-10-10', hasJournal: true })
     expect(await statusOf(journalLoader(args('http://collab.test:5173/calendar/2026-02-30', { date: '2026-02-30' }), site))).toBe(404)
+  })
+})
+
+describe('一键提交的 action', () => {
+  function submitChannelOf(listening: boolean) {
+    const channel = { value: null as SubmitState, listening, published: [] as SubmitState[] }
+    return {
+      channel,
+      submit: {
+        state: () => channel.value,
+        publish: (state: SubmitState) => {
+          channel.published.push(state)
+          channel.value = state
+        },
+        workbenchListening: () => channel.listening,
+      },
+    }
+  }
+
+  it('往频道写一份 requested（发起人是本机身份）；已经在提交 409；gwb-collab 没在听 503 且不写；站点没接 501；只读 403', async () => {
+    const { channel, submit } = submitChannelOf(true)
+    const submitting = siteAs(bobCode, { submit })
+    expect(outcomeOf(await recordAction(post({ intent: 'request-submit' }), submitting))).toEqual({ status: 200, result: { ok: true, intent: 'request-submit' } })
+    expect(channel.published).toEqual([{ state: 'requested', by: 'bob', at: expect.any(String) as unknown }])
+    expect(outcomeOf(await recordAction(post({ intent: 'request-submit' }), submitting))).toMatchObject({ status: 409, result: { ok: false, error: expect.stringContaining('已经在提交审核了') as unknown } })
+
+    channel.value = null
+    channel.listening = false
+    expect(outcomeOf(await recordAction(post({ intent: 'request-submit' }), submitting))).toMatchObject({ status: 503, result: { error: expect.stringContaining('工作台没连着这个站') as unknown } })
+    expect(channel.published).toHaveLength(1)
+
+    expect(outcomeOf(await recordAction(post({ intent: 'request-submit' }), site)).status).toBe(501)
+    expect(outcomeOf(await recordAction(post({ intent: 'request-submit' }), siteAs('nobodycode99', { submit }))).status).toBe(403)
+    expect(outcomeOf(await recordAction(post({ intent: 'request-submit', extra: 'x' }), submitting))).toMatchObject({ status: 400 })
+  })
+
+  it('布局数据带上一键提交的状态；站点没接就没有这一项', () => {
+    const merged: SubmitState = { state: 'merged', by: 'bob', at: '2026-10-17T08:00:00.000Z', pull: { number: 3, url: 'https://git.test/pulls/3' } }
+    expect(collabLayoutData(args('http://collab.test:5173/'), { ...site, submitState: () => merged }).submit).toEqual(merged)
+    expect('submit' in collabLayoutData(args('http://collab.test:5173/'), site)).toBe(false)
   })
 })
 

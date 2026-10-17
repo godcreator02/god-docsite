@@ -1,4 +1,5 @@
 import { parse } from 'yaml'
+import { reactionsField, reactionsOf, type Reactions } from './reactions.js'
 
 /**
  * 评论在磁盘上的形状：评论目录下一串一个文件夹 <threadId>/，串头是 index.mdx，回复是 <replyId>.mdx，
@@ -48,7 +49,7 @@ export interface ThreadResolution {
   at: string
 }
 
-/** 一个评论文件读出来的内容：frontmatter 字段加正文；path 是相对评论目录的路径。resolved 只有串头会有 */
+/** 一个评论文件读出来的内容：frontmatter 字段加正文；path 是相对评论目录的路径。resolved 只有串头会有，reactions 只在有人点过表情时有 */
 export interface CommentFileOnDisk {
   path: string
   page?: string
@@ -56,6 +57,7 @@ export interface CommentFileOnDisk {
   authorId: string
   createdAt: string
   resolved?: ThreadResolution
+  reactions?: Reactions
   body: string
 }
 
@@ -137,6 +139,7 @@ export function parseCommentFile(file: string, text: string): CommentFileOnDisk 
   const isThreadHead = file.replaceAll('\\', '/').split('/').at(-1) === THREAD_HEAD_FILE
   if (!isThreadHead) assertNoThreadStatus(file, fields)
   const resolved = isThreadHead ? threadResolutionOf(file, fields) : undefined
+  const reactions = reactionsOf(file, fields[reactionsField])
   return {
     path: file.replaceAll('\\', '/'),
     ...(page !== undefined ? { page } : {}),
@@ -144,6 +147,7 @@ export function parseCommentFile(file: string, text: string): CommentFileOnDisk 
     authorId: requiredStringField(file, fields, 'author'),
     createdAt: requiredStringField(file, fields, 'createdAt'),
     ...(resolved !== undefined ? { resolved } : {}),
+    ...(Object.keys(reactions).length > 0 ? { reactions } : {}),
     body,
   }
 }

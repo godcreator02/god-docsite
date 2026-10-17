@@ -5,13 +5,14 @@ import { remoteProjectOf } from './project/account.js'
 import type { GwbDocsiteApi } from '@godcreator/gwb-docsite'
 import { openProject, type Project, type RemoteProject } from './project/project.js'
 import type { QqTaskGroups } from './project/qq-task-groups.js'
+import type { CollabSubmits } from './collab-repo/submit/collab-submits.js'
 import type { SubmitFailures } from './collab-repo/submit/submit-failures.js'
 import type { ProjectNotifications } from './notifications/project-notifications.js'
 import type { ProjectEvents } from './organization/events/project-events.js'
 import type { CollabSites } from './site-process/collab-sites.js'
 
 /**
- * 登记命令时各领域共用的东西：命令总线、Gitea、gwb-docsite（本 home 的身份码、把身份码加进人员列表）、提交审核的失败记录、通知、
+ * 登记命令时各领域共用的东西：命令总线、Gitea、gwb-docsite（本 home 的身份码、把身份码加进人员列表）、提交审核的失败记录与提交审核本身、通知、
  * 站点、项目列表与组织事件、按项目注册的 QQ 任务组
  */
 export type PluginServices = {
@@ -19,6 +20,7 @@ export type PluginServices = {
   gitea: GiteaAccess
   docsite: Pick<GwbDocsiteApi, 'identityCode' | 'join'>
   submitFailures: SubmitFailures
+  submits: CollabSubmits
   notifications: ProjectNotifications
   sites: CollabSites
   events: ProjectEvents

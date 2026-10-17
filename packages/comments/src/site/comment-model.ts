@@ -8,16 +8,24 @@
  *   intent=delete-reply：threadId、replyId
  *   intent=delete-thread：threadId
  *   intent=resolve-thread、reopen-thread：threadId
+ *   intent=add-reaction、remove-reaction：threadId、replyId?（点在串头不带）、emoji（reactionEmojis 里的一个）
  * 返回 { ok: true, … } 或 { ok: false, error: 文案 }（失败随状态码）。
  * 界面只接收可写或只读的结果（commentsAccessOf），不认识身份码；头像由宿主经 AvatarComponent 传进来。
  * 署名（as）只给 agent 经命令用，网页界面里不出现。评论正文由宿主编译（fumadocs-mdx 集合），经 BodyComponent 按路径渲染。
  */
 import type { ComponentType } from 'react'
+import type { ReactionEmoji } from '../core/reactions.js'
 
 /** 评论作者：宿主解析过的可信组合（模型文件里存的是 authorId 字符串） */
 export interface CommentWriter {
   id: string
   name: string
+}
+
+/** 一个表情回应：点了它的人按点的先后排，至少一人 */
+export interface CommentReaction {
+  emoji: ReactionEmoji
+  people: CommentWriter[]
 }
 
 export interface PageThreadReplySummary {
@@ -26,6 +34,8 @@ export interface PageThreadReplySummary {
   path: string
   author: CommentWriter
   createdAt: string
+  /** 表情回应，按 reactionEmojis 的顺序；没人点过就没有 */
+  reactions?: CommentReaction[]
 }
 
 export interface PageThreadSummary {
@@ -39,6 +49,8 @@ export interface PageThreadSummary {
   createdAt: string
   /** 标为已解决的人与时刻；没有就是未解决 */
   resolved?: { by: CommentWriter; at: string }
+  /** 串头的表情回应，按 reactionEmojis 的顺序；没人点过就没有 */
+  reactions?: CommentReaction[]
   replies: PageThreadReplySummary[]
 }
 

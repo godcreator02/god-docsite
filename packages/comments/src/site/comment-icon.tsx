@@ -49,6 +49,13 @@ const iconPaths = {
   chevronUp: <path d="m18 15-6-6-6 6" />,
   chevronDown: <path d="m6 9 6 6 6-6" />,
   chevronRight: <path d="m9 18 6-6-6-6" />,
+  smile: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 14.5s1.3 1.8 3.5 1.8 3.5-1.8 3.5-1.8" />
+      <path d="M9 9.5h.01M15 9.5h.01" />
+    </>
+  ),
 }
 
 export type CommentIconName = keyof typeof iconPaths

@@ -16,7 +16,10 @@ import { registerRecordCommands } from './collab-repo/records/commands.js'
 import { collabRecordsStateOf } from './collab-repo/records/inbox.js'
 import { CollabRepoRules } from './collab-repo/rules.js'
 import { registerCollabRepoCommands } from './collab-repo/submit/commands.js'
+import { CollabSubmits } from './collab-repo/submit/collab-submits.js'
+import { submitCollab } from './collab-repo/submit/submit.js'
 import { SubmitFailures } from './collab-repo/submit/submit-failures.js'
+import { giteaRepo } from './gitea-api/gitea.js'
 import { CollabRepoSync } from './collab-repo/sync/state.js'
 import { openProjectAt, remoteProjectAt, type PluginServices } from './commands.js'
 import { messageOf } from './errors.js'
@@ -108,11 +111,26 @@ export function apply(ctx: GwbContext): void {
 
   const docsite = ctx.gwbDocsite
   const openProject = (repo: string) => openProjectAt({ docsite }, repo)
-  const sites: CollabSites = new CollabSites({ docsite, feedOf: (repo) => notifications.feedOf(repo), listedProjects: () => events.current(), log })
+  const sites: CollabSites = new CollabSites({
+    docsite,
+    feedOf: (repo) => notifications.feedOf(repo),
+    listedProjects: () => events.current(),
+    onSubmitState: (repo, data) => submits.onSiteState(repo, data),
+    log,
+  })
   ctx.effect(() => sites.watchStatus())
+  ctx.effect(() => () => sites.closeSubscriptions())
 
   // 协作仓那一套
   const submitFailures = new SubmitFailures(changed)
+  const submits = new CollabSubmits({
+    openRemote: (repo) => remoteProjectAt({ docsite, gitea }, repo),
+    submitProject: (project) => submitCollab(project, giteaRepo(gitea.http, project.gitea.owner, project.gitea.repo)),
+    failures: submitFailures,
+    publish: (repo, state) => sites.publishSubmit(repo, state),
+    log,
+    now: () => new Date(),
+  })
   const collabSync = new CollabRepoSync({
     sites,
     install: pnpmInstall,
@@ -230,7 +248,7 @@ export function apply(ctx: GwbContext): void {
     })
   })
 
-  const services: PluginServices = { commands, gitea, docsite, submitFailures, notifications, sites, events, qqTaskGroups }
+  const services: PluginServices = { commands, gitea, docsite, submitFailures, submits, notifications, sites, events, qqTaskGroups }
   registerOrganizationSetupCommands(services, (url) => shell.openExternal(url))
   registerOrganizationEventCommands(services)
   registerPaneCommands(services)

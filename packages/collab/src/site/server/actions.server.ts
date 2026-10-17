@@ -8,6 +8,7 @@ import type { CollabRouteArgs, CollabSite } from '../collab-site.js'
 import type { WriteResult } from '../page-data.js'
 import { isRecordIntent, recordIntents, type RecordIntent } from '../record-intents.js'
 import { writeComment } from './comments.server.js'
+import { requestSubmit, submitIntent, SubmitRequestRejected } from './submit.server.js'
 
 /** 写入请求的表单不对：缺字段、多字段、字段是文件；status 是要回给浏览器的 400 */
 class RecordFormRejected extends Error {
@@ -70,29 +71,38 @@ async function performRecordWrite(fields: Record<string, string>, intent: Record
 }
 
 function rejectionOf(error: unknown) {
-  if (error instanceof WriteAccessError || error instanceof RecordFormRejected) return data<WriteResult>({ ok: false, error: error.message }, { status: error.status })
+  if (error instanceof WriteAccessError || error instanceof RecordFormRejected || error instanceof SubmitRequestRejected) return data<WriteResult>({ ok: false, error: error.message }, { status: error.status })
   if (error instanceof WriteRejected) return data<WriteResult>({ ok: false, error: error.message }, { status: 422 })
   throw error
 }
 
-/** 表单的 intent：评论包的四种交给评论写入，其余要是写任务与模块的三种 */
+/** 表单的 intent：评论包的交给评论写入，一键提交交给 gwb-collab，其余要是写任务与模块的三种 */
 async function intentOf(request: Request): Promise<string | null> {
   const intent = (await formOf(request.clone())).get('intent')
   return typeof intent === 'string' ? intent : null
 }
 
 /**
- * 任务页与记录那一页的路由 action：写评论（评论包的四种 intent），或写任务与模块（record-intents.ts 的三种）。
+ * 任务页与记录那一页的路由 action：写评论（评论包的 intent）、写任务与模块（record-intents.ts 的三种），或一键提交（request-submit，网页提示栏的按钮提交到这里）。
  * 写的人是本机身份，请求的 Origin 要等于 site.trustedOrigin；被写入规则拒绝回 422 与原话，表单不对回 400，
- * 只读或来源不对回 403。只改 collab/records/ 里的文件，不跑 git
+ * 只读或来源不对回 403。只改 collab/records/ 里的文件，不跑 git：一键提交只往频道 collab-submit 写一份请求
  */
 export async function recordAction({ request }: CollabRouteArgs, site: CollabSite) {
   try {
     const intent = await intentOf(request)
     if ((commentIntents as readonly (string | null)[]).includes(intent)) return await writeComment(request, site)
-    if (!isRecordIntent(intent)) throw new RecordFormRejected(`认不出 intent ${JSON.stringify(intent)}，能写的只有 ${[...commentIntents, ...recordIntents].join('、')}`)
+    if (intent !== submitIntent && !isRecordIntent(intent)) {
+      throw new RecordFormRejected(`认不出 intent ${JSON.stringify(intent)}，能写的只有 ${[...commentIntents, ...recordIntents, submitIntent].join('、')}`)
+    }
     const actor = authorizeWrite(request, { identity: site.identity(), people: site.people(), origin: site.trustedOrigin }).id
-    return await performRecordWrite(textFieldsOf(await formOf(request)), intent, actor, site)
+    const fields = textFieldsOf(await formOf(request))
+    if (intent === submitIntent) {
+      const unknownName = Object.keys(fields).find((name) => name !== 'intent')
+      if (unknownName !== undefined) throw new RecordFormRejected(`${submitIntent} 认不出字段 ${unknownName}，只收 intent`)
+      requestSubmit(site, actor)
+      return data<WriteResult>({ ok: true, intent })
+    }
+    return await performRecordWrite(fields, intent, actor, site)
   } catch (error) {
     return rejectionOf(error)
   }

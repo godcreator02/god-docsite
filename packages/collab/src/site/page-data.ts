@@ -4,6 +4,7 @@ import type { JournalMention } from '../core/journal-mentions.js'
 import type { ModuleGroup } from '../core/module-groups.js'
 import type { DueState } from '../core/modules.js'
 import type { Notification } from '../core/notifications/notifications.js'
+import type { SubmitState } from '../core/notifications/submit-state.js'
 import type { TaskStatus } from '../core/records.js'
 import type { ModuleState, TaskState } from '../core/state.js'
 
@@ -24,8 +25,11 @@ export type CollabViewer = { people: PublicPerson[]; person: string | null; proj
 /** 一页上的评论：这一页的评论串与能不能写 */
 export type PageComments = { threads: PageThreadSummary[]; access: CommentsAccess }
 
-/** 整站布局用的轻量数据：公开人员、本机身份、推送通道交来的通知与交给 AI 的提示词（还没交来都为 null）；不读 collab/ */
-export type CollabLayoutData = { people: PublicPerson[]; person: string | null; notifications: Notification[] | null; aiPrompt: string | null }
+/**
+ * 整站布局用的轻量数据：公开人员、本机身份、推送通道交来的通知与交给 AI 的提示词（还没交来都为 null）；不读 collab/。
+ * submit 是一键提交此刻的状态，站点没接一键提交时没有这一项
+ */
+export type CollabLayoutData = { people: PublicPerson[]; person: string | null; notifications: Notification[] | null; aiPrompt: string | null; submit?: SubmitState }
 
 export type TasksPageData = CollabViewer & {
   siteName: string

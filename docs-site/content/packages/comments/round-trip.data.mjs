@@ -17,7 +17,7 @@ export const lanes = [
 export const anchorLines = [`quote: "${quote}"`, `start: ${quoteSpan[0]}`, `end: ${quoteSpan[1]}`, `snapshot: "${snapshot}"`];
 
 /** 第 2 步：提交的请求。表单字段是 create-thread 收的那几个（page、body、anchor），多写一个就拒绝 */
-/* ref file="../packages/comments/src/site/action.server.ts" lines="26-34" hash="3d03657ee3c9" blob="6d59e89ad160" */
+/* ref file="../packages/comments/src/site/action.server.ts" lines="27-37" hash="901e81be064e" blob="9272f5e66da8" */
 export const requestLines = [
   { text: 'POST /comments', kind: 'cmd' },
   { text: `Origin: ${trustedOrigin}`, kind: 'out' },
@@ -33,7 +33,7 @@ export const checks = ['Origin 等于可信 origin', '本机身份：zhou（小�
 export const checksNote = '被拒的情况见 identity 页';
 
 /** 第 4 步右半：写出的整份串头（字段顺序与写法照 createThread 与 serializeCommentFile 逐字照抄） */
-/* ref file="../packages/comments/src/node/store.ts" lines="56-63" hash="b036365e5954" blob="2b8aa1c9999c" */
+/* ref file="../packages/comments/src/node/store.ts" lines="57-64" hash="b036365e5954" blob="95aabef1afe4" */
 export const threadFileLines = [
   '---',
   `page: "${pageKey}"`,

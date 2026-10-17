@@ -155,5 +155,6 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 | `start(dir)` / `stop(dir)` / `status(dir)` | 启停与此刻的状态，形状同 `docsite.site.*`；不改常驻登记 |
 | `onStatus(listener)` | 某个站启动、停止、出错时调用 `listener(dir)`，返回撤掉的函数 |
 | `push(dir, channel, data)` | 往站点的推送通道推一份 JSON（频道只用字母、数字、`_`、`-`）；站点没在运行就报错 |
+| `subscribe(dir, channel, listener)` | 带着推送令牌订阅站点的一个频道（站点由此知道启动方在听）：先收到现在的值，之后每变一次调 `listener(data)`；站点每次启动都重新连，返回撤掉的函数 |
 | `join(dir, { id, name, gitea? })` | 同 `docsite.people.join`，回 `{ changed }` |
 | `identityCode()` | 本 home 的身份码 |

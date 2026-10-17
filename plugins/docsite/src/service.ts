@@ -5,7 +5,7 @@ import type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
 import type { SiteStarted, SiteStatus } from './site-host.js'
 
 /**
- * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在 gwb-data 的 hosted-sites 里，别的插件的站也经 add 登记）、往站点推数据、本 home 的身份码。
+ * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在 gwb-data 的 hosted-sites 里，别的插件的站也经 add 登记）、往站点推数据与订阅站点的频道、本 home 的身份码。
  * 站点都建在平台包 @godcreator/god-docsite 上，站点根有身份文件 docsite.json（类别与布局代号，建站时写）。站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
  */
 export interface GwbDocsiteApi {
@@ -26,6 +26,11 @@ export interface GwbDocsiteApi {
   status(dir: string): SiteStatus
   /** 往站点的推送通道推一份数据（频道只用字母、数字、_、-）：POST 到站点的 __docsite/feed/<频道>，带这次启动的推送令牌；站点没在运行就抛 Error */
   push(dir: string, channel: string, data: unknown): Promise<void>
+  /**
+   * 订阅站点推送通道的一个频道，带着这次启动的推送令牌（站点由此知道启动方在听，见平台包的 siteFeedHasLauncher）：站点在运行就马上连上，
+   * 之后每次启动都重新连；连上时先收到频道现在的值，之后每变一次收一次。频道名不对抛 Error。返回撤掉订阅的函数
+   */
+  subscribe(dir: string, channel: string, listener: (data: unknown) => void): () => void
   /** 把本 home 的身份码加进站点的 people.json：已有这个 id 就加进它的 codes，没有就新加一项；changed 为 false 是本来就在 */
   join(dir: string, person: JoiningPerson): Promise<{ changed: boolean }>
   /** 某个站的状态变了（启动、停止、出错）时调用；返回撤掉的函数 */
@@ -70,6 +75,9 @@ export class DocsiteService extends Service implements GwbDocsiteApi {
   }
   push(dir: string, channel: string, data: unknown) {
     return this.api.push(dir, channel, data)
+  }
+  subscribe(dir: string, channel: string, listener: (data: unknown) => void) {
+    return this.api.subscribe(dir, channel, listener)
   }
   join(dir: string, person: JoiningPerson) {
     return this.api.join(dir, person)

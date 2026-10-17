@@ -1,13 +1,13 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { collabPathInRepo, journalDirName, mergeWorkflowPathInRepo, siteFeedChannel, sitePathInRepo, type SiteFeed } from '@godcreator/collab'
+import { collabPathInRepo, journalDirName, mergeWorkflowPathInRepo, siteFeedChannel, sitePathInRepo, submitChannel, type SiteFeed, type SubmitState } from '@godcreator/collab'
 import type { GwbDocsiteApi, SiteFeatureAdded, SiteInitResult } from '@godcreator/gwb-docsite'
 import { CollabRejected, messageOf } from '../errors.js'
 import { repoKeyOf, sameRepo, type Project } from '../project/project.js'
 import { featurePackage } from './site-files.js'
 
-/** 用到的 gwb-docsite 服务方法：登记与撤销常驻、站点进程的启动与停止、状态与状态变化、推数据、从零建站、加功能 */
-export type DocsiteHosting = Pick<GwbDocsiteApi, 'add' | 'remove' | 'start' | 'stop' | 'status' | 'onStatus' | 'push' | 'init' | 'addFeature'>
+/** 用到的 gwb-docsite 服务方法：登记与撤销常驻、站点进程的启动与停止、状态与状态变化、推数据与订阅频道、从零建站、加功能 */
+export type DocsiteHosting = Pick<GwbDocsiteApi, 'add' | 'remove' | 'start' | 'stop' | 'status' | 'onStatus' | 'push' | 'subscribe' | 'init' | 'addFeature'>
 
 /** collab.site.init 的结果：gwb-docsite 建的基础站、加上的协作功能、自动合并工作流（written 为 false 是仓里已经有、没动）、写成项目首页的文件 */
 export type CollabSiteInitResult = SiteInitResult & { feature: SiteFeatureAdded; mergeWorkflow: { path: string; written: boolean }; homePage: string }
@@ -24,6 +24,8 @@ export type CollabSitesOptions = {
   feedOf: (repo: string) => Promise<SiteFeed>
   /** 项目列表里的仓根：站点状态变了时按它认出是哪个项目的站 */
   listedProjects: () => string[]
+  /** 站点频道 collab-submit 的值变了（网页上点了一键提交等）：交给提交审核那边 */
+  onSubmitState: (repo: string, data: unknown) => void
   log: { warn: (message: string) => void }
 }
 
@@ -49,12 +51,14 @@ function writeMergeWorkflowIfMissing(repo: string, mergeWorkflow: string): boole
 
 /**
  * 项目站点交给 gwb-docsite 托管：常驻的站只记在它的 gwb-data 的 hosted-sites 里（登记的一方记成 gwb-collab），进程的启停、状态、起不来的原因、工作台启动时拉起都是它做的。
- * 这里只做三件事：项目加进列表（以及插件加载、自动同步改了 site/ 之后）登记站点，移出列表撤销登记；
- * 站点一转成运行就把整份数据推到频道 collab（gwb-docsite 的 onStatus），通知、提示词或项目负责人一变也推
+ * 这里只做这几件事：项目加进列表（以及插件加载、自动同步改了 site/ 之后）登记站点、订阅频道 collab-submit，移出列表撤销登记与订阅；
+ * 站点一转成运行就把整份数据推到频道 collab（gwb-docsite 的 onStatus），通知、提示词或项目负责人一变也推；一键提交的状态写到频道 collab-submit
  */
 export class CollabSites {
   private readonly feedQueues = new Map<string, Promise<void>>()
   private readonly feedErrors = new Map<string, string>()
+  private readonly submitQueues = new Map<string, Promise<void>>()
+  private readonly submitSubscriptions = new Map<string, () => void>()
 
   constructor(private readonly options: CollabSitesOptions) {}
 
@@ -69,8 +73,40 @@ export class CollabSites {
    */
   async host(repo: string): Promise<void> {
     if (!existsSync(path.join(siteDirOf(repo), 'package.json'))) throw new CollabRejected(`${repo} 里还没有站点 ${sitePathInRepo}/：项目负责人用 collab.site.init 建站`)
+    // 先订阅：站点这次没能启动也照样订阅着，之后起来了 gwb-docsite 会连上
+    this.subscribeSubmit(repo)
     await this.options.docsite.add(siteDirOf(repo), { by: 'gwb-collab' })
     this.feedChanged(repo)
+  }
+
+  /** 订阅这个项目站点的频道 collab-submit（gwb-docsite 每次站点起来都重新连上）；已经订阅着就不动 */
+  private subscribeSubmit(repo: string): void {
+    const key = repoKeyOf(repo)
+    if (this.submitSubscriptions.has(key)) return
+    this.submitSubscriptions.set(key, this.options.docsite.subscribe(siteDirOf(repo), submitChannel, (data) => this.options.onSubmitState(repo, data)))
+  }
+
+  /**
+   * 把一键提交的状态写到站点的频道 collab-submit：排队一个一个写，先写的先到；站点没在运行就不写（没人看，下次网页点了再从头来）。
+   * 写不上只记日志：提交审核本身照常，结果照旧经通知交给网页
+   */
+  publishSubmit(repo: string, state: SubmitState): void {
+    const key = repoKeyOf(repo)
+    const queued = (this.submitQueues.get(key) ?? Promise.resolve()).then(async () => {
+      if (this.options.docsite.status(siteDirOf(repo)).state !== 'running') return
+      try {
+        await this.options.docsite.push(siteDirOf(repo), submitChannel, state)
+      } catch (error) {
+        this.options.log.warn(`${repo} 一键提交的状态没能写到站点：${messageOf(error)}`)
+      }
+    })
+    this.submitQueues.set(key, queued)
+  }
+
+  /** 插件卸载：撤掉全部订阅 */
+  closeSubscriptions(): void {
+    for (const unsubscribe of this.submitSubscriptions.values()) unsubscribe()
+    this.submitSubscriptions.clear()
   }
 
   /** 接到 gwb-docsite 的站点状态变化：是列表里某个项目的站、且转成了运行，就把数据推过去；返回撤掉的函数 */
@@ -143,6 +179,9 @@ export class CollabSites {
     const key = repoKeyOf(repo)
     this.feedErrors.delete(key)
     this.feedQueues.delete(key)
+    this.submitQueues.delete(key)
+    this.submitSubscriptions.get(key)?.()
+    this.submitSubscriptions.delete(key)
     await this.options.docsite.remove(siteDirOf(repo))
   }
 }

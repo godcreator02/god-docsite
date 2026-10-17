@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { feedTokenEnvName, feedTokenHeader, feedUrlOf, isFeedChannel } from '../src/core/feed.js'
-import { feedAction, feedLoader, publishSiteFeed, siteFeedValue } from '../src/site/feed.server.js'
+import { feedAction, feedLoader, publishSiteFeed, siteFeedHasLauncher, siteFeedValue } from '../src/site/feed.server.js'
 
 const originalToken = process.env[feedTokenEnvName]
 afterEach(() => {
@@ -72,6 +72,25 @@ describe('推送通道', () => {
     await new Promise((resolve) => setTimeout(resolve, 10))
     publishSiteFeed('t-stream', { n: 2 })
     expect(await received).toEqual([{ n: 1 }, { n: 2 }])
+  })
+
+  it('带着令牌订阅的算启动方在听，断开就不算；浏览器的订阅不算；令牌不对 403', async () => {
+    process.env[feedTokenEnvName] = 'secret'
+    const subscribe = (headers: Record<string, string>, abort: AbortController) =>
+      feedLoader(loaderArgs(new Request('http://site/x', { headers: { accept: 'text/event-stream', ...headers }, signal: abort.signal }), 't-launcher'))
+    expect(siteFeedHasLauncher('t-launcher')).toBe(false)
+    const browser = new AbortController()
+    subscribe({}, browser)
+    expect(siteFeedHasLauncher('t-launcher')).toBe(false)
+    expect(subscribe({ [feedTokenHeader]: 'wrong' }, new AbortController()).status).toBe(403)
+    const launcher = new AbortController()
+    const received = eventsOf(subscribe({ [feedTokenHeader]: 'secret' }, launcher), 1, launcher)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(siteFeedHasLauncher('t-launcher')).toBe(true)
+    publishSiteFeed('t-launcher', { request: 1 })
+    expect(await received).toEqual([{ request: 1 }])
+    expect(siteFeedHasLauncher('t-launcher')).toBe(false)
+    browser.abort()
   })
 
   it('频道名不对 404', () => {

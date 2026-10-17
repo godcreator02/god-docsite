@@ -14,18 +14,18 @@ export const actors = [
   { id: 'browser', name: '浏览器' },
 ];
 
-/* ref file="../packages/god-docsite/src/core/feed.ts" lines="1-7" hash="996597c39f34" blob="fcb5c0377071" */
+/* ref file="../packages/god-docsite/src/core/feed.ts" lines="1-8" hash="e5791a988a60" blob="0a7ba1d93eff" */
 
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="86-106" hash="ec19335418dd" blob="056d782aae7e" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="113-133" hash="ec19335418dd" blob="18a760bcfa2d" */
 
 /** 第 3 步的频道表：站点进程里每个频道只留最新一份 */
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="16-27" hash="abd786ebeea0" blob="056d782aae7e" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="30-41" hash="abd786ebeea0" blob="18a760bcfa2d" */
 
 /** 第 4、5 步：loader 读初始值、浏览器订阅事件流 */
 /* ref file="../packages/god-docsite/src/site/use-site-feed.ts" lines="1-16" hash="9dd20fa265b3" blob="ede7dacdd948" */
 
 /** 第 5 步的事件流：连上先发现在的值，之后每推一次发一次 */
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="47-84" hash="18fdf1cfc04b" blob="056d782aae7e" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="61-111" hash="e92a659880ee" blob="18a760bcfa2d" */
 
 export const steps = [
   {

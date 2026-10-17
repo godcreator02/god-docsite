@@ -43,6 +43,8 @@ export type DevServer = {
   stopNow(): void
   /** 往开发服务的推送通道推一份数据；开发服务回的不是 2xx 就把它的原话报出来 */
   push(channel: string, data: unknown): Promise<void>
+  /** 带着令牌订阅推送通道的一个频道（站点由此知道启动方在听）：先收到现在的值，之后每变一次收一次；连接断了调 onEnd 写明原因。返回断开的函数，断开后不再调 onEnd */
+  subscribe(channel: string, listener: (data: unknown) => void, onEnd: (reason: string) => void): () => void
 }
 
 /** 启动开发服务、交给它身份码，等它报出地址；port 是想用的端口，null 是让站点自己随机挑。先退出或超时就抛 DocsiteRejected，写明开发服务的输出。测试里换成假的 */
@@ -108,6 +110,48 @@ export async function postFeed(siteUrl: string, token: string, channel: string, 
   if (!response.ok) throw new DocsiteRejected(`站点的推送路由回 ${response.status}：${await response.text()}`)
 }
 
+/** 事件流里攒着的文字切出完整的事件，回每个事件 data 行的 JSON 与还没收完的剩余部分；注释行（: 开头）不算事件 */
+export function feedEventsOf(buffered: string): { events: unknown[]; rest: string } {
+  const blocks = buffered.replaceAll('\r\n', '\n').split('\n\n')
+  const rest = blocks.pop()!
+  const events = blocks.flatMap((block) => {
+    const data = block
+      .split('\n')
+      .filter((line) => line.startsWith('data:'))
+      .map((line) => line.slice('data:'.length).replace(/^ /, ''))
+    return data.length === 0 ? [] : [JSON.parse(data.join('\n')) as unknown]
+  })
+  return { events, rest }
+}
+
+/** 订阅：GET 推送路由，Accept 写事件流、请求头带令牌；一直读到连接断开，断开原因交给 onEnd，调返回的函数主动断开 */
+export function subscribeFeed(siteUrl: string, token: string, channel: string, listener: (data: unknown) => void, onEnd: (reason: string) => void): () => void {
+  const feedUrl = feedUrlOf(channel)
+  const abort = new AbortController()
+  const read = async (): Promise<string> => {
+    const response = await fetch(new URL(feedUrl, siteUrl), { headers: { accept: 'text/event-stream', [feedTokenHeader]: token }, signal: abort.signal })
+    if (!response.ok || response.body === null) return `站点的推送路由回 ${response.status}：${await response.text()}`
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
+    let buffered = ''
+    for (;;) {
+      const { value, done } = await reader.read()
+      if (done) return '站点关掉了事件流'
+      const { events, rest } = feedEventsOf(buffered + value)
+      buffered = rest
+      for (const event of events) listener(event)
+    }
+  }
+  read().then(
+    (reason) => {
+      if (!abort.signal.aborted) onEnd(reason)
+    },
+    (error: unknown) => {
+      if (!abort.signal.aborted) onEnd(error instanceof Error ? error.message : String(error))
+    },
+  )
+  return () => abort.abort()
+}
+
 /**
  * 在站点目录里运行 pnpm dev，环境变量交给它身份码与这次启动生成的推送令牌，等它在输出里报出地址。
  * 给了 port 就带上 --port（平台的 vite 插件加 strictPort，被占就起不来），没给由平台的 vite 插件随机挑；报出的地址端口和给的不同就拒绝。
@@ -161,6 +205,7 @@ export const devServerLauncher = (outputLog: DevOutputLog): LaunchDevServer => (
         stop: () => stopProcessTree(child),
         stopNow: () => stopProcessTreeNow(child),
         push: (channel, data) => postFeed(url, token, channel, data),
+        subscribe: (channel, listener, onEnd) => subscribeFeed(url, token, channel, listener, onEnd),
       })
     }
     const onEarlyExit = (code: number | null) => fail(`开发服务启动后就退出了（退出码 ${String(code)}）`)

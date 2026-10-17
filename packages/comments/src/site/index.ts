@@ -4,6 +4,7 @@ export { CommentsTable, type CommentsTableRow, type CommentsTableProps } from '.
 export {
   type CommentAvatar,
   type CommentBodyComponent,
+  type CommentReaction,
   type CommentsAccess,
   type CommentWriter,
   type PageThreadReplySummary,

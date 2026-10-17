@@ -2,8 +2,9 @@
  * 评论界面里几处共用的零件：图标、作者行、评论正文、写评论的输入框、批的位置那一行。
  * 样式在本包 styles.css 的同名类上
  */
-import { Component, useEffect, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { Component, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { useFetcher } from 'react-router'
+import { ComposerEmojiButton } from './comment-emoji.js'
 import { errorOf, type CommentAvatar, type CommentBodyComponent, type CommentWriter } from './comment-model.js'
 import { CommentIcon } from './comment-icon.js'
 
@@ -130,13 +131,20 @@ export interface ComposerProps {
   onSent?: (result: CommentWriteSuccess) => void
 }
 
+/** 文本框随内容长高，最高 200px */
+function fitTextareaHeight(textarea: HTMLTextAreaElement) {
+  textarea.style.height = 'auto'
+  textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
+}
+
 /**
- * 写评论的输入框（Notion 式）：头像、随内容长高的文本框、右边的发送按钮。
+ * 写评论的输入框（Notion 式）：头像、随内容长高的文本框、右边的表情与发送按钮；选的表情插在光标处。
  * Enter 发送，Shift+Enter 换行，输入法组字时的 Enter 不算；发出去了清空
  */
 export function Composer({ action, fields, placeholder, writer, AvatarComponent, autoFocus, formAttributes, onSent }: ComposerProps) {
   const fetcher = useFetcher()
   const [body, setBody] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const error = errorOf(fetcher.data)
   const busy = fetcher.state !== 'idle'
   const sent = fetcher.state === 'idle' ? successOf(fetcher.data) : null
@@ -145,6 +153,17 @@ export function Composer({ action, fields, placeholder, writer, AvatarComponent,
     setBody('')
     onSent?.(sent)
   }, [sent])
+  const insertEmoji = (emoji: string) => {
+    const textarea = textareaRef.current!
+    const start = textarea.selectionStart
+    const caret = start + emoji.length
+    setBody(body.slice(0, start) + emoji + body.slice(textarea.selectionEnd))
+    requestAnimationFrame(() => {
+      textarea.focus()
+      textarea.setSelectionRange(caret, caret)
+      fitTextareaHeight(textarea)
+    })
+  }
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
     event.preventDefault()
@@ -161,6 +180,7 @@ export function Composer({ action, fields, placeholder, writer, AvatarComponent,
       </span>
       <div className="docsite-composer-box">
         <textarea
+          ref={textareaRef}
           name="body"
           required
           rows={1}
@@ -171,11 +191,11 @@ export function Composer({ action, fields, placeholder, writer, AvatarComponent,
           value={body}
           onChange={(event) => {
             setBody(event.target.value)
-            event.target.style.height = 'auto'
-            event.target.style.height = `${Math.min(event.target.scrollHeight, 200)}px`
+            fitTextareaHeight(event.target)
           }}
           onKeyDown={onKeyDown}
         />
+        <ComposerEmojiButton onPick={insertEmoji} />
         <button type="submit" className="docsite-composer-send" disabled={!ready} title={busy ? '写入中…' : '发送（Enter）'} aria-label="发送">
           <CommentIcon name="send" />
         </button>

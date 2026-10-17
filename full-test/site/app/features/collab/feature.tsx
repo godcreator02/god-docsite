@@ -3,7 +3,7 @@ import { useRouteLoaderData, type LoaderFunctionArgs } from 'react-router'
 import { CalendarDays, ListTodo } from 'lucide-react'
 import type { SiteIdentity, StoredPerson } from '@godcreator/identity'
 import { useSiteFeed, type BaseSiteContext } from '@godcreator/god-docsite/react'
-import { calendarUrl, pushedSiteFeedOf, siteFeedChannel, siteFeedOf, tasksPageUrl } from '@godcreator/collab'
+import { calendarUrl, pushedSiteFeedOf, siteFeedChannel, siteFeedOf, submitChannel, submitStateOf, tasksPageUrl } from '@godcreator/collab'
 import { collabLayoutData, collabMdxComponents, NotificationBar, type CollabLayoutData } from '@godcreator/collab/site'
 
 // 这个文件浏览器侧也会加载（MDX 组件、布局顶部插槽）：只 import 浏览器能用的出口，服务端的东西经 layoutData 的参数传进来
@@ -16,20 +16,27 @@ export const sidebarLinks = [
   { name: '日历', url: calendarUrl, icon: <CalendarDays />, order: 20 },
 ]
 
-/** 布局 loader 调用，结果进布局数据的 collab 键：公开人员、本机身份、推送来的通知 */
+/** 布局 loader 调用，结果进布局数据的 collab 键：公开人员、本机身份、推送来的通知、一键提交的状态 */
 export function layoutData(args: LoaderFunctionArgs, base: BaseSiteContext<StoredPerson, SiteIdentity>): CollabLayoutData {
-  return collabLayoutData(args, { people: base.people, identity: base.identity, feed: () => pushedSiteFeedOf(base.feedValue(siteFeedChannel)) })
+  return collabLayoutData(args, {
+    people: base.people,
+    identity: base.identity,
+    feed: () => pushedSiteFeedOf(base.feedValue(siteFeedChannel)),
+    submitState: () => submitStateOf(base.feedValue(submitChannel) ?? null),
+  })
 }
 
 /** 站点模板里整站布局路由的 id（平台约定固定为 routes/layout） */
 const layoutRouteId = 'routes/layout'
 
-/** 布局顶部插槽：通知栏。首屏用布局数据里的通知与提示词，连上推送通道以后跟着推来的新值变 */
+/** 布局顶部插槽：通知栏。首屏用布局数据里的通知、提示词与一键提交的状态，连上推送通道以后跟着推来的新值变 */
 export function LayoutTop() {
   const layout = useRouteLoaderData<{ collab: CollabLayoutData }>(layoutRouteId)
   const pushed = useSiteFeed<unknown>(siteFeedChannel)
   const pushedFeed = useMemo(() => (pushed === undefined ? undefined : siteFeedOf(pushed)), [pushed])
+  const pushedSubmit = useSiteFeed<unknown>(submitChannel)
+  const pushedSubmitState = useMemo(() => (pushedSubmit === undefined ? undefined : submitStateOf(pushedSubmit)), [pushedSubmit])
   if (layout === undefined) throw new Error(`LayoutTop 要放在布局路由 ${layoutRouteId} 里面：协作的布局数据在那个路由的 loader 数据的 collab 键下`)
   const shown = pushedFeed ?? layout.collab
-  return <NotificationBar notifications={shown.notifications} aiPrompt={shown.aiPrompt} people={layout.collab.people} />
+  return <NotificationBar notifications={shown.notifications} aiPrompt={shown.aiPrompt} people={layout.collab.people} submit={pushedSubmitState === undefined ? layout.collab.submit : pushedSubmitState} />
 }

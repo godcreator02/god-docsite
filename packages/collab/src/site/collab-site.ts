@@ -1,6 +1,7 @@
 import type { Person, SiteIdentity } from '@godcreator/identity'
 import type { Params } from 'react-router'
 import type { SiteFeed } from '../core/notifications/site-feed.js'
+import type { SubmitState } from '../core/notifications/submit-state.js'
 import type { SitePageRef } from './page-data.js'
 
 /**
@@ -26,6 +27,18 @@ export type CollabSite = {
   pages: () => readonly SitePageRef[]
   /** 推送通道交来的最新一份（通知、项目负责人）；还没交来为 null */
   feed: () => SiteFeed | null
+  /** 一键提交用的频道 collab-submit；站点的 site.server.ts 没接它，网页上就没有一键提交 */
+  submit?: SubmitChannel
+}
+
+/** 站点用平台的推送通道接上频道 collab-submit：读现在的状态、写一份请求、问 gwb-collab 在不在听 */
+export type SubmitChannel = {
+  /** 频道现在的状态，还没写过是 null */
+  state: () => SubmitState
+  /** 写一份新状态，推给在听的浏览器与 gwb-collab */
+  publish: (state: SubmitState) => void
+  /** gwb-collab（经 gwb-docsite 带着令牌）此刻在听这个频道 */
+  workbenchListening: () => boolean
 }
 
 /** loader / action 用到的 React Router 参数：站点转发文件把收到的 args 原样传进来 */

@@ -24,6 +24,7 @@ const platformHomePage = 'export default function Home() {}\n'
 function fakeDocsite(initial: 'running' | 'stopped' | 'failed' = 'stopped', url: string | null = null) {
   const calls: string[] = []
   const pushed: unknown[] = []
+  const subscriptions: Array<{ dir: string; channel: string; listener: (data: unknown) => void; active: boolean }> = []
   const listeners = new Set<(dir: string) => void>()
   let state = initial
   const become = (dir: string, next: typeof state) => {
@@ -60,6 +61,13 @@ function fakeDocsite(initial: 'running' | 'stopped' | 'failed' = 'stopped', url:
       calls.push(`push ${dir} ${channel}`)
       pushed.push(data)
     },
+    subscribe: (dir, channel, listener) => {
+      const subscription = { dir, channel, listener, active: true }
+      subscriptions.push(subscription)
+      return () => {
+        subscription.active = false
+      }
+    },
     init: async (dir, options) => {
       calls.push(`init ${dir} ${JSON.stringify(options)}`)
       mkdirSync(path.join(dir, 'app', 'routes'), { recursive: true })
@@ -72,13 +80,20 @@ function fakeDocsite(initial: 'running' | 'stopped' | 'failed' = 'stopped', url:
       return { feature: 'collab', specifier: options.specifier!, addedFiles: ['routes.ts'], keptFiles: [], features: ['collab'] }
     },
   }
-  return { docsite, calls, pushed }
+  return { docsite, calls, pushed, subscriptions }
 }
 
 function sitesWith(docsite: DocsiteHosting, listed: string[] = [repo]) {
   const warned: string[] = []
-  const sites = new CollabSites({ docsite, feedOf: async () => feed, listedProjects: () => listed, log: { warn: (message) => void warned.push(message) } })
-  return { sites, warned }
+  const submitStates: Array<[string, unknown]> = []
+  const sites = new CollabSites({
+    docsite,
+    feedOf: async () => feed,
+    listedProjects: () => listed,
+    onSubmitState: (stateRepo, data) => void submitStates.push([stateRepo, data]),
+    log: { warn: (message) => void warned.push(message) },
+  })
+  return { sites, warned, submitStates }
 }
 
 /** 建一个带 site/package.json 的临时协作仓，跑完删掉 */
@@ -295,6 +310,33 @@ describe('项目站点交给 gwb-docsite', () => {
     } finally {
       rmSync(newRepo, { recursive: true, force: true })
     }
+  })
+
+  it('一键提交：登记站点时订阅一次频道 collab-submit，收到的值交给提交审核那边；移出列表撤掉订阅', async () => {
+    await withBuiltSite(async (builtRepo, builtSiteDir) => {
+      const { docsite, subscriptions } = fakeDocsite()
+      const { sites, submitStates } = sitesWith(docsite, [builtRepo])
+      await sites.host(builtRepo)
+      await sites.host(builtRepo)
+      expect(subscriptions.map(({ dir, channel }) => [dir, channel])).toEqual([[builtSiteDir, 'collab-submit']])
+      subscriptions[0]!.listener({ state: 'requested', by: 'bob', at: 't' })
+      expect(submitStates).toEqual([[builtRepo, { state: 'requested', by: 'bob', at: 't' }]])
+      await sites.unhost(builtRepo)
+      expect(subscriptions[0]!.active).toBe(false)
+    })
+  })
+
+  it('一键提交的状态写到频道 collab-submit，排队按先后写；站点没在运行就不写', async () => {
+    const running = fakeDocsite('running', 'http://127.0.0.1:4331/')
+    const { sites } = sitesWith(running.docsite)
+    sites.publishSubmit(repo, { state: 'running', by: 'bob', at: 't' })
+    sites.publishSubmit(repo, null)
+    await vi.waitFor(() => expect(running.pushed).toEqual([{ state: 'running', by: 'bob', at: 't' }, null]))
+    expect(running.calls).toEqual([`push ${siteDir} collab-submit`, `push ${siteDir} collab-submit`])
+    const stopped = fakeDocsite('stopped')
+    sitesWith(stopped.docsite).sites.publishSubmit(repo, null)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(stopped.pushed).toEqual([])
   })
 
   it('项目移出列表：撤销 gwb-docsite 的登记（它停掉在运行的站点）', async () => {

@@ -1,9 +1,10 @@
 import { authorizeWrite, WriteAccessError, type Person, type SiteIdentity } from '@godcreator/identity'
 import { data } from 'react-router'
 import { CommentWriteRejected } from '../core/comment-file.js'
-import { createReply, createThread, deleteReply, deleteThread, setThreadStatus } from '../node/store.js'
+import { isReactionEmoji, reactionEmojis, type ReactionEmoji } from '../core/reactions.js'
+import { createReply, createThread, deleteReply, deleteThread, setReaction, setThreadStatus } from '../node/store.js'
 
-export const commentIntents = ['create-thread', 'reply', 'delete-reply', 'delete-thread', 'resolve-thread', 'reopen-thread'] as const
+export const commentIntents = ['create-thread', 'reply', 'delete-reply', 'delete-thread', 'resolve-thread', 'reopen-thread', 'add-reaction', 'remove-reaction'] as const
 export type CommentIntent = (typeof commentIntents)[number]
 
 /** 写入结果：评论界面按 ok 判断成败，失败时显示 error（外部契约，见 comment-model.ts 的字段约定） */
@@ -31,6 +32,15 @@ const fieldsOfIntent: Record<CommentIntent, readonly string[]> = {
   'delete-thread': ['threadId'],
   'resolve-thread': ['threadId'],
   'reopen-thread': ['threadId'],
+  'add-reaction': ['threadId', 'replyId', 'emoji'],
+  'remove-reaction': ['threadId', 'replyId', 'emoji'],
+}
+
+/** 表单里收到的表情：不是能点的那几个就拒绝 */
+function reactionEmojiField(form: FormData): ReactionEmoji {
+  const emoji = textField(form, 'emoji')
+  if (!isReactionEmoji(emoji)) throw new CommentWriteRejected(400, `表情 ${JSON.stringify(emoji)} 不能点，能点的只有 ${reactionEmojis.join(' ')}`)
+  return emoji
 }
 
 function isCommentIntent(value: string): value is CommentIntent {
@@ -103,11 +113,18 @@ async function performCommentWrite(form: FormData, commentsDir: string, author: 
       await setThreadStatus(commentsDir, threadId, 'open')
       return { ok: true, intent, threadId }
     }
+    case 'add-reaction':
+    case 'remove-reaction': {
+      const threadId = textField(form, 'threadId')
+      const replyId = optionalTextField(form, 'replyId')
+      await setReaction(commentsDir, threadId, { ...(replyId !== undefined ? { replyId } : {}), emoji: reactionEmojiField(form), by: author.id, on: intent === 'add-reaction' })
+      return { ok: true, intent, threadId, ...(replyId !== undefined ? { replyId } : {}) }
+    }
   }
 }
 
 /**
- * 评论写入的路由 action：核对 Origin 与身份（as 只给 agent，表单里的空 as 当没写），再按 intent 建串、回复、删除、标为已解决、重新打开。
+ * 评论写入的路由 action：核对 Origin 与身份（as 只给 agent，表单里的空 as 当没写），再按 intent 建串、回复、删除、标为已解决、重新打开、加上或撤掉表情。
  * 返回值路由 action 直接 return：成功 { ok: true, intent, threadId?, replyId? }；
  * 来源或身份不对、请求字段不对、目标评论不存在时 { ok: false, error } 并带上 4xx 状态码；别的错原样抛出
  */

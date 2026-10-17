@@ -1,5 +1,5 @@
 import path from 'node:path'
-import type { CommentFileOnDisk } from '@godcreator/comments'
+import type { CommentFileOnDisk, Reactions } from '@godcreator/comments'
 import { readCommentThreads } from '@godcreator/comments/node'
 import { mentionsOf, type Person } from '@godcreator/identity'
 import { sitePeople } from '@godcreator/identity/node'
@@ -7,7 +7,8 @@ import { DocsiteRejected } from './errors.js'
 
 export type CommentFilter = { page?: string; about?: string }
 
-type ListedComment = { author: string; createdAt: string; body: string; mentions: string[] }
+/** reactions 只在有人点过表情时有：表情 → 点了的人员 id */
+type ListedComment = { author: string; createdAt: string; body: string; mentions: string[]; reactions?: Reactions }
 
 export type ListedThread = {
   id: string
@@ -20,11 +21,12 @@ export type ListedThread = {
   resolvedAt?: string
   body: string
   mentions: string[]
+  reactions?: Reactions
   replies: ListedComment[]
 }
 
 function listedOf(entry: CommentFileOnDisk, people: readonly Person[]): ListedComment {
-  return { author: entry.authorId, createdAt: entry.createdAt, body: entry.body, mentions: mentionsOf(entry.body, people) }
+  return { author: entry.authorId, createdAt: entry.createdAt, body: entry.body, mentions: mentionsOf(entry.body, people), ...(entry.reactions !== undefined ? { reactions: entry.reactions } : {}) }
 }
 
 /** 读站点目录里的评论（不要站点在运行）：按挂的页面、和谁有关筛。page 是页面在内容目录里的路径（如 "writing/collapse-test.mdx"） */
@@ -54,6 +56,7 @@ export async function listComments(siteDir: string, filter: CommentFilter): Prom
           : { status: 'open' as const }),
         body: thread.head.body,
         mentions: [...new Set(mentions)],
+        ...(thread.head.reactions !== undefined ? { reactions: thread.head.reactions } : {}),
         replies: thread.replies.map((reply) => listedOf(reply, people)),
       }
     })

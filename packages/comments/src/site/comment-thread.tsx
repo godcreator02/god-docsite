@@ -1,9 +1,10 @@
 /**
- * 一串评论的完整样子：批的位置、串头、回复（长串折起中间的）、回复框；可写时悬停一条评论露出删除，悬停串头还露出标为已解决或重新打开。
+ * 一串评论的完整样子：批的位置、串头、回复（长串折起中间的）、每条评论下的表情回应、回复框；可写时悬停一条评论露出加表情与删除，悬停串头还露出标为已解决或重新打开。
  * 正文旁的浮窗（CommentsDock）与全站评论表格展开的那一行都用它
  */
 import { useState, type ReactNode } from 'react'
 import { useFetcher } from 'react-router'
+import { AddReactionButton, ReactionBar } from './comment-emoji.js'
 import { errorOf, type CommentAvatar, type CommentBodyComponent, type CommentWriter, type PageThreadSummary } from './comment-model.js'
 import { CommentBody, CommentHeading, CommentIcon, Composer, ThreadQuote, type CommentWriteSuccess, type ThreadPlace } from './comment-parts.js'
 
@@ -48,9 +49,11 @@ export function CommentThread({ thread, action, writer, BodyComponent, AvatarCom
           path={thread.headPath}
           BodyComponent={BodyComponent}
           AvatarComponent={AvatarComponent}
+          reactions={<ReactionBar action={action} target={{ threadId: thread.id }} reactions={thread.reactions ?? []} writer={writer} />}
           hoverActions={
             writable ? (
               <>
+                <AddReactionButton action={action} target={{ threadId: thread.id }} reactions={thread.reactions ?? []} writer={writer} />
                 <ThreadStatusButton action={action} thread={thread} />
                 <DeleteButton action={action} fields={{ intent: 'delete-thread', threadId: thread.id }} marker={{ 'data-delete-thread': thread.id }} title="删除整串（含回复）" />
               </>
@@ -71,8 +74,14 @@ export function CommentThread({ thread, action, writer, BodyComponent, AvatarCom
               path={reply.path}
               BodyComponent={BodyComponent}
               AvatarComponent={AvatarComponent}
+              reactions={<ReactionBar action={action} target={{ threadId: thread.id, replyId: reply.id }} reactions={reply.reactions ?? []} writer={writer} />}
               hoverActions={
-                writable ? <DeleteButton action={action} fields={{ intent: 'delete-reply', threadId: thread.id, replyId: reply.id }} marker={{ 'data-delete-reply': reply.id }} title="删除这条回复" /> : null
+                writable ? (
+                  <>
+                    <AddReactionButton action={action} target={{ threadId: thread.id, replyId: reply.id }} reactions={reply.reactions ?? []} writer={writer} />
+                    <DeleteButton action={action} fields={{ intent: 'delete-reply', threadId: thread.id, replyId: reply.id }} marker={{ 'data-delete-reply': reply.id }} title="删除这条回复" />
+                  </>
+                ) : null
               }
             />
           </div>
@@ -101,6 +110,7 @@ function OneComment({
   path,
   BodyComponent,
   AvatarComponent,
+  reactions,
   hoverActions,
 }: {
   author: CommentWriter
@@ -108,6 +118,7 @@ function OneComment({
   path: string
   BodyComponent: CommentBodyComponent
   AvatarComponent?: CommentAvatar
+  reactions: ReactNode
   hoverActions: ReactNode
 }) {
   return (
@@ -116,6 +127,7 @@ function OneComment({
       <CommentHeading author={author} createdAt={createdAt} AvatarComponent={AvatarComponent} />
       <div className="docsite-comment-body">
         <CommentBody path={path} BodyComponent={BodyComponent} />
+        {reactions}
       </div>
     </div>
   )

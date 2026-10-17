@@ -2,15 +2,29 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
 import { feedTokenEnvName, feedTokenHeader, isFeedChannel } from '../core/feed.js'
 
 type FeedListener = (data: unknown) => void
-type FeedHub = { latest: Map<string, unknown>; listeners: Map<string, Set<FeedListener>> }
+/** launchers 记每个频道有几个带着令牌订阅的连接（启动方），浏览器的订阅不算 */
+type FeedHub = { latest: Map<string, unknown>; listeners: Map<string, Set<FeedListener>>; launchers: Map<string, number> }
 
 // 挂在 globalThis 上：dev 下站点模块随热更新重新执行时，订阅表若跟着模块走，已连着的浏览器就收不到之后的推送
 const feedHubKey = Symbol.for('@godcreator/god-docsite/feed-hub')
 
 function feedHub(): FeedHub {
   const holder = globalThis as { [feedHubKey]?: FeedHub }
-  holder[feedHubKey] ??= { latest: new Map(), listeners: new Map() }
+  holder[feedHubKey] ??= { latest: new Map(), listeners: new Map(), launchers: new Map() }
   return holder[feedHubKey]
+}
+
+/**
+ * 启动方（带着 DOCSITE_FEED_TOKEN 订阅的一方，比如 gwb-docsite）此刻有没有在听这个频道：
+ * 站点要启动方替它做事时（往频道里写一份请求），先用它确认有人接
+ */
+export function siteFeedHasLauncher(channel: string): boolean {
+  return (feedHub().launchers.get(channel) ?? 0) > 0
+}
+
+function countLauncher(channel: string, delta: 1 | -1): void {
+  const launchers = feedHub().launchers
+  launchers.set(channel, (launchers.get(channel) ?? 0) + delta)
 }
 
 /** 某个频道现在的值，还没推过是 undefined：给布局、页面的 loader 读 */
@@ -44,8 +58,8 @@ function textResponse(status: number, text: string) {
   return new Response(text, { status, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
 }
 
-/** 一个频道的事件流：先发现在的值（推过才有），之后每推一次发一次，浏览器断开时退订 */
-function eventStreamOf(channel: string, signal: AbortSignal): Response {
+/** 一个频道的事件流：先发现在的值（推过才有），之后每推一次发一次，对方断开时退订；launcher 是带着令牌订阅的启动方 */
+function eventStreamOf(channel: string, signal: AbortSignal, launcher: boolean): Response {
   const encoder = new TextEncoder()
   let unsubscribe = () => {}
   let closed = false
@@ -55,7 +69,15 @@ function eventStreamOf(channel: string, signal: AbortSignal): Response {
       controller.enqueue(encoder.encode(': connected\n\n'))
       const hub = feedHub()
       if (hub.latest.has(channel)) send(hub.latest.get(channel))
-      unsubscribe = subscribe(channel, send)
+      const unsubscribeListener = subscribe(channel, send)
+      if (launcher) countLauncher(channel, 1)
+      let unsubscribed = false
+      unsubscribe = () => {
+        if (unsubscribed) return
+        unsubscribed = true
+        unsubscribeListener()
+        if (launcher) countLauncher(channel, -1)
+      }
       signal.addEventListener('abort', () => {
         unsubscribe()
         if (closed) return
@@ -75,12 +97,17 @@ function eventStreamOf(channel: string, signal: AbortSignal): Response {
 
 /**
  * 推送通道的资源路由 loader（路由 `__docsite/feed/:channel`）：请求头要 text/event-stream（EventSource）时回事件流，
- * 否则回这个频道现在的值的 JSON（还没推过是 null）
+ * 否则回这个频道现在的值的 JSON（还没推过是 null）。事件流的请求头带了令牌就算启动方在听（siteFeedHasLauncher），令牌不对 403
  */
 export function feedLoader({ request, params }: LoaderFunctionArgs): Response {
   const channel = channelOf(params)
-  if (request.headers.get('accept')?.includes('text/event-stream')) return eventStreamOf(channel, request.signal)
-  return Response.json(siteFeedValue(channel) ?? null, { headers: { 'Cache-Control': 'no-cache' } })
+  if (!request.headers.get('accept')?.includes('text/event-stream')) return Response.json(siteFeedValue(channel) ?? null, { headers: { 'Cache-Control': 'no-cache' } })
+  const token = request.headers.get(feedTokenHeader)
+  if (token === null) return eventStreamOf(channel, request.signal, false)
+  const expected = process.env[feedTokenEnvName]
+  if (!expected) return textResponse(403, `站点进程没有 ${feedTokenEnvName}：只有启动方给了令牌的站认启动方的订阅`)
+  if (token !== expected) return textResponse(403, `${feedTokenHeader} 不对`)
+  return eventStreamOf(channel, request.signal, true)
 }
 
 /**

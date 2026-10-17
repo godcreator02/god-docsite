@@ -21,7 +21,7 @@ export const resolvedLines = ['status: "resolved"', `resolvedBy: "${resolvedBy}"
 export const rejectedMessage = `评论串 ${threadId} 已经是已解决（${resolvedBy} 在 ${resolvedAt} 标的）`;
 
 /** setThreadStatus：只改串头三项、别的字段与正文原样写回；已经是这个状态就 409，写明谁在什么时候标的 */
-/* ref file="../packages/comments/src/node/store.ts" lines="93-113" hash="6f9768792991" blob="2b8aa1c9999c" */
+/* ref file="../packages/comments/src/node/store.ts" lines="94-114" hash="6f9768792991" blob="95aabef1afe4" */
 /** 测试：标为已解决写上连续的三行，重新打开后文件与标之前一个字不差 */
 /* ref file="../packages/comments/test/thread-status.test.ts" lines="28-43" hash="6bc337fb932a" blob="f6f3c76d0905" */
 /** 测试：重复标 409，报错里有「谁在什么时候标的」 */

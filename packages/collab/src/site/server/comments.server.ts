@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs'
+import { reactionsField, serializeReactions } from '@godcreator/comments'
 import { readCommentThreads, type CommentThreadOnDisk } from '@godcreator/comments/node'
 import { commentsAccessOf } from '@godcreator/comments/site'
 import { handleCommentWrite, pageThreadsOf, type CommentCollectionEntry } from '@godcreator/comments/site/server'
@@ -20,6 +21,7 @@ function entriesOf(threads: readonly CommentThreadOnDisk[]): CommentCollectionEn
       ...(file.page !== undefined ? { page: file.page } : {}),
       ...(file.anchor !== undefined ? { anchor: file.anchor } : {}),
       ...(file.resolved !== undefined ? { status: 'resolved', resolvedBy: file.resolved.by, resolvedAt: file.resolved.at } : {}),
+      ...(file.reactions !== undefined ? { [reactionsField]: serializeReactions(file.reactions) } : {}),
     }))
 }
 
