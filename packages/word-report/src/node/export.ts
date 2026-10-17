@@ -231,7 +231,7 @@ export async function reportExport(options: ReportExportOptions): Promise<Report
   const engine = path.resolve(options.engineDir ?? process.env.DOCREPORT_ENGINE_ROOT ?? packagedEngineDir(compiler))
   const key = keyFor(site, entry, mode), active = await latestAttempt(engine, compiler, key, site), previous = await previousJob(engine, key, site, entry, mode)
   const outputs = await outputPaths(engine, previous)
-  if (!(await exists(path.join(engine, '.venv/Scripts/python.exe')))) return { state: 'unavailable', message: `Word 引擎 ${engine} 里还没有 Python 环境：在那里运行 python -m venv .venv 与 .venv\\Scripts\\pip install -r requirements.txt（要本机装着 Word 与 MathType）；引擎放在别处时用 --engine 或环境变量 DOCREPORT_ENGINE_ROOT 指过去`, ...outputs }
+  if (!(await exists(path.join(engine, '.venv/Scripts/python.exe')))) return { state: 'unavailable', message: `Word 引擎 ${engine} 里还没有 Python 环境：在那里运行 python -m venv .venv、.venv\\Scripts\\pip install -r requirements.txt 与 .venv\\Scripts\\pip install --no-build-isolation --no-deps -e .（要本机装着 Word 与 MathType）；node_modules 里的路径太长时 Word 打不开图片，把 engine/ 复制到路径短的目录、用 --engine 或环境变量 DOCREPORT_ENGINE_ROOT 指过去`, ...outputs }
   let current: Awaited<ReturnType<typeof capture>>
   try { current = await capture(site, engine, compiler, entry, mode) } catch (error) { return { state: 'failed', stale: Boolean(previous), message: (error as Error).message, ...outputs } }
   const latest = active ?? previous

@@ -254,6 +254,51 @@ class ReportBoundaryTests(unittest.TestCase):
     def test_utf16_offsets_include_surrogate_pairs(self):
         self.assertEqual(utf16_length('公式😀x'), 5)
 
+    def test_marker_finder_continues_after_the_previous_body_hit_and_falls_back_to_every_story(self):
+        class FakeRange:
+            def __init__(self, doc, start, end, story=1):
+                self.doc, self.Start, self.End, self.StoryType = doc, start, end, story
+                self.Find = MagicMock()
+                self.Find.Execute.side_effect = self.execute
+
+            def execute(self, text, *args):
+                at = self.doc.text.find(text, self.Start, self.End) if self.StoryType == 1 else self.doc.note.find(text)
+                if at < 0:
+                    return False
+                self.Start, self.End = at, at + len(text)
+                return True
+
+            @property
+            def Duplicate(self):
+                return FakeRange(self.doc, self.Start, self.End, self.StoryType)
+
+            @property
+            def NextStoryRange(self):
+                return None
+
+        class FakeDoc:
+            text, note = '@A@ body @B@ body @C@', '@N@'
+
+            def __init__(self):
+                self.searched_from = []
+                self.Content = FakeRange(self, 0, len(self.text))
+                self.StoryRanges = [FakeRange(self, 0, len(self.text)), FakeRange(self, 0, len(self.note), story=2)]
+
+            def Range(self, start, end):
+                self.searched_from.append(start)
+                return FakeRange(self, start, end)
+
+        from docreport.word import MarkerFinder
+        doc = FakeDoc()
+        finder = MarkerFinder(doc)
+        self.assertEqual([finder.find(m).Start for m in ('@A@', '@B@', '@C@')], [0, 9, 18])
+        self.assertEqual(doc.searched_from, [0, 0, 9])
+        self.assertEqual(finder.find('@N@').StoryType, 2)
+        self.assertEqual(finder.position, 18)
+        self.assertEqual(finder.find('@A@').Start, 0)
+        with self.assertRaisesRegex(ValueError, 'Generation marker missing'):
+            finder.find('@Z@')
+
 
 class MathTypeTests(unittest.TestCase):
     def test_readback_delimiters_do_not_change_the_exact_equation_body(self):

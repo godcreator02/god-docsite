@@ -10,7 +10,7 @@ import re
 import struct
 from hashlib import sha256
 
-from .word import find_text
+from .word import MarkerFinder
 
 DEFAULT_DLL = Path(r"C:\Program Files (x86)\MathType\MathPage\64\MathPage.wll")
 
@@ -138,12 +138,13 @@ def fill_and_reopen(draft, destination, pending, record, dll=DEFAULT_DLL):
         word.Visible, word.DisplayAlerts, word.AutomationSecurity = False, 0, 3
         missing = comtypes.automation.VARIANT.missing
         doc = word.Documents.Open(str(draft), False, False, False)
+        markers = MarkerFinder(doc)
         for item in pending:
             equation = item["equation"]
             tex = mathtype_tex(equation["latex"])
             if tex != equation["latex"]:
                 record("tex-adaptation", id=equation["id"], sourceTex=equation["latex"], mathTypeTex=tex)
-            target = find_text(doc, item["token"])
+            target = markers.find(item["token"])
             target.Text = ""
             shape = doc.InlineShapes.AddOLEObject("Equation.DSMT4", missing, False, False,
                                                  missing, missing, missing, target)

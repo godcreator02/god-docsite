@@ -51,7 +51,7 @@ export const pythonClaim = {
 };
 
 /** 一次导出的六步：capture（组装取快照、算指纹）→ acquireLock → 建任务 → execute（写目录、启动 Python、收尾） */
-/* ref file="../packages/word-report/src/node/export.ts" lines="221-252" hash="f6d7bb6446be" blob="a10afb8c5c20" */
+/* ref file="../packages/word-report/src/node/export.ts" lines="221-252" hash="f3cf69182e78" blob="706cd2001bab" */
 export const steps = [
   {
     title: '组装并取快照',

@@ -72,6 +72,29 @@ def find_text(doc, text):
     raise ValueError(f"Generation marker missing: {text}")
 
 
+class MarkerFinder:
+    """Find generation markers written in body order without rescanning from the top each time.
+
+    The body story is searched from the previous body hit; a marker not found there
+    (notes, headers, or out of order) falls back to the full search of every story.
+    """
+
+    MAIN_STORY = 1
+
+    def __init__(self, doc):
+        self.doc = doc
+        self.position = 0
+
+    def find(self, text):
+        target = self.doc.Range(self.position, self.doc.Content.End)
+        target.Find.ClearFormatting()
+        if not target.Find.Execute(text, True, False, False, False, False, True, 0):
+            target = find_text(self.doc, text)
+        if target.StoryType == self.MAIN_STORY:
+            self.position = target.Start
+        return target
+
+
 def refresh(doc):
     """Resolve sequence fields before cross-references, then refresh TOC pages."""
     for _ in range(2):

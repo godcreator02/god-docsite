@@ -16,6 +16,7 @@ from types import SimpleNamespace
 from .content import read_json, validate_content, validate_layout
 from .compose import ContentComposer
 from .mathtype import DEFAULT_DLL, fill_and_reopen, validate_pending
+from .plain_math import clear_east_asian_hints
 from .verify import document_state, package_state, pdf_state, sha, content_state, abstract_state
 from .word import opened_document, refresh, word_application
 
@@ -114,9 +115,17 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
     evidence = dict(status="running", startedAt=datetime.now(timezone.utc).isoformat(),
                     report=str(directory), visualReview="pending", events=[])
 
+    # Rewriting the whole record per event is quadratic: a report with 858 equations logs ~3500 events.
+    last_written = [0.0]
+
+    def persist():
+        write_json(output / "verification.json", evidence)
+        last_written[0] = time.perf_counter()
+
     def record(event, **values):
         evidence["events"].append(dict(event=event, **values))
-        write_json(output / "verification.json", evidence)
+        if time.perf_counter() - last_written[0] >= 2:
+            persist()
         print(json.dumps(dict(event=event, **values), ensure_ascii=True), flush=True)
 
     manifest = dict(report=str(directory), inputs=inputs,
@@ -146,6 +155,7 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
             validate_pending(pending)
             doc.SaveAs2(str(draft), 16, AddToRecentFiles=False)
             record("draft-saved", equations=len(pending))
+        record("inline-math-hints-cleared", runs=clear_east_asian_hints(draft))
 
         if pending:
             fill_and_reopen(draft, destination, pending, record, dll.resolve())
@@ -195,6 +205,7 @@ def build(directory, output, dll=DEFAULT_DLL, *, data_only=False, layout_path=No
         record("exception", detail=traceback.format_exc())
         raise
     finally:
+        persist()
         write_json(output / "manifest.json", manifest)
 
 

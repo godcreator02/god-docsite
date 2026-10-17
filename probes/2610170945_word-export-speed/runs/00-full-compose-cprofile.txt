@@ -1,0 +1,40 @@
+pages 155 equations 858 fields 681 bookmarks 3435
+{'finish': 77.6, 'build total': 364.0}
+Sat Oct 17 09:31:22 2026    C:\Users\GODAME~1\AppData\Local\Temp\claude\D--unitfolders-b2o8l-sst-mmc-2026\f3abea6a-4605-427a-84f9-3d2db40ed1b8\scratchpad\compose-baseline.prof
+
+         18899529 function calls (17730409 primitive calls) in 363.847 seconds
+
+   Ordered by: internal time
+   List reduced from 488 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   333096   86.208    0.000   87.478    0.000 {method 'Bind' of 'PyITypeComp' objects}
+    36144   59.062    0.002   59.062    0.002 {method 'InvokeTypes' of 'PyIDispatch' objects}
+   193401   44.941    0.000   44.941    0.000 {method 'GetTypeAttr' of 'PyITypeInfo' objects}
+    83327   38.224    0.000   38.224    0.000 {method 'Invoke' of 'PyIDispatch' objects}
+   108607   25.890    0.000   25.890    0.000 {method 'GetNames' of 'PyITypeInfo' objects}
+    60860   20.746    0.000   20.746    0.000 {method 'GetTypeInfo' of 'PyIDispatch' objects}
+    60860   16.555    0.000   16.555    0.000 {method 'GetTypeComp' of 'PyITypeInfo' objects}
+    42603   11.137    0.000   11.137    0.000 {method 'GetRefTypeInfo' of 'PyITypeInfo' objects}
+    42313    9.029    0.000    9.029    0.000 {method 'GetDocumentation' of 'PyITypeInfo' objects}
+       74    8.096    0.109  224.809    3.038 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\compose.py:456(table_node)
+272649/196956    5.139    0.000   44.991    0.000 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\.venv\Lib\site-packages\win32com\client\build.py:545(_ResolveType)
+    29583    3.621    0.000    3.621    0.000 {built-in method builtins.compile}
+     3319    3.549    0.001   79.625    0.024 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\compose.py:238(paragraph)
+        1    3.334    3.334   77.631   77.631 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\compose.py:177(finish)
+     3238    2.886    0.001   20.609    0.006 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\compose.py:251(mark)
+     2389    1.778    0.001   60.642    0.025 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\compose.py:503(trim_container)
+   110278    1.621    0.000  235.117    0.002 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\.venv\Lib\site-packages\win32com\client\dynamic.py:544(__getattr__)
+   2533/1    1.450    0.001  269.782  269.782 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\compose.py:542(blocks)
+   108607    1.380    0.000   72.459    0.001 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\.venv\Lib\site-packages\win32com\client\build.py:192(_AddFunc_)
+    83274    1.155    0.000  161.227    0.002 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\.venv\Lib\site-packages\win32com\client\dynamic.py:485(_LazyAddAttr_)
+   224493    1.140    0.000    1.271    0.000 <string>:12(__init__)
+      680    0.915    0.001   35.820    0.053 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\word.py:66(find_text)
+     3394    0.867    0.000   28.350    0.008 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\src\docreport\compose.py:231(point)
+    60860    0.777    0.000   65.187    0.001 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\.venv\Lib\site-packages\win32com\client\__init__.py:21(__WrapDispatch)
+ 301991/7    0.619    0.000    5.870    0.839 D:\unitfolders\b2o8l-sst-mmc-2026\wr-engine\.venv\Lib\site-packages\jsonschema\validators.py:397(descend)
+
+
+Sat Oct 17 09:31:22 2026    C:\Users\GODAME~1\AppData\Local\Temp\claude\D--unitfolders-b2o8l-sst-mmc-2026\f3abea6a-4605-427a-84f9-3d2db40ed1b8\scratchpad\compose-baseline.prof
+
+         18899529 function calls (17730409 primitive calls) in 363.847 seconds

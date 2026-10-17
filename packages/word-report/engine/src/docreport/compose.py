@@ -7,7 +7,8 @@ Word objects and deferred MathType/field placeholders.
 from pathlib import Path
 import re
 
-from docreport.word import utf16_length, find_text
+from docreport.plain_math import INLINE_MATH_STYLE, plain_runs
+from docreport.word import utf16_length, find_text, MarkerFinder
 
 
 def mm(value):
@@ -179,23 +180,21 @@ class Composer:
         if self._finished:
             raise RuntimeError('Composer.finish() may only be called once.')
         doc = self.doc
+        fields = MarkerFinder(doc)
         for token, code, bookmark in self._pending_fields:
-            rng = find_text(doc, token)
+            rng = fields.find(token)
             field = doc.Fields.Add(rng, -1, code, False)
             field.Code.Font.Bold, field.Code.Font.Italic = 0, 0
             if bookmark:
                 doc.Bookmarks.Add(bookmark, field.Result)
+        numbers = MarkerFinder(doc)
         for begin, end, bookmark in self._pending_numbers:
-            rng = doc.Content.Duplicate
-            if not rng.Find.Execute(FindText=end, Wrap=0):
-                raise RuntimeError(f'Number boundary missing: {end}')
-            end_position = rng.Start
-            rng.Delete()
-            rng = doc.Content.Duplicate
-            if not rng.Find.Execute(FindText=begin, Wrap=0):
-                raise RuntimeError(f'Number boundary missing: {begin}')
-            start_position = rng.Start
-            rng.Delete()
+            opening = numbers.find(begin)
+            closing = numbers.find(end)
+            end_position = closing.Start
+            closing.Delete()
+            start_position = opening.Start
+            opening.Delete()
             doc.Bookmarks.Add(bookmark, doc.Range(
                 start_position, end_position - utf16_length(begin)))
         for table in doc.Tables:
@@ -227,6 +226,7 @@ class ContentComposer(Composer):
         self.heading_lists = {}
         self.appendix_numbering = None
         self.appendix_count = 0
+        self._inline_math_style = None
 
     def point(self):
         rng = self.doc.Content.Duplicate if self.container is None else self.container.Range.Duplicate
@@ -286,7 +286,15 @@ class ContentComposer(Composer):
             if kind == 'text':
                 value = node['text']
             elif kind == 'math':
-                value = self.math_token(node, True)
+                runs = plain_runs(node['latex'])
+                if runs is None:
+                    value = self.math_token(node, True)
+                else:
+                    for run in runs:
+                        marks = ['math'] + (['em'] if run.italic else []) + ([run.script] if run.script else [])
+                        spans.append((utf16_length(text), utf16_length(run.text), marks + node.get('marks', [])))
+                        text += run.text
+                    continue
             elif kind == 'ref':
                 value = self.ref_token(node)
             elif kind == 'break':
@@ -309,14 +317,39 @@ class ContentComposer(Composer):
     def rich_paragraph(self, nodes, style=None, prefix='', suffix=''):
         text, spans = self.inline(nodes)
         rng = self.paragraph(prefix + text + suffix, style)
+        self.apply_marks(rng, utf16_length(prefix), spans)
+        return rng
+
+    def apply_marks(self, rng, offset, spans):
         for start, length, marks in spans:
-            run = self.part(rng, utf16_length(prefix) + start, length)
+            if not marks:
+                continue
+            run = self.part(rng, offset + start, length)
             for mark in marks:
                 if mark == 'code':
                     run.Font.Name = 'Consolas'
+                elif mark == 'math':
+                    run.Style = self.inline_math_style()
                 else:
                     setattr(run.Font, {'strong': 'Bold', 'em': 'Italic', 'sup': 'Superscript', 'sub': 'Subscript'}[mark], True)
-        return rng
+
+    def inline_math_style(self):
+        """Character style of inline formulas written as text; created in the document, the DOTX stays unchanged."""
+        if self._inline_math_style is None:
+            style = self.doc.Styles.Add(INLINE_MATH_STYLE, 2)
+            style.Font.Name = 'Times New Roman'
+            self._inline_math_style = style
+        return self._inline_math_style
+
+    def single_paragraph_cell(self, cell, node):
+        """Write a one-paragraph cell in one assignment; the general path inserts then trims a paragraph."""
+        text, spans = self.inline(node['content'])
+        rng = cell.Range
+        rng.Text = text
+        rng = self.part(cell.Range, 0, utf16_length(text))
+        rng.Style = self.doc.Styles.Item(self.layout.get(node['id'], {}).get('style') or self.style)
+        self.apply_marks(rng, 0, spans)
+        self.mark(node['id'], rng, '_b')
 
     def chapter_sequence(self, kind, bookmark):
         """「章号-序号」 for an equation, figure or table in the current top-level chapter."""
@@ -489,11 +522,14 @@ class ContentComposer(Composer):
         saved = self.container, self.cell, self.style, self.width
         for r, c, rs, cs, cell in placements:
             self.container = cells[r, c].Cells.Item(1)
-            # Merge can concatenate the original empty cell paragraphs.
-            self.container.Range.Text = ''
             self.cell = True
             self.style = 'Table Header' if r < node['headerRows'] else 'Table Text'
             self.width = sum(widths[c:c + cs]) - 8
+            if len(cell['blocks']) == 1 and cell['blocks'][0]['type'] == 'paragraph':
+                self.single_paragraph_cell(self.container, cell['blocks'][0])
+                continue
+            # Merge can concatenate the original empty cell paragraphs.
+            self.container.Range.Text = ''
             self.blocks(cell['blocks'], depth)
             self.trim_container()
         self.container, self.cell, self.style, self.width = saved
