@@ -10,13 +10,15 @@ description: 用 Next 与 @godcreator/docfirst-workflow 建的旧文档站，怎
 之后 gwb-gitea、gwb-unit-folder、gwb-nas-suite、gwb-mineru、gwb-agents 五个站照这页迁过，组件样式写在全站 CSS 里、组件没有数据文件这几条出自它们；
 再之后 lceda-studio、gwb-block-note、gwb-cgm-alert、gwb-qq-bot、codedoc_fpga_customperiph、gwb-ui-plugins、gwb-base-plugins 七个站由 ZCode 照这页迁、Claude 复查提交，
 生成正本里的组件、正文里的 `fumadocs-ui` import、没有轨迹卡的旧站、仓根脚本用 `--filter` 这几条出自它们；
-页数上百的 gwb-kernel、gwb-lifecycle-plugins、gwb-paper-fetch 也照这页迁过，仓根 `allowBuilds`、卡的 frontmatter 写法、跨区共用组件这几条出自它们。
+页数上百的 gwb-kernel、gwb-lifecycle-plugins、gwb-paper-fetch 也照这页迁过，仓根 `allowBuilds`、卡的 frontmatter 写法、跨区共用组件这几条出自它们；
+plecs-studio（291 个 mdx、带 `.ledger.json`）与 anpc-lcl（用 `explainer-player`）是最后两个，旧记录簿、`public/`、自写页面、组件汇总表这几条出自它们。
 
 开始前站点要停着，`git status` 里没有别人在 `docs-site/` 下未提交的改动。
 站是仓根 pnpm 工作区的成员时（仓根 `pnpm-workspace.yaml` 的 `packages` 里列着 `docs-site`），先从那里去掉：平台站自带 `pnpm-workspace.yaml`，留在里面就是工作区里嵌套工作区。
 去掉后在仓根 `pnpm install`，锁文件里站的那一份依赖跟着删掉，一起提交。
 仓根 `package.json` 的脚本用 `pnpm --filter <站的包名> …` 调站里命令的（gwb-base-plugins 的 `doc`、`doc:confirm`、`doc:render`），站移出工作区后 filter 找不到它，改成 `pnpm -C docs-site run …`；
 为了排除站写的 `--filter=!<站的包名>`（gwb-kernel 的 `build`）一起去掉。
+站本来就不在工作区里、仓根脚本写 `pnpm --dir docs-site <脚本>` 的（plecs-studio），调 `build`、`start` 的照旧能用；调站里旧的 `docfirst` 脚本的，新站没有这个脚本，改成 `pnpm --dir docs-site exec docfirst`。
 仓根 `pnpm-workspace.yaml` 的 `allowBuilds` 不要跟着站一起删：注释写着「文档站带进来的」也先在锁文件里查清是谁带的，gwb-lifecycle-plugins 的 `esbuild`、`@parcel/watcher` 实际是插件的依赖带的，
 删了仓根 install 报 `Ignored build scripts` 退出码 1，pnpm 还往 `pnpm-workspace.yaml` 里写一段占位设置，要整段改回。
 仓根锁文件除了删掉站的那份依赖，别的条目会重新排版；核对新增的条目旧锁文件里都有，就没有版本变化。
@@ -52,7 +54,8 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 
 构建产物与旧依赖也删掉：`.next/`、`.source/`、`out/`（旧命令行写出的各页机读文本 `*.mdx.ai.md`）、`node_modules/`、`next-env.d.ts`、`tsconfig.tsbuildinfo`，然后 `pnpm install`。
 新的 `.gitignore` 不再忽略 `.next/`，不删它就出现在 `git status` 里；仓根 `.gitignore` 里专给旧站产物写的规则（`docs-site/.next/` 这类）一起删掉。
-`next dev` 在站目录里写过 `AGENTS.md`、`CLAUDE.md` 的（旧 `.gitignore` 忽略、没有跟踪），换了 `.gitignore` 后会露出来，一起删。
+`next dev` 在站目录里写过 `AGENTS.md`、`CLAUDE.md` 的（旧 `.gitignore` 忽略、没有跟踪），换了 `.gitignore` 后会露出来，一起删；
+被提交过、git 跟踪着的（plecs-studio），用 `git rm` 删。
 
 站里还有这几样的，照下面处理：
 
@@ -111,7 +114,8 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 - 旧站用脚本按目录生成组件汇总表的（plecs-studio 的 `scripts/explain-index.mjs` 生成 `src/components/explain/index.ts` 与 `index.ai.mjs`，再交给全局组件表与 `docfirst.config.mjs`），
   脚本和两份汇总表一起删：页面各自 import 组件，`docfirst.config.mjs` 逐个 import 各组件的 `.ai.mjs` 规则
 - 机读规则用 `readFileSync(new URL('./x.data.json', import.meta.url))` 读数据的（anpc-lcl 的 `ring-down.ai.mjs`），数据文件跟组件挪进同一个文件夹，路径不用改
-- 站里组件直接 import 的第三方包（anpc-lcl 的 `math.tsx` 用 `katex`）写进站的 `package.json` 依赖：骨架只带了 `rehype-katex`，pnpm 不让代码 import 没声明的包。
+- 站里组件直接 import 的第三方包要在站的 `package.json` 依赖里，pnpm 不让代码 import 没声明的包。先看骨架的依赖里有没有：
+  anpc-lcl 的 `math.tsx` 用的 `katex` 骨架已经带了，不用加；骨架没有的照旧站的版本加上。
   旧站声明了却没有代码在用的包（anpc-lcl 的 `motion`）不带过来
 - 组件没有 `.data.mjs`、机读文字直接写在 `docfirst.config.mjs` 里的，规则照抄，只改注释里的组件路径，不用补下面的 `.d.mts`
 - 数据文件保持 `.mjs`（`docfirst.config.mjs` 在 Node 里直接 import 它），旁边补一份同名的 `.d.mts` 写出导出的类型。
@@ -210,6 +214,8 @@ pnpm build
 
 页面里 import 组件的相对路径算错了层级，`pnpm typecheck` 发现不了（它不解析 mdx 里的 import），要到 `pnpm build` 才报 `UNRESOLVED_IMPORT` / `Module not found`；
 同名文件夹本身是路径的一段，`content/docs/x/index.mdx` 到 `content/docs/_shared/` 是 `../_shared`。
+页面里用了组件却漏写 import 的（plecs-studio 一页漏了 `SeamMap`），三条命令都过：旧站的组件靠全局组件表提供，mdx 编译不检查标签名有没有定义。
+只有请求那一页才回 500，所以用到组件的页要逐页请求，不能只请求各区首页。
 
 开发服务的日志里 `Failed to resolve dependency: @godcreator/code-pin > @types/mdast, present in client 'optimizeDeps.include'` 每个平台站都有，骨架站也有，不影响页面。
 
@@ -226,5 +232,7 @@ pnpm build
 - 旧页面 frontmatter 里的 `full: true` 不再生效：平台的页面组件不把它交给 fumadocs 的 `DocsPage`，正文旁边照样有目录栏。
   gwb-windows-backup 两张 1200 宽的接缝图因此在 593 宽的正文里横向滚动，图本身画全了；这是平台包的事，迁移时不改页面
 - 旧站 `global.css` 里给 `@theme` 设的字体（如更纱黑体）不在骨架的 `app/app.css` 里，迁过来用的是平台默认字体
+- 旧站改平台外观的样式没有去处：plecs-studio 的 `disk.css` 改星轨盘（默认隐藏节点标签，悬停与选中才显示）、`docfirst.css` 给窄屏表格设 `min-width: 34rem`。
+  星轨盘的样式由 trajectory 功能包提供、正文排版归平台，迁移时不带，记进迁移卡；要保留得改平台包
 - 有的页面是 CRLF 行尾（gwb-base-plugins 的 `mcp.mdx`）：批量给页面插 import 的脚本只认 LF 就会漏掉它，插入时跟着文件自己的行尾
 - `pnpm exec docfirst trajectory` 文本输出的卡数不算根卡，新卡写好后数字看着少一张时用 `--json` 看 `cards`
