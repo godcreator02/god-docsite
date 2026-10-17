@@ -2,7 +2,7 @@
  * 这个项目的 docfirst 配置：命令行 docfirst（check / confirm / render / trajectory）读它，项目根是这个站目录。
  *
  * 引用的代码在工作区的 packages/ 与 plugins/ 下，所以引用里写 `../packages/…` 或 `../plugins/…`。
- * content：内容根。下面除 future/ 外的目录都是现状区、都进 check，外加 app/components/ 下跨组共用的讲解组件源码。
+ * content：内容根。下面除 future/ 外的目录都是现状区、都进 check，跨组共用的讲解组件源码也在里面（_components/）。
  * outputs：仓根 README.md / CLAUDE.md 与插件里的几份 SKILL.md 是生成物，正本是下面映射左边的 mdx
  * （都在 content/docs/outputs/）；AGENTS.md 是手写的正本，不在 outputs 里——
  * 改 mdx 正本要运行 `pnpm doc:render`（`doc:confirm` 也会顺带做），两份放进同一个提交，`pnpm doc` 检查生成物跟正本是否一致。

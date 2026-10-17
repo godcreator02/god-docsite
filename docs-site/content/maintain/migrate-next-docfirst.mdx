@@ -91,17 +91,17 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 
 ### 讲解组件
 
-新的 docfirst 只核对现状区里与站点 `app/components/` 下的组件源码，站目录下 `src/components/` 里还有文件就直接报错，不会悄悄少核对一批钉码：
+新的 docfirst 只核对现状区（内容根）里的组件源码。站目录下 `src/components/` 里还有文件、站点 `app/components/` 下有带钉码标记的文件，都直接报错，不会悄悄少核对一批钉码：
 
-{/* ref file="../packages/docfirst/src/project.ts" lines="76-84" hash="cc64e38b44df" blob="f6eb46f4a4d7" */}
+{/* ref file="../packages/docfirst/src/project.ts" lines="76-98" hash="6f84241ffe4d" blob="1b2711940464" */}
 
 先按每个组件被哪几页用到分好去处，再挪：
 
 - 只给一页用的组件挪进那一页的同名文件夹：gwb-vscode 首页 `content/docs/index.mdx` 用的接缝图挪进 `content/docs/index/`，在侧栏里不会多出一组；
   gwb-windows-backup 的 `windows-backup/health.mdx` 用的选情况组件挪进 `windows-backup/health/`
 - 同一组里几页共用的放进组里 `_` 开头的文件夹：gwb-windows-backup 的接缝图 `SeamMap` 由 `docs/index.mdx` 与 `docs/windows-backup/index.mdx` 共用，
-  和两张图共用的图标、几个组件共用的样式一起放进 `content/docs/_shared/`。跨组共用的才放站点 `app/components/`，放之前先问人：
-  gwb-paper-fetch 的 `icons.tsx`、`file-tree.tsx`、`paper.css` 被 docs 与 paper-data 两区的组件共用，问过人后放进了 `app/components/`。交给 ZCode 批量迁时它没法停下来问，回报里要单列出来，提交前由派任务的一方问
+  和两张图共用的图标、几个组件共用的样式一起放进 `content/docs/_shared/`。跨组共用的才放内容根下的 `_components/`，放之前先问人：
+  gwb-paper-fetch 的 `icons.tsx`、`file-tree.tsx`、`paper.css` 被 docs 与 paper-data 两区的组件共用，问过人后放进了 `content/_components/`，组件里写 `@components/icons`（站点 `tsconfig.json` 的 `paths` 带这个前缀）。交给 ZCode 批量迁时它没法停下来问，回报里要单列出来，提交前由派任务的一方问
 - 页面开头加 import，路径相对页面：`import { VscodeSeams } from './index/vscode-seams'`、`import { SeamMap } from '../_shared/seam-map/seam-map'`。旧站靠全局组件表，页面里不用 import
 - 去掉文件头的 `'use client'`：React Router 站没有服务端组件
 - 站自己的组件样式：旧站在 `src/app/global.css` 里统一引（gwb-windows-backup 是 `@import '../components/backup.css'`），新站的 `app/app.css` 是骨架的，不再引它们；

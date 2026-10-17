@@ -43,7 +43,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 - **侧栏顺序**写在各目录的 `meta.json`：`{ "pages": ["index", "...", "glossary"] }`，`"..."` 是其余按文件名排
 - **`app/` 由建站器写出**：`app/features/` 下文件名带 `generated` 的汇总文件每次加功能都重写，不手改
 - **页面用到的文件放哪**：只给一页用的组件、数据、样式、图片放进和页面同名的文件夹（`push.mdx` 配 `push/`），页面开头按相对路径 `import`（`./push/auto-merge`）；
-  同一组里几页共用的放进组里 `_` 开头的文件夹；跨组共用的放站点 `app/components/`，**放之前先问人**。这些文件夹里不放页面与 `meta.json`，组文件夹里只放页面、`meta.json` 与这几种文件夹，放错了构建直接报错，开发服务在页面底部的问题按钮里列出来。
+  同一组里几页共用的放进组里 `_` 开头的文件夹；跨组共用的放内容根下的 `_components/`（`content/_components/`），页面里按前缀 `@components/…` import，**放之前先问人**。这些文件夹里不放页面与 `meta.json`，组文件夹里只放页面、`meta.json` 与这几种文件夹，放错了构建直接报错，开发服务在页面底部的问题按钮里列出来。
   写法与例子看 gwb-docsite 的说明书 `docsite`「写页面」
 - **用组件**：fumadocs 自带的组件（`Callout`、`Cards`、`Tabs`、`Steps`、`Files` 等）与平台的 `Term` 不用 import。
   生成正本里用到的组件才要在 `docfirst.config.mjs` 的 `components` 给一条机读规则，名册外的组件 `pnpm doc` 报红、render 拒绝渲染
@@ -122,7 +122,7 @@ pnpm exec docfirst trajectory                   列出轨迹卡在星轨盘上�
 
 **读 `--json` 报告**：`docs[].items[]` 里 `status` 是 `changed`（内容变了）或 `missing`（目标不在了）的就是待处理，带 `blocking: true` 的黄灯算红；
 `line` 是记号在文档里第几行，`lines` 是被引的那段今天在源文件里的位置，`diff` 是变了的那几行；`unconfirmed` 不算对不上。
-`doc` 也可能是讲解组件的源码：现状区里与站点 `app/components/` 下的 `.ts`、`.tsx`、`.mjs`（项目根下还有 `src/components/` 时 docfirst 直接报错，组件要挪走）。生成正本还有 `outputs[]`，轨迹卡的问题在顶层 `trajectory[]`。
+`doc` 也可能是讲解组件的源码：现状区里的 `.ts`、`.tsx`、`.mjs`（项目根下还有 `src/components/`、或站点 `app/components/` 下有带钉码标记的文件时 docfirst 直接报错，组件要挪进内容根）。生成正本还有 `outputs[]`，轨迹卡的问题在顶层 `trajectory[]`。
 
 ### 改了被钉的代码：同一个提交里处理黄灯
 

@@ -1,0 +1,29 @@
+---
+born-at: 2026-10-17T15:46
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 几组页面共用的组件放内容根下的 _components/，不放站点 app/components/；docfirst 只核对内容根，app/components/ 下有带钉码标记的文件就报错
+domain: 钉码
+---
+
+## 背景
+
+用户在 SST 协作站讨论后定了：几组页面共用的组件属于正文，跟页面一起放在 `content/` 里，不放 `app/`。
+`app/` 是站点代码；两站合并时一个站的 `content/` 整个搬过去、`app/` 整个丢掉，组件只有在 `content/` 里才跟着页面走。
+名字定为 `_components`：`_` 开头表示不是一组页面，components 说清里面装的是组件。协作站与平台用同一个名字，站点 `tsconfig.json` 的 `paths` 加前缀 `@components/*` 指向它。
+
+这张卡改掉了上一次定的跨组共用位置。
+supersedes:: [讲解组件的源码跟着页面放](2026-10-16-explainer-sources-beside-pages.md)
+
+## 结论与边界
+
+- 页面用到的文件：只给一页用的放同名文件夹，同一组里几页共用的放组里 `_` 开头的文件夹，几组都要用的放内容根下的 `_components/`，放之前仍先问人。
+- 平台包的内容结构检查本来就允许内容根下 `_` 开头的文件夹，只改了报错里「该怎么放」那句话。
+- docfirst 不再单独收 `app/components/`：`_components/` 是内容根下的普通文件夹，现状区本来就把它扫进来。
+- `app/components/` 下有带钉码标记的代码文件，装配时报错，列出文件、说明挪到 `content/_components/`：没迁的站不会悄悄少核对一批钉码。
+- 平台模板的 `tsconfig.json` 带上 `@components/*`；已经用 `app/components/` 的 plecs-studio、gwb-paper-fetch 两个站同一批迁过去。
+
+## 否掉的候选
+
+- `app/components/` 里只要有代码文件就报错（像 `src/components/` 那样）：站点自己的代码也可能放这里（fumadocs 的 customise 会把布局源码复制进 `app/components/`），只有带钉码标记的文件才会让钉码没人核对。
+- `content/_shared/`（协作站先用的名字）：「共用」说不清里面装的是什么，改成 `_components`。

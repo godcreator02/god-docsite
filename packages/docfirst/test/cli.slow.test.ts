@@ -224,11 +224,11 @@ test("目录树与整文件一篇文档：两种标记各自认得回来；多�
   }
 });
 
-test("讲解组件的源码也是现状区：页面同名文件夹里与站点 app/components/ 下的块注释标记一样核对与确认", async () => {
+test("讲解组件的源码也是现状区：页面同名文件夹里与内容根下 _components/ 里的块注释标记一样核对与确认", async () => {
   const p = setupProject();
   try {
     const pageDir = join(p.root, "docs", "x");
-    const sharedDir = join(p.root, "app", "components", "y");
+    const sharedDir = join(p.root, "docs", "_components", "y");
     mkdirSync(pageDir, { recursive: true });
     mkdirSync(sharedDir, { recursive: true });
     writeFileSync(join(pageDir, "x.data.mjs"), '/* ref file="src/greet.ts" lines="2-3" */\nexport const code = "greet";\n');
@@ -236,7 +236,7 @@ test("讲解组件的源码也是现状区：页面同名文件夹里与站点 a
     writeFileSync(join(sharedDir, "y.tsx"), '/* ref file="src/greet.ts" lines="2-3" */\nexport const Y = () => null;\n');
     const first = await p.cli("check");
     assert.match(first.out, /⚪ docs\/x\/x\.data\.mjs {2}src\/greet\.ts:2-3 {2}未确认/);
-    assert.match(first.out, /⚪ app\/components\/y\/y\.tsx {2}src\/greet\.ts:2-3 {2}未确认/);
+    assert.match(first.out, /⚪ docs\/_components\/y\/y\.tsx {2}src\/greet\.ts:2-3 {2}未确认/);
     const report = JSON.parse((await p.cli("check", "--json")).out) as { docs: Array<{ doc: string }> };
     assert.equal(report.docs.some((d) => d.doc === "docs/x/x.data.mjs"), true);
     assert.equal(report.docs.some((d) => d.doc === "docs/x/x.css"), false, "没有哪种代码格式认领 .css：不进现状区");

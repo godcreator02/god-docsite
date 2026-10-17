@@ -2,7 +2,7 @@
  * 一个项目 = 项目根 + 校验过的配置。装配时定下现状区有哪些文件，备好钉码与生成物两个功能包要的对象。
  *
  * 分区按约定：内容根下 `trajectory/` 与 `future/` 两个名字固定、不进核对；内容根下别的 .mdx 都是现状区，
- * 再加上组件格式认领的代码文件（讲解组件的源码）：现状区里的（页面同名文件夹、组里 `_` 开头的共用文件夹）与站点 `app/components/` 下的。
+ * 再加上现状区里组件格式认领的代码文件（讲解组件的源码）：页面同名文件夹、组里 `_` 开头的共用文件夹、内容根下几组页面共用的 `_components/`。
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { isAbsolute, join, relative, sep } from "node:path";
@@ -62,25 +62,39 @@ function filesUnder(dir: string): string[] {
   });
 }
 
-/** 站点里几组页面共用的组件 */
-const SHARED_COMPONENTS_DIR = "app/components";
+/** 内容根下放几组页面共用的组件的文件夹：`_` 开头，所以是现状区里的普通文件夹，不用单独收 */
+const SHARED_COMPONENTS_FOLDER = "_components";
 /** 讲解组件以前放的位置：还有文件就报错，不然里面的钉码没人核对 */
 const RETIRED_COMPONENTS_DIR = "src/components";
+/** 几组页面共用的组件以前放的位置：站点代码也可以放这里，只有带钉码标记的文件才报错 */
+const RETIRED_SHARED_COMPONENTS_DIR = "app/components";
 
-function sharedComponentSources(root: string): string[] {
-  const dir = join(root, SHARED_COMPONENTS_DIR);
-  if (!existsSync(dir)) return [];
-  return filesUnder(dir).map((path) => docIdOf(root, path)).filter(codeFormat.claims);
+function whereComponentsGo(contentDir: string): string {
+  return `讲解组件只给一页用的放进那一页的同名文件夹，几组页面共用的放进 ${contentDir}/${SHARED_COMPONENTS_FOLDER}/，docfirst 只核对内容根里的钉码`;
 }
 
-function assertNoRetiredComponents(root: string): void {
+function assertNoRetiredComponents(root: string, contentDir: string): void {
   const dir = join(root, RETIRED_COMPONENTS_DIR);
   if (!existsSync(dir)) return;
   const files = filesUnder(dir).map((path) => docIdOf(root, path));
   if (files.length === 0) return;
-  throw new Error(
-    `${RETIRED_COMPONENTS_DIR}/ 下还有文件：${files.join("、")}——讲解组件只给一页用的放进那一页的同名文件夹，几组页面共用的放进 ${SHARED_COMPONENTS_DIR}/，docfirst 只核对这两处的钉码`,
-  );
+  throw new Error(`${RETIRED_COMPONENTS_DIR}/ 下还有文件：${files.join("、")}——${whereComponentsGo(contentDir)}`);
+}
+
+function hasPinMarkers(root: string, file: string): boolean {
+  try {
+    return codeFormat.parse(readFileSync(join(root, file), "utf8")).length > 0;
+  } catch (err) {
+    throw new Error(`${file}：${(err as Error).message}`);
+  }
+}
+
+function assertNoPinsInRetiredSharedComponents(root: string, contentDir: string): void {
+  const dir = join(root, RETIRED_SHARED_COMPONENTS_DIR);
+  if (!existsSync(dir)) return;
+  const pinnedFiles = filesUnder(dir).map((path) => docIdOf(root, path)).filter(codeFormat.claims).filter((file) => hasPinMarkers(root, file));
+  if (pinnedFiles.length === 0) return;
+  throw new Error(`${RETIRED_SHARED_COMPONENTS_DIR}/ 下有带钉码标记的文件：${pinnedFiles.join("、")}——${whereComponentsGo(contentDir)}`);
 }
 
 /** outputs 里的正本得是现状区里的 mdx 页面：写错路径的映射不会被核对，也不会被生成 */
@@ -96,9 +110,10 @@ export function assembleProject(root: string, config: DocfirstConfig): Project {
     throw new Error(`内容根 ${config.contentDir} 不是项目根下的目录——配置的 content 写错了，或者还没建`);
   }
   assertOutputTurf(root, [config.contentDir], config.outputs);
-  assertNoRetiredComponents(root);
+  assertNoRetiredComponents(root, config.contentDir);
+  assertNoPinsInRetiredSharedComponents(root, config.contentDir);
   const statusFiles = statusAreaFiles(root, contentAbs);
-  const docs = [...statusFiles.filter(isPage), ...statusFiles.filter(codeFormat.claims), ...sharedComponentSources(root)].sort();
+  const docs = [...statusFiles.filter(isPage), ...statusFiles.filter(codeFormat.claims)].sort();
   assertOutputSourcesAreStatusPages(config.outputs, docs);
   const pins = createPinWorkspace(root);
   return {

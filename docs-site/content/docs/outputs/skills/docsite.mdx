@@ -97,7 +97,8 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
   - 只给一页用的组件、数据、样式、图片、被 import 的正文（`_` 开头的 `.mdx`）放进和页面同名的文件夹，里面可以再分子文件夹；
     `waveform.mdx`、`waveform.page.tsx`、`waveform.html` 都配 `waveform/`，页面里写 `./waveform/…`
   - 同一组里几页共用的放进组里 `_` 开头的文件夹（如 `_shared/`）
-  - 跨组共用的放站点 `app/components/`，**放之前先问人**：多数时候放进上面两处就够了
+  - 跨组共用的放内容根下的 `_components/`（`content/_components/`），页面里写 `@components/…`（站点 `tsconfig.json` 的 `paths` 带这个前缀，早建的站没有就补上 `"@components/*": ["./content/_components/*"]`），**放之前先问人**：多数时候放进上面两处就够了。
+    `app/` 是站点代码，页面用的组件不放那里
   - 同名文件夹与 `_` 开头的文件夹里不放页面（不以 `_` 开头的 `.mdx`、`.page.tsx`、`.html`）与 `meta.json`：
     fumadocs 解析 `meta.json` 里的名字时先找文件夹，同名文件夹一旦被认成组，那一页就从侧栏消失。目录说明只认 `meta.json`，别的 `.json` 可以当附件放
   - 组文件夹（有 `meta.json`、里面是页面）只放页面、`meta.json`、同名文件夹、`_` 开头的文件夹与子组，不散放别的文件

@@ -14,7 +14,7 @@ export interface TreeKind {
 
 export interface TreeNode {
   name: string;
-  /** kinds 里的 id；目录行也可以有（app/components） */
+  /** kinds 里的 id；目录行也可以有（content/_components） */
   kind?: string;
   children?: TreeNode[];
 }

@@ -2,7 +2,7 @@ import { readdirSync, type Dirent } from 'node:fs'
 import path from 'node:path'
 import { pageNameOf } from '../core/page-files.js'
 
-const wherePageFilesGo = '只给一页用的放进和页面同名的文件夹，同一组里几页共用的放进组里 _ 开头的文件夹，几组都要用的放站点 app/components/'
+const wherePageFilesGo = '只给一页用的放进和页面同名的文件夹，同一组里几页共用的放进组里 _ 开头的文件夹，几组都要用的放内容根下的 _components/'
 
 /**
  * 父目录列出来的子目录，进去之前可能已经被删掉（dev 运行中 git 改名、挪目录，每删一个文件就触发一次检查）：

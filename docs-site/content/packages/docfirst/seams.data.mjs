@@ -72,7 +72,7 @@ export const docfirstSeams = defineSeamGraph({
       blurb: 'docfirst 与三个功能包读写的文件，路径相对站目录。',
       caps: [
         { id: 'config-file', name: '配置', ident: 'docfirst.config.mjs' },
-        { id: 'status-area', name: '现状区', ident: 'content/ · app/components/' },
+        { id: 'status-area', name: '现状区', ident: 'content/ · content/_components/' },
         { id: 'card-dir', name: '轨迹卡目录', ident: 'trajectory/' },
         { id: 'output-files', name: '生成物', ident: '../README.md · ../CLAUDE.md · SKILL.md' },
       ],
@@ -114,7 +114,7 @@ export const docfirstSeams = defineSeamGraph({
       name: '定现状区',
       a: ['project'],
       b: ['status-area'],
-      iface: '内容根下除 trajectory/、future/ 外的文件，加 app/components/ 下被认领的源码',
+      iface: '内容根下除 trajectory/、future/ 外的文件，几组共用的组件在 _components/',
       convention: true,
       via: 'disk',
       text: '哪些文件进核对只看目录约定，不登记；每篇的全文由装配好的项目读出。',

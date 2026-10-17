@@ -85,7 +85,7 @@ const code = formatOf(COMPONENT, PIN_FORMATS);
 
 test("认领：mdx 认 .mdx；组件格式认 .ts / .tsx / .mjs，在哪个目录都一样；别的扩展名都不认", () => {
   assert.equal(code.name, "组件格式");
-  for (const file of [COMPONENT, "content/docs/greet/greet.tsx", "app/components/registry.ts"]) assert.equal(formatOf(file, PIN_FORMATS).name, "组件格式", file);
+  for (const file of [COMPONENT, "content/docs/greet/greet.tsx", "content/_components/registry.ts"]) assert.equal(formatOf(file, PIN_FORMATS).name, "组件格式", file);
   assert.equal(formatOf("content/docs/a.mdx", PIN_FORMATS).name, "mdx 格式");
   for (const file of ["content/docs/greet/greet.css", "content/docs/greet/fpga.data.d.mts", "content/docs/notes.md"]) {
     assert.throws(() => formatOf(file, PIN_FORMATS), /没有格式认领这个文件/, file);

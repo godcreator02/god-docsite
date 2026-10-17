@@ -102,11 +102,22 @@ test("default 导出不是对象：报错", async () => {
   await assert.rejects(loadConfig(root), /要 export default 一个对象/);
 });
 
-test("项目根下还有 src/components/：装配时报错，讲解组件要挪到页面的同名文件夹或 app/components/", () => {
+test("项目根下还有 src/components/：装配时报错，讲解组件要挪到页面的同名文件夹或 content/_components/", () => {
   const root = tempRoot();
   mkdirSync(join(root, "src", "components", "x"), { recursive: true });
   writeFileSync(join(root, "src", "components", "x", "x.data.mjs"), "export const code = 1;\n");
-  assert.throws(() => assembleProject(root, { contentDir: "content", trajectoryDir: "trajectory", roster: {}, outputs: {} }), /src\/components\//);
+  assert.throws(() => assembleProject(root, { contentDir: "content", trajectoryDir: "trajectory", roster: {}, outputs: {} }), /src\/components\/.*content\/_components\//);
+});
+
+test("站点 app/components/ 下有带钉码标记的代码文件：装配时报错，要挪到 content/_components/；不带标记的站点代码照旧放", () => {
+  const root = tempRoot();
+  const config = { contentDir: "content", trajectoryDir: "trajectory", roster: {}, outputs: {} };
+  mkdirSync(join(root, "app", "components", "layout"), { recursive: true });
+  writeFileSync(join(root, "app", "components", "layout", "sidebar.tsx"), "/* 站点自己的布局 */\nexport const Sidebar = () => null;\n");
+  assert.deepEqual(assembleProject(root, config).docs, []);
+
+  writeFileSync(join(root, "app", "components", "y.data.mjs"), '/* ref file="src/greet.ts" lines="2-3" */\nexport const code = 1;\n');
+  assert.throws(() => assembleProject(root, config), /app\/components\/ 下有带钉码标记的文件：app\/components\/y\.data\.mjs——.*content\/_components\//);
 });
 
 test("内容根不在：装配时报错", async () => {

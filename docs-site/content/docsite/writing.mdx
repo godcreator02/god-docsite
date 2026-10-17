@@ -63,7 +63,8 @@ icon: FileText
 - **只给一页用的**放进和页面同名的文件夹：`push.mdx` 的组件在 `push/`，开头写 `import { AutoMergeRun } from './push/auto-merge'`；
   这一页的图在 `writing/`。TSX 页面 `名字.page.tsx`、HTML 页面 `名字.html` 的文件也放在同名文件夹 `名字/` 里。被页面 import 的正文写成 `_` 开头的 `.mdx`，也放在这里
 - **同一组里几页共用的**放进组里 `_` 开头的文件夹：fumadocs 图解的几个 HTML 页共用 `_shared/` 里的脚本和样式
-- **几组都要用的**放站点的 `app/components/`。这种情况很少，放之前先问人
+- **几组都要用的**放内容根下的 `_components/`（`content/_components/`），页面里写 `import { X } from '@components/x'`：站点 `tsconfig.json` 的 `paths` 把 `@components/*` 指到这个文件夹。
+  组件属于正文，跟着 `content/` 走；`app/` 是站点代码，不放页面用的组件。这种情况很少，放之前先问人
 - **有子页面的页**写成文件夹加 `index.mdx`：`gitea/index.mdx` 是 `/gitea`，它要用组件就放 `gitea/index/`
 
 `meta.json` 的 `pages` 只写页面名，不写这些文件夹。同名文件夹与 `_` 开头的文件夹里不放页面（不以 `_` 开头的 `.mdx`、`.page.tsx`、`.html`）和 `meta.json`：
