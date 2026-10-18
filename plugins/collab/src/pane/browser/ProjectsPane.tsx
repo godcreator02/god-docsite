@@ -52,7 +52,7 @@ function useProjectList(host: HostBridge, shell: ShellBridge): { list: Receipt<P
   return { list, refresh }
 }
 
-/** 点站点链接：经 docsite.site.start 确保站点在运行（没在运行就启动），再把地址交给系统浏览器打开；失败的原话交给那一行显示 */
+/** 点站点链接：经 docsite.site.open 启动站点（已在运行就不动）并用 Chrome 应用窗口打开，一个站一个窗口；失败的原话交给那一行显示 */
 type OpenSite = (site: SiteRow) => Promise<string | null>
 
 /** 用 VS Code 打开项目文件夹；失败的原话交给那一行显示 */
@@ -65,11 +65,9 @@ export function ProjectsPane({ host, shell }: { host: HostBridge; shell: ShellBr
   const { list, refresh } = useProjectList(host, shell)
   const openSite = useCallback<OpenSite>(
     async (site) => {
-      const reply = receiptOf<{ url: string }>(await host.call('docsite.site.start', { dir: site.dir }))
+      const reply = receiptOf<unknown>(await host.call('docsite.site.open', { dir: site.dir }))
       await refresh()
-      if (!reply.ok) return reply.error
-      window.open(reply.data.url, '_blank', 'noopener,noreferrer')
-      return null
+      return reply.ok ? null : reply.error
     },
     [host, refresh],
   )

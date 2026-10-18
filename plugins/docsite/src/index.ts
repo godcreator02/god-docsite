@@ -5,6 +5,7 @@ import type {} from '@godcreator/gwb-data'
 import type {} from '@godcreator/gwb-settings'
 import type { GwbShellApi } from '@godcreator/gwb-shell'
 import type {} from '@godcreator/gwb-skills'
+import { chromeCandidatesOf, findChrome, openInChromeApp } from './chrome-app.js'
 import { registerCommands } from './commands.js'
 import { registerDocfirstCommands } from './docfirst/commands.js'
 import { devServerLauncher } from './dev-server.js'
@@ -55,7 +56,7 @@ const settingDefinitions = [
   },
 ] as const
 
-/** 装配：身份码、托管站点（常驻登记与每个站上次的端口都记在 gwb-data 里）、服务 gwbDocsite、命令（含建 docfirst 站的 docfirst.create）、站点窗格与说明书 */
+/** 装配：身份码、托管站点（常驻登记与每个站上次的端口都记在 gwb-data 里）、服务 gwbDocsite、命令（含建 docfirst 站的 docfirst.create、用 Chrome 应用窗口打开站点的 docsite.site.open）、站点窗格与说明书 */
 export function apply(ctx: GwbContext): void {
   const log = ctx.logger(name)
   const commands = ctx.gwbCommands
@@ -117,7 +118,8 @@ export function apply(ctx: GwbContext): void {
   hosted.startAll((message) => log.warn(message))
 
   const list = async () => siteListingsOf(await hosted.list(), host.list(), (dir) => host.statusOf(dir), siteDescriptionOf)
-  registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list })
+  const openSiteWindow = (url: string, siteTitle: string | null) => openInChromeApp(findChrome(chromeCandidatesOf(process.env)), url, siteTitle)
+  registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list, openSiteWindow })
   registerDocfirstCommands({ commands, docsite: api, packagesFrom: pluginDir, log })
 
   ctx.inject(['gwbSkills'], (scoped) => {

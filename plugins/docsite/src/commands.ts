@@ -2,8 +2,9 @@ import path from 'node:path'
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 import { listComments, writeComment, type CommentFilter, type CommentWrite } from './comments.js'
 import { DocsiteRejected, messageOf } from './errors.js'
+import type { SiteWindowOpened } from './chrome-app.js'
 import type { GwbDocsiteApi } from './service.js'
-import type { SiteListing } from './site-list.js'
+import { siteTitleOf, type SiteListing } from './site-list.js'
 
 type Args = Record<string, unknown>
 
@@ -45,6 +46,8 @@ export type CommandServices = {
   /** 站点目录有没有登记为常驻 */
   isRegistered(dir: string): Promise<boolean>
   list(): Promise<SiteListing[]>
+  /** 用 Chrome 应用窗口打开站点首页：siteTitle 是站名，靠它认出这个站已经开着的窗口 */
+  openSiteWindow(url: string, siteTitle: string | null): Promise<SiteWindowOpened>
 }
 
 function register(commands: GwbCommandsApi, definition: { name: string; description: string; usage: string; effect: 'read' | 'write' | 'external' }, handler: Handler) {
@@ -68,7 +71,7 @@ const listingShape =
 const commentWriteUsage =
   '要站点在运行（POST 到站点的评论写入路由 /comments，和网页评论面板同一套规则与字段）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
 
-export function registerCommands({ commands, docsite, isRegistered, list }: CommandServices): void {
+export function registerCommands({ commands, docsite, isRegistered, list, openSiteWindow }: CommandServices): void {
   const urlOfRunning = (dir: string) => {
     const status = docsite.status(dir)
     if (status.state !== 'running' || status.url === null) throw new DocsiteRejected(`${dir} 的站点没在运行：先 docsite.site.start`)
@@ -138,6 +141,30 @@ export function registerCommands({ commands, docsite, isRegistered, list }: Comm
       } catch (error) {
         throw new DocsiteRejected(messageOf(error))
       }
+    },
+  )
+
+  register(
+    commands,
+    {
+      name: 'docsite.site.open',
+      description: '用 Chrome 的应用窗口打开一个站点（没有标签栏和地址栏）：没在运行先启动，一个站只开一个窗口；站点窗格与协作窗格的「打开」调的就是它',
+      usage:
+        '{ dir }：站点目录的绝对路径。先照 docsite.site.start 确保站点在运行（起不来就拒绝，报出开发服务的输出），再用本机的 Chrome 运行 chrome.exe --app=<地址>。' +
+        '这个站已经有应用窗口开着（按窗口标题里的站名、即 content/meta.json 的 title 认）就恢复它、切到前台，不再开新的；站点没写站名时认不出窗口，每次都新开。' +
+        'Chrome 只在 Program Files、Program Files (x86)、当前用户的 LocalAppData 下的 Google\\Chrome\\Application\\chrome.exe 找，找不到就拒绝，不改用默认浏览器。' +
+        '登录状态与 Cookie 和平时的 Chrome 共用。回 { url, window }：window 是 focused（切到了已经开着的窗口）或 launched（新开了一个）',
+      effect: 'write',
+    },
+    async (args) => {
+      const dir = dirOf(argsOf(args, ['dir']))
+      let url: string
+      try {
+        url = (await docsite.start(dir)).url
+      } catch (error) {
+        throw new DocsiteRejected(messageOf(error))
+      }
+      return { url, window: await openSiteWindow(url, siteTitleOf(dir)) }
     },
   )
 

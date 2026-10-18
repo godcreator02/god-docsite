@@ -112,8 +112,7 @@ function SiteLine({ site, run }: { site: SiteRow; run: RunSiteCommand }): ReactE
       .catch((error: unknown) => setActionError(error instanceof Error ? error.message : String(error)))
       .finally(() => setBusy(false))
   }
-  // 站点可能没在运行：先经 docsite.site.start 确保在运行（已在运行就回现状），再把地址交给系统浏览器
-  const open = () => act<{ url: string }>('docsite.site.start', ({ url }) => window.open(url, '_blank', 'noopener,noreferrer'))
+  const open = () => act('docsite.site.open')
   const reason = site.error ?? actionError
 
   return (
@@ -132,7 +131,7 @@ function SiteLine({ site, run }: { site: SiteRow; run: RunSiteCommand }): ReactE
           {site.url !== null && ` · 端口 ${new URL(site.url).port}`}
         </span>
         <span className="docsite:ml-auto docsite:flex docsite:shrink-0 docsite:items-center docsite:gap-1">
-          <Button type="button" variant="ghost" size="xs" disabled={busy} title={site.url === null ? '启动并在浏览器里打开' : `在浏览器里打开 ${site.url}`} onClick={open}>
+          <Button type="button" variant="ghost" size="xs" disabled={busy} title={site.url === null ? '启动并在 Chrome 应用窗口里打开' : `在 Chrome 应用窗口里打开 ${site.url}`} onClick={open}>
             <ExternalLink />
             打开
           </Button>

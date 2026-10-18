@@ -46,6 +46,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 ```text
 docsite.site.add     {"dir":…}   登记为常驻并启动；插件每次加载时（工作台启动、插件升级）也启动登记着的站
 docsite.site.start   {"dir":…}   启动；已在运行或正在启动就回现状
+docsite.site.open    {"dir":…}   没在运行先启动，再用 Chrome 应用窗口打开；这个站的窗口已经开着就切到前台，回 { url, window: focused | launched }
 docsite.site.stop    {"dir":…}   停掉；没在运行就拒绝
 docsite.site.list    {}          每个站 { dir, state, url, error, title, kind, hosted, by }：state 是 running / stopped / failed，url 只在运行时有，
                                  title 是站名，kind 是类别（base / docs / collab，没有身份文件为 null），hosted 是登记为常驻，by 是谁登记的（docsite.site.add 或插件名）
@@ -59,7 +60,8 @@ docsite.site.remove  {"dir":…}   去掉常驻登记，在运行就停掉；没
 - `failed` 时 `error` 写着退出码与最后几行输出。进程自己退出了会自动重启：连续崩溃时依次等 2 秒、10 秒、60 秒，`error` 末尾写着几秒后第几次；连续三次重启都没撑过 5 分钟就不再重启，`error` 写着「不再自动重启」，查明原因修好后 `docsite.site.start`。等着重启时 `docsite.site.stop` 取消这次重启
 - 常驻的站只记在 gwb-data 的文档 `hosted-sites` 里，不在设置里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
   不想要某个协作站就移出项目列表（`collab.project.remove`），单 `docsite.site.remove` 的话 gwb-collab 下次加载又登记回来
-- 人在工作台的「站点」窗格里看每个站：站名、类别（协作站、文档站、基础站）、来源（手动、gwb-collab、临时）、状态与端口，能打开、启停，手动登记的还能不再托管
+- 人在工作台的「站点」窗格里看每个站：站名、类别（协作站、文档站、基础站）、来源（手动、gwb-collab、临时）、状态与端口，能打开（`docsite.site.open`，协作窗格的打开也是它）、启停，手动登记的还能不再托管
+- `docsite.site.open` 只用 Chrome：在 Program Files、Program Files (x86)、当前用户的 LocalAppData 下找 `Google\Chrome\Application\chrome.exe`，找不到就拒绝。窗口按标题里的站名（`content/meta.json` 的 `title`）认，没写站名的站每次都新开
 
 ## 我是谁
 

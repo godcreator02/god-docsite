@@ -27,6 +27,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 // 上一次构建留下的文件会随 files 白名单一起发出去，先清空
 fs.rmSync(path.join(here, 'dist'), { recursive: true, force: true })
 fs.mkdirSync(path.join(here, 'dist'), { recursive: true })
+// 找站点窗口的脚本由 chrome-app.ts 按 import.meta.url 旁边的路径运行
+fs.copyFileSync(path.join(here, 'src', 'chrome-window.ps1'), path.join(here, 'dist', 'chrome-window.ps1'))
 
 await build({
   entryPoints: ['src/index.ts'],
@@ -63,4 +65,4 @@ await build({
   logLevel: 'warning',
 })
 
-console.log('[docsite] dist/index.js ← src/index.ts，dist/client.js ← src/pane/browser/index.tsx')
+console.log('[docsite] dist/index.js ← src/index.ts，dist/client.js ← src/pane/browser/index.tsx，dist/chrome-window.ps1 ← src/chrome-window.ps1')

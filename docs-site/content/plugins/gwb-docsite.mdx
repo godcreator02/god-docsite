@@ -1,6 +1,6 @@
 ---
 title: gwb-docsite：文档站插件
-description: gwb 工作台插件这一层：一张接缝图看它夹在工作台、平台包、站点开发服务、gwb-collab 之间各经什么接；docfirst.create 从空目录建站的七步（前四步就是普通的 init）；常驻的站记在哪、站点窗格列什么；一个站的 running / stopped / failed 由哪些事件转换；一次 start 怎么定端口；给别的插件的服务 gwbDocsite；打包与随包说明书
+description: gwb 工作台插件这一层：一张接缝图看它夹在工作台、平台包、站点开发服务、gwb-collab 之间各经什么接；docfirst.create 从空目录建站的七步（前四步就是普通的 init）；常驻的站记在哪、站点窗格列什么、「打开」怎么用 Chrome 应用窗口一个站只开一个窗口；一个站的 running / stopped / failed 由哪些事件转换；一次 start 怎么定端口；给别的插件的服务 gwbDocsite；打包与随包说明书
 icon: Plug
 ---
 
@@ -15,15 +15,15 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 <DocsiteSeams />
 
-第 1 号（注册命令）：插件 inject 工作台的命令服务，注册 `docsite.*` 十四条与 `docfirst.create`；`gwbSkills` 是可选的注入，有它时才把随包的 `skills/` 目录注册给工作台；`gwbShell` 也是可选的注入，有它时才注册站点窗格。第 2、3 号见「服务 gwbDocsite」，第 4 号见「建站与加功能」，第 5、6 号见「托管开发服务」，第 7、8 号见「推送与评论」，第 9 号见「站点窗格」。
+第 1 号（注册命令）：插件 inject 工作台的命令服务，注册 `docsite.*` 十五条与 `docfirst.create`；`gwbSkills` 是可选的注入，有它时才把随包的 `skills/` 目录注册给工作台；`gwbShell` 也是可选的注入，有它时才注册站点窗格。第 2、3 号见「服务 gwbDocsite」，第 4 号见「建站与加功能」，第 5、6 号见「托管开发服务」，第 7、8 号见「推送与评论」，第 9 号见「站点窗格」。
 
 插件自己的状态有三样：设置里只有本 home 的身份码 `identity-code`；gwb-data 里有常驻站点的登记表 `hosted-sites` 与每个站上次用的端口 `site-ports`。身份码是人会去看、换电脑时要手填的，放设置；另外两样都是插件运行时自己维护的，放 gwb-data：
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="47-56" hash="ceabc6e44d53" blob="53d11d0d8ce5" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="48-57" hash="ceabc6e44d53" blob="e93a9842f5cc" */}
 
-图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令、说明书与站点窗格。
+图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令（`docsite.site.open` 打开窗口用的函数在这里接上本机 Chrome）、说明书与站点窗格。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="58-139" hash="4c175ab5d3d3" blob="772fa2bc2a36" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="59-141" hash="8d4e34d5ef48" blob="e93a9842f5cc" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。每次启动开发服务时现读，所以改了设置只影响之后启动的开发服务。
 
@@ -63,11 +63,19 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 图上第 9 号。插件注册一个窗格 `sites`（标题「站点」），列的就是 `docsite.site.list`：每个站一行，写站名（没有就用目录名，协作站的 `site` 带上上一级）、类别（协作站、文档站、基础站，没有身份文件的写「未标注」）、来源、状态与端口、站点目录，站点出错或这一行的操作失败时原因写在下面。窗格看得见时每 5 秒重读一次。
 
-每行右边三个操作，都是调命令：「打开」先 `docsite.site.start`（已在运行就回现状）再把地址交给系统浏览器；「启动」「停止」调 `docsite.site.start` / `docsite.site.stop`。来源是「手动」的站（`docsite.site.add` 登记的）还有「不再托管」，点了要再点一次确认，调 `docsite.site.remove`；别的插件登记的站不给这个按钮，协作站要在协作窗格移出项目列表，不然 gwb-collab 下次加载又登记回来。建站、加功能这些事窗格不做，由人让自己的 AI 调命令。
+每行右边三个操作，都是调命令：「打开」调 `docsite.site.open`（见下一节）；「启动」「停止」调 `docsite.site.start` / `docsite.site.stop`。来源是「手动」的站（`docsite.site.add` 登记的）还有「不再托管」，点了要再点一次确认，调 `docsite.site.remove`；别的插件登记的站不给这个按钮，协作站要在协作窗格移出项目列表，不然 gwb-collab 下次加载又登记回来。建站、加功能这些事窗格不做，由人让自己的 AI 调命令。
 
 {/* ref file="../plugins/docsite/src/pane/browser/sites.ts" lines="33-51" hash="f38bd645f7d8" blob="e7b9275b9c93" */}
 
 浏览器侧照 gwb-collab 的窗格搭：React 与 lucide 从外壳的共享模块取，按钮是 shadcn 的那份，Tailwind 类名都带前缀 `docsite:`，只匹配本插件画出来的元素；外壳的主题令牌里没有表示「运行中」的绿色，在 `tokens.css` 里补了一个。
+
+### 打开站点：Chrome 应用窗口
+
+`docsite.site.open` 是站点窗格与 gwb-collab 协作窗格的「打开」共用的一条命令：先照 `start` 确保站点在运行，再用本机 Chrome 运行 `chrome.exe --app=<地址>`，开出一个没有标签栏和地址栏、在任务栏上单独一个图标的窗口，登录状态与 Cookie 和平时的 Chrome 共用。Chrome 只在 Program Files、Program Files (x86)、当前用户的 LocalAppData 下找，找不到就拒绝，不改用默认浏览器。
+
+一个站只开一个窗口：打开前先运行随包的 `chrome-window.ps1` 找这个站已经开着的窗口，找到就恢复、切到前台，回 `window: "focused"`；没找到才新开，回 `launched`。窗口按两样认：应用身份 `Chrome.<主机>_<路径>`（Chrome 给应用窗口的身份不带端口），与窗口标题（站名，或「页面名 · 站名」，站点自己这样设标题；站名取 `content/meta.json` 的 `title`）。标题在窗口外框上，窗口被盖住、最小化时都读得到。站点没写站名时认不出窗口，每次都新开。刚启动的窗口页面还没加载出来、标题还不是站名，所以只用标题找开着的窗口，启动后不等窗口出现。同一个站同时点几次只打开一次。两个 home 开着同名的站时分不出是谁的窗口，切到的是先找到的那个。
+
+`chrome-app.ts` 在打包时进 `dist/index.js`，它按自己旁边的路径运行 `chrome-window.ps1`，所以 `build.ts` 把脚本复制进 `dist/`。
 
 ### 一个站的三种状态
 
@@ -141,5 +149,6 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 | --- | --- | --- |
 | 快 | `tests/site-host.test.ts`、`hosted-sites.test.ts`、`site-ports.test.ts` | 状态机、常驻表、端口记录（含等上次的端口空出来）；开发服务、gwb-data 都是假的 |
 | 快 | `tests/site-list.test.ts` | `docsite.site.list` 怎么合成一张表、站名怎么取，窗格一行的来源、站名与能不能「不再托管」 |
+| 快 | `tests/chrome-app.test.ts` | 找 Chrome 的位置、应用窗口身份、一个站一个窗口（找窗口与启动都是假的） |
 | 快 | `tests/scaffold-create.test.ts`、`scaffold-add-feature.test.ts`、`docfirst/*.test.ts` | 真的平台建站器、假的 pnpm 与首页检查（`tests/site-fixtures.ts`） |
 | 慢 | `tests/real-site.slow.test.ts` | 在临时目录真建站、装依赖、启动、写评论、推送、重启沿用端口、加功能、`pnpm build`；要先在仓根 `pnpm build` |

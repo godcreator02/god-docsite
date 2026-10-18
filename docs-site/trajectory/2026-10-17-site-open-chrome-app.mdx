@@ -1,0 +1,22 @@
+---
+born-at: 2026-10-17T19:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 站点又用 Chrome 应用窗口打开：gwb-docsite 加 docsite.site.open，站点窗格与协作窗格的「打开」都调它，不加 site-window 设置
+domain: 形态
+---
+
+## 背景
+
+10-12 重写 gwb-docsite 时删掉了打开窗口的服务，写的是「打开窗口归 VS Code 插件」，但两个窗格之后都没接 VS Code：站点窗格与协作窗格的「打开」都是 `docsite.site.start` 后 `window.open`，交给系统默认浏览器，开成一个普通标签页。用户从协作窗格打开协作站时发现进的是标签页，要的是应用窗口。
+
+## 做了
+
+- gwb-docsite 加命令 `docsite.site.open {dir}`：照 `start` 确保在运行，再 `chrome.exe --app=<地址>`。找窗口、找 Chrome 的做法照 10-07 定下的那一套搬回来（`chrome-app.ts` 与 `chrome-window.ps1`）：按应用身份与窗口标题里的站名认已经开着的窗口，开着就切到前台，没有才新开
+- 站点窗格与 gwb-collab 协作窗格的「打开」都改调这条命令，打开的做法只在 gwb-docsite 一处
+- 不加 `site-window` 设置：用户只要 Chrome 应用窗口这一种。找不到 Chrome 就拒绝，不改用默认浏览器
+
+## 否掉的
+
+- **放回 gwb-collab**：站点窗格也要同一个打开，放在托管站点的 gwb-docsite 里两边才共用
+- **交给 VS Code 插件在内置浏览器里开**：09-28 用户已定协作站在 Chrome 里开，内置浏览器不放行弹窗与 `vscode://`

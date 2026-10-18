@@ -92,10 +92,10 @@ export const docsiteSeams = defineSeamGraph({
       name: '注册命令',
       a: ['commands-service'],
       b: ['commands-cap'],
-      iface: 'inject gwbCommands → commands.register()：docsite.* 十四条 + docfirst.create',
+      iface: 'inject gwbCommands → commands.register()：docsite.* 十五条 + docfirst.create',
       convention: false,
       via: 'code',
-      text: '命令服务是 inject 进来的，插件在它上面注册 docsite.* 十四条命令与 docfirst.create；gwbSkills 是可选的注入，有它时才把随包的 skills/ 目录注册给工作台。',
+      text: '命令服务是 inject 进来的，插件在它上面注册 docsite.* 十五条命令与 docfirst.create；gwbSkills 是可选的注入，有它时才把随包的 skills/ 目录注册给工作台。',
     },
     {
       n: 2,
@@ -175,7 +175,7 @@ export const docsiteSeams = defineSeamGraph({
       iface: "可选 inject gwbShell → registerPane({ id: 'sites', client: dist/client.js, style: dist/style.css })",
       convention: false,
       via: 'code',
-      text: '有外壳时注册窗格「站点」：浏览器侧经命令总线调 docsite.site.list 列出每个站，打开、启停、不再托管都是调 docsite.site.* 命令。没装外壳只是没有窗格。',
+      text: '有外壳时注册窗格「站点」：浏览器侧经命令总线调 docsite.site.list 列出每个站，打开、启停、不再托管都是调 docsite.site.* 命令，打开调 docsite.site.open、用 Chrome 应用窗口开。没装外壳只是没有窗格。',
     },
   ],
 });
