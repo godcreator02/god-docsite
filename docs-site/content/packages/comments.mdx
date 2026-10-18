@@ -153,15 +153,15 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 {/* ref file="../packages/comments/template/styles.css" lines="3-5" hash="45c5688bc0d3" blob="2df3d9654916" */}
 
-{/* tree dir="../packages/comments/src" depth="2" hash="66367156efdb" */}
+{/* tree dir="../packages/comments/src" depth="2" hash="55a2060acb3b" */}
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
 | `core/` | `@godcreator/comments` | 评论文件的格式（读、写、状态、表情回应）、锚点的三种写法、按文件夹分串、`page` 换成站内地址（`pageAddressOf`）；不碰磁盘 |
 | `node/` | `@godcreator/comments/node` | 评论目录的读写：建串、回复、删除、改状态、加撤表情，直接读整个目录（`readCommentThreads`，站点不在运行也能读） |
-| `site/` | `@godcreator/comments/site` | `CommentsDock`、`CommentThread`、`CommentsTable`、`commentsAccessOf`、`commentScopeProps`；浏览器里的页面文字、稳定 id、落点推算在 `site/browser/`，不单独导出 |
+| `site/` | `@godcreator/comments/site` | `CommentsDock`、`CommentThread`、`CommentsTable`、`commentsAccessOf`、`commentScopeProps`、`CopyForAiButton`；浏览器里的页面文字、稳定 id、落点推算在 `site/browser/`，不单独导出 |
 | `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`threadsByPageOf`、`commentsTableRowsOf`、`commentIntents` |
 
 层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；comments 只依赖 identity。
 
-用它的四方就是总图右列。平台模板（god-docsite 的 `template/`）页面路由用 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`，正文组件加 `commentScopeProps`，头像用 identity 的 `Avatar` 包一层传给 `AvatarComponent`（怎么接归 god-docsite 页）；collab 的任务页与记录页把评论的 intent 转给 `handleCommentWrite`，站点接的也是那几样（`CommentsDock`、`commentScopeProps`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`），通知里评论的链接用 `pageAddressOf`；word-report 的报告页接 `CommentsDock`、`commentScopeProps`，站点的接线文件用 `pageThreadsOf`、`commentsAccessOf` 取本页评论，写入提交到 `/comments`；gwb-docsite 的评论命令与 gwb-collab 的收件箱都直接 `readCommentThreads` 读整个目录（图上第 5 号），前者还用类型 `CommentFileOnDisk`。
+用它的四方就是总图右列。平台模板（god-docsite 的 `template/`）页面路由用 `pageThreadsOf`、`commentsAccessOf`、`CommentsDock`，正文组件加 `commentScopeProps`，头像用 identity 的 `Avatar` 包一层传给 `AvatarComponent`（怎么接归 god-docsite 页）；collab 的任务页与记录页把评论的 intent 转给 `handleCommentWrite`，站点接的也是那几样（`CommentsDock`、`commentScopeProps`、`pageThreadsOf`、`commentsAccessOf`、`commentIntents`），通知里评论的链接用 `pageAddressOf`，提示栏的「复制给 AI」用 `CopyForAiButton`（全仓只有这一份复制按钮：collab 能依赖 comments，不能依赖 god-docsite）；word-report 的报告页接 `CommentsDock`、`commentScopeProps`，站点的接线文件用 `pageThreadsOf`、`commentsAccessOf` 取本页评论，写入提交到 `/comments`；gwb-docsite 的评论命令与 gwb-collab 的收件箱都直接 `readCommentThreads` 读整个目录（图上第 5 号），前者还用类型 `CommentFileOnDisk`。

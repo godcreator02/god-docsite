@@ -4,7 +4,6 @@ import {
   ArrowDownToLine,
   ChevronDown,
   CircleCheck,
-  Copy,
   FileWarning,
   GitBranch,
   ListTodo,
@@ -16,6 +15,7 @@ import {
   Upload,
   type LucideIcon,
 } from 'lucide-react'
+import { CopyForAiButton } from '@godcreator/comments/site'
 import type { PublicPerson } from '@godcreator/identity'
 import { recordPageUrlOf, tasksPageUrl } from '../../core/layout.js'
 import { hasUnsubmittedChanges, isSubmitInProgress, submitBlockersOf, type SubmitState } from '../../core/notifications/submit-state.js'
@@ -176,38 +176,6 @@ function SummaryPart({ icon: SummaryIcon, className, children }: { icon: LucideI
   )
 }
 
-/** 复制成功后提示停留的毫秒数 */
-const copiedNoticeMilliseconds = 3000
-
-/** 「复制给 AI」：把提示词写进剪贴板；写不进去（浏览器不让）把原因显示在按钮旁 */
-function CopyForAiButton({ prompt, items }: { prompt: string; items: number }) {
-  const [state, setState] = useState<{ kind: 'idle' } | { kind: 'copied' } | { kind: 'failed'; reason: string }>({ kind: 'idle' })
-  const copy = () => {
-    navigator.clipboard.writeText(prompt).then(
-      () => {
-        setState({ kind: 'copied' })
-        setTimeout(() => setState({ kind: 'idle' }), copiedNoticeMilliseconds)
-      },
-      (error: unknown) => setState({ kind: 'failed', reason: error instanceof Error ? error.message : String(error) }),
-    )
-  }
-  return (
-    <span className="inline-flex items-baseline gap-2">
-      {state.kind === 'copied' && <span className="text-[12px] text-fd-muted-foreground">已复制 {items} 件事，粘贴给你的 AI</span>}
-      {state.kind === 'failed' && <span className="text-[12px] text-danger">没能复制：{state.reason}</span>}
-      <button
-        type="button"
-        onClick={copy}
-        title="把这些事写成一份提示词复制下来，粘贴给你用的 AI"
-        className="inline-flex items-center gap-1 rounded-md border border-fd-border px-2 py-0.5 text-[12px] text-fd-foreground hover:bg-fd-accent"
-      >
-        <Copy size={13} />
-        复制给 AI
-      </button>
-    </span>
-  )
-}
-
 /** 合并了的结果在提示栏上留这么久 */
 const mergedNoticeMilliseconds = 15_000
 
@@ -338,7 +306,9 @@ export function NotificationBar({
             <h2 className="m-0 text-[13px] font-semibold">要处理的事</h2>
             <span className="ml-auto inline-flex flex-wrap items-baseline justify-end gap-2">
               {submit !== undefined && <SubmitButton submit={submit} notifications={shownNotifications} />}
-              {aiPrompt !== null && <CopyForAiButton prompt={aiPrompt} items={shownNotifications.length} />}
+              {aiPrompt !== null && (
+                <CopyForAiButton prompt={aiPrompt} copiedNotice={`已复制 ${shownNotifications.length} 件事，粘贴给你的 AI`} title="把这些事写成一份提示词复制下来，粘贴给你用的 AI" />
+              )}
             </span>
           </header>
           <div className="min-h-0 overflow-y-auto">

@@ -45,6 +45,40 @@
   cursor: default;
 }
 
+/* ---------- 「复制给 AI」：评论串底下与协作站提示栏共用 ---------- */
+.docsite-copy-for-ai {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.docsite-copy-for-ai-notice {
+  font-size: 12px;
+  color: var(--color-fd-muted-foreground, #666);
+}
+.docsite-copy-for-ai-failed {
+  font-size: 12px;
+  color: var(--docsite-comment-danger);
+}
+.docsite-copy-for-ai-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid var(--color-fd-border, #e5e5e5);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-fd-foreground, #111);
+  font-size: 12px;
+  cursor: pointer;
+}
+.docsite-copy-for-ai-button:hover {
+  background: var(--docsite-comment-hover-strong);
+}
+.docsite-copy-for-ai-button .docsite-comment-icon {
+  width: 13px;
+  height: 13px;
+}
+
 /* ---------- 一条评论：头像、名字、时间，正文和名字对齐；可写时悬停露出删除 ---------- */
 .docsite-comment {
   position: relative;

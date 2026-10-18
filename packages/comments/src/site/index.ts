@@ -1,6 +1,7 @@
 export { CommentsDock, commentScopeProps, type CommentsDockProps } from './comments-dock.js'
 export { CommentThread, type CommentThreadProps } from './comment-thread.js'
 export { CommentsTable, type CommentsTableRow, type CommentsTableProps } from './comments-table.js'
+export { CopyForAiButton, type CopyForAiButtonProps } from './copy-for-ai-button.js'
 export {
   type CommentAvatar,
   type CommentBodyComponent,
