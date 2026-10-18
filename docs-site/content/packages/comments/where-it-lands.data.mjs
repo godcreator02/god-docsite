@@ -17,7 +17,7 @@ const goneToday = '标题文字第一段话，着重的部分。换成了别的�
 const editedToday = '标题文字第一段话，着重的部分。第二句话。￼后面还有字';
 
 /** 收件箱筛在哪一栏与引文行的原文：照 comments-dock 的 placeOf 与 noteOf（前缀加「原文」） */
-/* ref file="../packages/comments/src/site/comments-dock.tsx" lines="150-171" hash="d86bf34b0efb" blob="3c547188a509" */
+/* ref file="../packages/comments/src/site/comments-dock.tsx" lines="151-172" hash="d86bf34b0efb" blob="f7ec2f05b28d" */
 const notes = {
   same: `「${quote}」`,
   moved: `「${quote}」`,

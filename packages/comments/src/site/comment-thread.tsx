@@ -1,5 +1,5 @@
 /**
- * 一串评论的完整样子：批的位置、串头、回复（长串折起中间的）、每条评论下的表情回应、回复框；可写时悬停一条评论露出加表情与删除，悬停串头还露出标为已解决或重新打开。
+ * 一串评论的完整样子：批的位置、串头、回复（长串折起中间的）、每条评论下的表情回应、「复制给 AI」（调用方给了提示词时）、回复框；可写时悬停一条评论露出加表情与删除，悬停串头还露出标为已解决或重新打开。
  * 正文旁的浮窗（CommentsDock）与全站评论表格展开的那一行都用它
  */
 import { useState, type ReactNode } from 'react'
@@ -7,6 +7,7 @@ import { useFetcher } from 'react-router'
 import { AddReactionButton, ReactionBar } from './comment-emoji.js'
 import { errorOf, type CommentAvatar, type CommentBodyComponent, type CommentWriter, type PageThreadSummary } from './comment-model.js'
 import { CommentBody, CommentHeading, CommentIcon, Composer, ThreadQuote, type CommentWriteSuccess, type ThreadPlace } from './comment-parts.js'
+import { CopyForAiButton } from './copy-for-ai-button.js'
 
 /** 回复超过这么多条时只露第一条和最后一条，中间的折成「另外 N 条回复」 */
 const repliesShownWhenFolded = 2
@@ -24,12 +25,14 @@ export interface CommentThreadProps {
   note?: string
   /** 回复多时折起中间的 */
   foldReplies?: boolean
+  /** 给了就在回复框上方放「复制给 AI」，复制的就是它 */
+  aiPrompt?: string
   /** 给了就在右上角放收起按钮 */
   onClose?: () => void
   onReplySent?: (result: CommentWriteSuccess) => void
 }
 
-export function CommentThread({ thread, action, writer, BodyComponent, AvatarComponent, place, note, foldReplies = false, onClose, onReplySent }: CommentThreadProps) {
+export function CommentThread({ thread, action, writer, BodyComponent, AvatarComponent, place, note, foldReplies = false, aiPrompt, onClose, onReplySent }: CommentThreadProps) {
   const [unfolded, setUnfolded] = useState(false)
   const folded = foldReplies && !unfolded && thread.replies.length > repliesShownWhenFolded
   const shownReplies = folded ? [thread.replies.at(-1)!] : thread.replies
@@ -87,6 +90,11 @@ export function CommentThread({ thread, action, writer, BodyComponent, AvatarCom
           </div>
         ))}
       </div>
+      {aiPrompt !== undefined ? (
+        <div className="docsite-thread-ai" data-thread-ai={thread.id}>
+          <CopyForAiButton prompt={aiPrompt} copiedNotice="已复制，粘贴给你的 AI" title="把这一串写成提示词复制下来，粘贴给你用的 AI：它读完整串、核实以后回复在这里" />
+        </div>
+      ) : null}
       {writable ? (
         <div className="docsite-thread-reply">
           <Composer

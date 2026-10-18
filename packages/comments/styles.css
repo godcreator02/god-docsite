@@ -363,6 +363,11 @@ button.docsite-reaction:hover {
 .docsite-floating .docsite-thread-comments > .docsite-comment:first-child .docsite-comment-actions {
   right: 32px;
 }
+.docsite-thread-ai {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
 .docsite-thread-reply {
   margin-top: 6px;
   padding-top: 8px;

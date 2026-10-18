@@ -147,13 +147,17 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 - 被批的元素不铺底色，正文栏左边外侧画一道和它上下对齐的竖黄条；划的字用浏览器的 CSS Custom Highlight API 高亮（注册名 `docsite-comment`）
 - 全站评论页 `/comments` 是只读表格，一行一串，按最近有人说话排，内容页与功能包页面的评论都列；那里不量落点，位置只按锚点的种类写
 
+可写时浮出的那一串在回复框上方有「复制给 AI」：复制一份提示词，粘贴给自己用的 AI，由它读完整串、核实以后用 gwb 的 `docsite.comment.reply` 回复。站点与 gwb 插件都不启动 AI（为什么不做成自动回复见轨迹卡 `2026-10-18-comment-thread-copy-for-ai`）。提示词只写站点地址、页面、串 id、打开这一串的链接和被批那一块的文字，串里的发言让 AI 用 `docsite.comments` 自己读；被批元素的 id 是浏览器按内容算的，只有浏览器拿得到那一块的文字，所以提示词在浏览器里拼。只读的站（发布版）上 AI 回复不了，没有这个按钮；全站评论表格不渲染正文，也没有。
+
+{/* ref file="../packages/comments/src/site/thread-ai-prompt.ts" lines="50-68" hash="3a554061f7e1" blob="61e37486dd82" */}
+
 ## 分层与谁在用它
 
 建站、装完依赖后，建站器（平台包的 `addBaseFeatures`）把本包 `template/` 补进站点 `app/features/comments/`：全站评论页兼写入路由、侧栏入口、样式与正文高亮。评论目录不进 Tailwind 的源码扫描：扫到的文件一变，dev 下整页刷新，推送连接与页面状态都断掉。
 
 {/* ref file="../packages/comments/template/styles.css" lines="3-5" hash="45c5688bc0d3" blob="2df3d9654916" */}
 
-{/* tree dir="../packages/comments/src" depth="2" hash="55a2060acb3b" */}
+{/* tree dir="../packages/comments/src" depth="2" hash="44c6f4775a7f" */}
 
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |

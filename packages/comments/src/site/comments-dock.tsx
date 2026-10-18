@@ -35,6 +35,7 @@ import { CommentIcon, Composer, ThreadQuote, type ThreadPlace } from './comment-
 import { CommentThread } from './comment-thread.js'
 import { CommentsInbox, type InboxItem } from './comments-inbox.js'
 import { linkedThreadIdOf } from './comment-link.js'
+import { threadAiPromptOf, type ThreadTargetForAi } from './thread-ai-prompt.js'
 
 /** 收件箱开关存在 localStorage 的键 */
 const inboxOpenStorageKey = 'docsite-comments-inbox-open'
@@ -168,6 +169,29 @@ function noteOf(anchor: CommentAnchor, target: ThreadTarget | undefined): string
   if (target?.kind === 'text') return quoteNote(target.quote, target.changed ? '原文改过：' : '')
   if (target?.kind === 'element') return commentTargetLabelOf(target.element)
   return undefined
+}
+
+/** 批在哪写给 AI：元素交它此刻的文字，划字交原文；找不到、看不见的交界面上那句说明 */
+function targetForAiOf(anchor: CommentAnchor, target: ThreadTarget | undefined, note: string | undefined): ThreadTargetForAi {
+  if (anchor.kind === 'page') return { kind: 'page' }
+  if (target?.kind === 'element') return { kind: 'element', text: (target.element.textContent ?? '').trim() }
+  if (target?.kind === 'text') return { kind: 'text', quote: readablePageText(target.quote), changed: target.changed }
+  return { kind: 'unplaced', note: note ?? '原文找不到了' }
+}
+
+/** 打开着的这一串复制给 AI 的提示词：站点地址与这一串的链接取浏览器此刻的地址 */
+function aiPromptOfThread(thread: PageThreadSummary, target: ThreadTarget | undefined, note: string | undefined): string {
+  const threadUrl = new URL(window.location.href)
+  threadUrl.search = ''
+  threadUrl.hash = ''
+  threadUrl.searchParams.set('comment', thread.id)
+  return threadAiPromptOf({
+    siteUrl: `${window.location.origin}/`,
+    threadUrl: threadUrl.href,
+    page: thread.page,
+    threadId: thread.id,
+    target: targetForAiOf(parseCommentAnchor(thread.anchor), target, note),
+  })
 }
 
 /** 浮窗挂在哪：元素正下方；划的字所在那一块正下方、小三角对准那几个字；其余浮在正文顶上 */
@@ -628,6 +652,8 @@ export function CommentsDock({ pagePath, action, threads, access, BodyComponent,
             // 批的是元素时浮窗就贴在它下面，不再重复写它是什么
             note={openTarget?.kind === 'element' ? undefined : openItem.note}
             foldReplies
+            // AI 回复要写评论：只读的站（发布版）上回不了，不放这个按钮
+            aiPrompt={writable ? aiPromptOfThread(openItem.thread, openTarget, openItem.note) : undefined}
             onClose={() => setOpenThread(null)}
           />
         </FloatingLayer>

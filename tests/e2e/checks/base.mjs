@@ -471,6 +471,29 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         }
       })
 
+      await check('复制给 AI（dev）：点开批了一块的那一串，「复制给 AI」复制的提示词写着站点地址、页面、串 id、打开这一串的链接与那一块的文字', async () => {
+        const commentText = `e2e 批一块 ${runTag}`
+        await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
+        await page.waitForLoadState('networkidle')
+        await openCommentsInbox(page)
+        const row = page.locator('[data-comment-row]', { hasText: commentText })
+        await row.waitFor({ timeout: stepTimeoutMs })
+        const threadId = await row.getAttribute('data-comment-row')
+        const card = await openThreadFromInbox(page, threadId)
+        const blockText = ((await page.locator(`[data-comment-thread="${threadId}"]`).textContent()) ?? '').trim()
+        // 剪贴板换成记下写入的内容：无头浏览器里不用申请剪贴板权限
+        await page.evaluate(() => {
+          window.__copiedForAi = []
+          Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (text) => void window.__copiedForAi.push(text) } })
+        })
+        await card.locator('[data-thread-ai] button').click()
+        await card.locator('[data-thread-ai]', { hasText: '已复制' }).waitFor({ timeout: stepTimeoutMs })
+        const [prompt = ''] = await page.evaluate(() => window.__copiedForAi)
+        const expected = [`站点地址：${baseUrl}/`, '页面：writing/collapse-test.mdx', `评论串：${threadId}`, `${baseUrl}/writing/collapse-test?comment=${threadId}`, `> ${blockText.split('\n')[0]}`, 'docsite.comment.reply']
+        const missing = expected.filter((text) => !prompt.includes(text))
+        return { pass: blockText !== '' && missing.length === 0, detail: missing.length === 0 ? `串 ${threadId} 复制了 ${prompt.length} 字的提示词，带着那一块的文字` : `提示词里缺：${missing.join('；')}\n${prompt}` }
+      })
+
       await check('换头像（dev）：侧栏底部点开身份标记，选一张 300×200 的 SVG，浏览器居中裁成 128×128 的 webp 存进 public/avatars/<本人>.webp；侧栏、评论收件箱、项目首页成员都换成这张图；不合格的图与外来请求被拒；改回首字删掉文件', async () =>
         checkAvatarUpload({ page, baseUrl, siteDir, runTag }),
       )
@@ -509,9 +532,13 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         await page.goto(`${baseUrl}/writing/collapse-test`, { waitUntil: 'load' })
         const card = await openThreadFromInbox(page, threadId)
         const statusToggles = await card.locator('[data-thread-status-toggle]').count()
+        const copyForAi = await card.locator('[data-thread-ai]').count()
         const rejected = await postFormToAction(baseUrl, '/comments.data', { intent: 'resolve-thread', threadId })
         const unchanged = readFileSync(presetHead, 'utf8') === before
-        return { pass: statusToggles === 0 && rejected.status === 403 && unchanged, detail: `点开的那串里状态按钮 ${statusToggles} 个；直接提交 → ${rejected.status}；预置串 ${threadId} 的串头${unchanged ? '没变' : '变了'}` }
+        return {
+          pass: statusToggles === 0 && copyForAi === 0 && rejected.status === 403 && unchanged,
+          detail: `点开的那串里状态按钮 ${statusToggles} 个、「复制给 AI」${copyForAi} 个；直接提交 → ${rejected.status}；预置串 ${threadId} 的串头${unchanged ? '没变' : '变了'}`,
+        }
       })
     }
 
