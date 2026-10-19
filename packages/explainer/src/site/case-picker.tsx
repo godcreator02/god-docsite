@@ -12,7 +12,12 @@ export interface CaseItem {
   text: string;
 }
 
-export interface CasePickerProps<C extends CaseItem> {
+/** 说明要放公式等排版时用它：text 是 ReactNode，这样的数据不能交给 casesText 转机读文字 */
+export interface RichCaseItem extends Omit<CaseItem, "text"> {
+  text: ReactNode;
+}
+
+export interface CasePickerProps<C extends RichCaseItem> {
   cases: readonly C[];
   /** 不受控时一开始选中哪个，默认第一个 */
   initial?: string;
@@ -25,7 +30,7 @@ export interface CasePickerProps<C extends CaseItem> {
   label?: string;
 }
 
-export function CasePicker<C extends CaseItem>({ cases, initial, value, onChange, children, label }: CasePickerProps<C>): JSX.Element {
+export function CasePicker<C extends RichCaseItem>({ cases, initial, value, onChange, children, label }: CasePickerProps<C>): JSX.Element {
   if (cases.length === 0) throw new Error("CasePicker 的 cases 不能是空数组");
   const [ownSelection, setOwnSelection] = useState(initial ?? cases[0]!.id);
   const selectedId = value ?? ownSelection;

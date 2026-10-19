@@ -2,7 +2,7 @@
  * 三种外壳共用的控制条按钮、说明行与键盘处理。
  * 分步与动画的控制条是同一行、同样的位置：[播放] [上一步] [中间：步号或横条] [下一步] [计数]。
  */
-import type { JSX, KeyboardEvent } from "react";
+import type { JSX, KeyboardEvent, ReactNode } from "react";
 
 function PlayIcon(): JSX.Element {
   return (
@@ -56,7 +56,7 @@ export function Counter({ current, total }: { current: number; total: number }):
 }
 
 /** 画面下方的说明：标题加粗，后面接说明文字。换步时读屏会念出新内容 */
-export function Caption({ title, text }: { title: string; text: string }): JSX.Element {
+export function Caption({ title, text }: { title: string; text: ReactNode }): JSX.Element {
   return (
     <p className="dx-caption" aria-live="polite">
       <b className="dx-caption-title">{title}</b>

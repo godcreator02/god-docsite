@@ -14,7 +14,12 @@ export interface Chapter {
   duration: number;
 }
 
-export interface TimelineFrame<C extends Chapter> {
+/** 说明要放公式等排版时用它：text 是 ReactNode，这样的数据不能交给 chaptersText 转机读文字 */
+export interface RichChapter extends Omit<Chapter, "text"> {
+  text: ReactNode;
+}
+
+export interface TimelineFrame<C extends RichChapter> {
   /** 从开头算起的秒数 */
   time: number;
   chapter: C;
@@ -23,7 +28,7 @@ export interface TimelineFrame<C extends Chapter> {
   progress: number;
 }
 
-export interface TimelineProps<C extends Chapter> {
+export interface TimelineProps<C extends RichChapter> {
   chapters: readonly C[];
   /** 画面：给这一刻画什么 */
   children: (frame: TimelineFrame<C>) => ReactNode;
@@ -35,7 +40,7 @@ export interface TimelineProps<C extends Chapter> {
 const BACK_TO_CHAPTER_START_AFTER = 0.6;
 
 /** 每一章开头的时刻（秒），第一章是 0 */
-function chapterStarts(chapters: readonly Chapter[]): number[] {
+function chapterStarts(chapters: readonly RichChapter[]): number[] {
   const starts: number[] = [];
   let sum = 0;
   for (const chapter of chapters) {
@@ -52,14 +57,14 @@ function chapterIndexAt(starts: readonly number[], time: number): number {
   return index;
 }
 
-function assertChaptersPlayable(chapters: readonly Chapter[]): void {
+function assertChaptersPlayable(chapters: readonly RichChapter[]): void {
   if (chapters.length === 0) throw new Error("Timeline 的 chapters 不能是空数组");
   for (const chapter of chapters) {
     if (!(chapter.duration > 0)) throw new Error(`Timeline 的章节「${chapter.title}」duration 得是正数秒，现在是 ${chapter.duration}`);
   }
 }
 
-export function Timeline<C extends Chapter>({ chapters, children, label }: TimelineProps<C>): JSX.Element {
+export function Timeline<C extends RichChapter>({ chapters, children, label }: TimelineProps<C>): JSX.Element {
   assertChaptersPlayable(chapters);
   const starts = useMemo(() => chapterStarts(chapters), [chapters]);
   const total = starts[starts.length - 1]! + chapters[chapters.length - 1]!.duration;

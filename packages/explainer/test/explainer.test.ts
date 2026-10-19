@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { createElement } from "react";
 import type { SVGProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { CasePicker, CodeLines, Diff, Pane, Pill, SeamDiagram, Stepper, Terminal, Timeline, cap } from "../src/site/index.ts";
+import { CasePicker, CodeLines, CompareGrid, Diff, Pane, Pill, SeamDiagram, Stepper, Terminal, Timeline, cap, ease, ramp, revealByRow } from "../src/site/index.ts";
 import type { SeamLayout } from "../src/site/index.ts";
 import { defineSeamGraph, seamGraphText } from "../src/core/seam-graph.ts";
 import type { SeamGraphInput } from "../src/core/seam-graph.ts";
@@ -114,6 +114,54 @@ test("CasePicker 第一帧：每种情况一个胶囊，默认选第一个；受
   assert.equal(captionOf(render({ value: "moved" })), "挪了位置内容还在，只是行号变了。");
   assert.equal(captionOf(render({ initial: "moved" })), "挪了位置内容还在，只是行号变了。");
   assert.throws(() => render({ value: "nope" }), /没有 id 为「nope」的情况/);
+});
+
+test("说明可以是排版过的内容：给 ReactNode 时原样放进说明行", () => {
+  const html = renderToStaticMarkup(
+    createElement(Timeline, {
+      chapters: [{ title: "公式", text: createElement("span", { className: "math" }, "i = a·i + b"), duration: 1 }],
+      children: () => null,
+    }),
+  );
+  assert.match(html, /<span class="dx-caption-text"><span class="math">i = a·i \+ b<\/span><\/span>/);
+});
+
+test("CompareGrid：栏头带角色色，每格的状态由 cellState 给；格数和栏数对不上直接报错", () => {
+  const columns = [
+    { title: "CPU", note: "按顺序", role: "blue" as const },
+    { title: "FPGA", role: "violet" as const },
+  ];
+  const rows = [
+    { label: "乘法", cells: ["一个接一个", { content: "同时做", role: "emerald" as const }] },
+    { label: "加法", cells: ["一个接一个", "加法树"] },
+  ];
+  const html = renderToStaticMarkup(createElement(CompareGrid, { columns, rows, cellState: revealByRow([0, 1], 0), minWidth: 480 }));
+  assert.match(html, /class="dx-compare" style="grid-template-columns:6.5em repeat\(2, minmax\(0, 1fr\)\);min-width:480px"/);
+  assert.match(html, /class="dx-compare-head" data-role="blue"><span>CPU<\/span><span class="dx-compare-note">按顺序<\/span>/);
+  assert.match(html, /data-role="emerald" data-state="active">同时做</, "单格可以换颜色");
+  assert.equal(html.match(/data-state="active"/g)?.length, 2, "第 1 行正在讲");
+  assert.equal(html.match(/data-state="hidden"/g)?.length, 2, "第 2 行还没讲到");
+  assert.match(html, /class="dx-compare-label" data-on="true">乘法</);
+  assert.throws(
+    () => renderToStaticMarkup(createElement(CompareGrid, { columns, rows: [{ label: "缺", cells: ["一格"] }], cellState: () => "on" as const, minWidth: 0 })),
+    /对比表第 1 行有 1 格，应为 2 格/,
+  );
+});
+
+test("revealByRow：没到 hidden，开讲那一章与点名的行 active，之后 on；没给开始章号的行直接报错", () => {
+  const at = (current: number, activeRows?: number[]) => [0, 1, 2].map(revealByRow([0, 1, 2], current, activeRows));
+  assert.deepEqual(at(0), ["active", "hidden", "hidden"]);
+  assert.deepEqual(at(2), ["on", "on", "active"]);
+  assert.deepEqual(at(2, [0]), ["active", "on", "active"]);
+  assert.throws(() => revealByRow([0], 0)(1), /没有第 2 行的开始章号/);
+});
+
+test("ramp 与 ease：把本章进度切成一段、放慢两头", () => {
+  assert.equal(ramp(0.25, 0.5, 1), 0);
+  assert.equal(ramp(0.75, 0.5, 1), 0.5);
+  assert.equal(ramp(2, 0.5, 1), 1);
+  assert.deepEqual([0, 0.5, 1].map(ease), [0, 0.5, 1]);
+  assert.ok(ease(0.1) < 0.1, "开头比匀速慢");
 });
 
 test("外壳拿到空数组直接报错", () => {

@@ -1,12 +1,13 @@
 ---
 title: explainer：讲解组件
-description: 讲解组件包：分步、动画、选情况三种外壳共用一套控制条与说明行，六个零件、两组颜色名拼画面；接缝图把内容和坐标分开；包的 `.` 出口不 import React，给生成物写机读文字
+description: 讲解组件包：分步、动画、选情况三种外壳共用一套控制条与说明行，六个零件、两组颜色名拼画面，对比表放进画面按章亮起；接缝图把内容和坐标分开；包的 `.` 出口不 import React，给生成物写机读文字
 icon: Presentation
 ---
 
 import { StepperDemo, TimelineDemo, CasePickerDemo } from './explainer/shell-demos'
 import { ExplainerSeams } from './explainer/seams'
 import { PartsGallery } from './explainer/parts-gallery'
+import { CompareDemo } from './explainer/compare-demo'
 
 explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动画 `Timeline`、选情况 `CasePicker` 三种外壳，加上一张接缝图 `SeamDiagram`。外壳管控制条与说明行，页面交给它一个「当前这一项 → 画面」的函数，只画这一页独有的部分。
 
@@ -38,6 +39,8 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 
 三者共同的部分：控制条在画面上方（播放、上一步、中间一格、下一步、计数），画面在中间，说明在画面下方。←/→ 是上一步、下一步，空格是播放、暂停；焦点在按钮上时空格交给按钮，焦点在横条上时方向键交给横条；带 Alt/Ctrl/Meta 的组合键一律不接。传进来的数组是空的，直接报错。
 
+说明一般是纯文字，这样同一份数据还能交给机读文字函数。说明里要放公式这类排版时，数据写成 `RichStepItem`、`RichChapter`、`RichCaseItem`：`text` 是 ReactNode，三种外壳照样收，但这样的数据不能再交给机读文字函数，类型检查会拦下。
+
 下面三个组件是同一种布局的最小例子：左块是画面函数拿到的参数，右块是同一份数据经机读文字函数转出的段落，当前这一项亮起。
 
 ### 分步 `Stepper`
@@ -46,7 +49,7 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 
 <StepperDemo />
 
-{/* ref file="../packages/explainer/src/site/stepper.tsx" lines="9-52" hash="2a5e062955f5" blob="dafaf7713972" */}
+{/* ref file="../packages/explainer/src/site/stepper.tsx" lines="9-57" hash="1c6184a17da4" blob="38e358edbf84" */}
 
 ### 动画 `Timeline`
 
@@ -54,9 +57,13 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 
 <TimelineDemo />
 
-{/* ref file="../packages/explainer/src/site/timeline.tsx" lines="10-24" hash="88a7ba5715fa" blob="40324b1df520" */}
+{/* ref file="../packages/explainer/src/site/timeline.tsx" lines="10-29" hash="f996468bd947" blob="3ff0feb0e12e" */}
 
-{/* ref file="../packages/explainer/src/site/timeline.tsx" lines="37-60" hash="0cf645e2d0bb" blob="40324b1df520" */}
+{/* ref file="../packages/explainer/src/site/timeline.tsx" lines="42-65" hash="30cdda5ca3c9" blob="3ff0feb0e12e" */}
+
+画面常把本章的 `progress` 切成几段：`ramp(p, from, to)` 给出 `p` 在 `[from, to]` 里走到了哪儿（夹在 0–1），`ease` 让开头和结尾慢、中间快，`clamp01` 夹到 0–1。
+
+播放时画面每一帧都重画，**每一帧只改样式（位置、长度、透明度），文字只在换章或离散事件时变**。站点可能在正文上监听文字变化（比如协作站更新目录和仓库链接），每帧改字会让它每帧都重算一遍，页面就卡了。数值要随时间变时，按离散的步或事件取值，不按每一帧算。
 
 ### 选情况 `CasePicker`
 
@@ -66,7 +73,7 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 
 `JudgeCases` 就是这么写的：它只写了「这一种情况 → 画面」。
 
-{/* ref file="../packages/explainer/src/site/case-picker.tsx" lines="9-34" hash="cbc0fdef16e6" blob="f6d9bff872e4" */}
+{/* ref file="../packages/explainer/src/site/case-picker.tsx" lines="9-39" hash="457d5f9cef5a" blob="47ae77ec033f" */}
 
 ## 零件与颜色
 
@@ -75,6 +82,16 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 <PartsGallery />
 
 语气 `Tone` 说「这一项是什么状态」，角色色 `Role` 说「这个东西是哪个角色」，同一个角色在整页里固定一种颜色；零件只写 `data-tone` / `data-role` 属性，样式表按属性给颜色，深色主题另有一套。
+
+## 对比表：放进画面按章亮起
+
+几种做法要逐个方面比时用对比表 `CompareGrid`：每种做法一栏、带角色色，每行讲一个方面。它不是外壳，放进动画或分步的画面里，由画面按章号给每格一个状态：`hidden` 还没讲到（留着位置不显示）、`off` 淡、`on` 讲过、`active` 正在讲（描边）。最常见的规则是 `revealByRow(每行从第几章开始讲, 当前章号)`。下面拿三种外壳自己当例子，一章讲一行：
+
+<CompareDemo />
+
+{/* ref file="../packages/explainer/src/site/compare-grid.tsx" lines="11-35" hash="88d47236e8f5" blob="591f3bf75df8" */}
+
+一行的格数和栏数对不上、`revealByRow` 问到没给开始章号的行，都直接报错。表格比容器宽时在自己的框里横向滚动，页面本身不横向滚动。
 
 ## 接缝图：内容和坐标分开
 
@@ -110,4 +127,5 @@ explainer 把一段讲解变成能看、能动的东西：分步 `Stepper`、动
 
 - **gwb-docsite**：`docfirst.create` 建 docfirst 站时，把 explainer 和 code-pin、trajectory 一起装上
 - **本站各包、各插件页的讲解组件**：如 code-pin 页的 `JudgeCases`、[实时推送与执行器](/gitea/push) 页的 `AutoMergeRun`
+- **协作站的讲解页**：协作站建站时不带它，要用时 `docsite.feature.add` 加上；说明里要放公式的讲解用 `Rich*` 那组类型
 - **docfirst**：生成正本里用到的组件，经 `docfirst.config.mjs` 的 `components` 加载机读规则，规则 import `.` 出口

@@ -11,7 +11,12 @@ export interface StepItem {
   text: string;
 }
 
-export interface StepperProps<S extends StepItem> {
+/** 说明要放公式等排版时用它：text 是 ReactNode，这样的数据不能交给 stepsText 转机读文字 */
+export interface RichStepItem extends Omit<StepItem, "text"> {
+  text: ReactNode;
+}
+
+export interface StepperProps<S extends RichStepItem> {
   steps: readonly S[];
   /** 画面：给当前这一步画什么 */
   children: (step: S, index: number) => ReactNode;
@@ -21,7 +26,7 @@ export interface StepperProps<S extends StepItem> {
   label?: string;
 }
 
-export function Stepper<S extends StepItem>({ steps, children, interval = 3500, label }: StepperProps<S>): JSX.Element {
+export function Stepper<S extends RichStepItem>({ steps, children, interval = 3500, label }: StepperProps<S>): JSX.Element {
   if (steps.length === 0) throw new Error("Stepper 的 steps 不能是空数组");
   const last = steps.length - 1;
   const [at, setAt] = useState(0);
