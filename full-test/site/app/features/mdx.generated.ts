@@ -6,11 +6,10 @@ import * as trajectoryMdx from './trajectory/mdx.ts'
 
 export type MdxPluginList = Extract<NonNullable<DefaultMDXOptions['remarkPlugins']>, unknown[]>
 
-/** 集合工厂收到的全站插件与代码高亮选项：工厂把它们并进自己集合的 applyMdxPreset（集合写了 mdxOptions，全局的就不生效） */
+/** 集合工厂收到的全站插件：工厂把它们并进自己集合的 applyMdxPreset（集合写了 mdxOptions，全局的就不生效） */
 export interface SiteMdxPlugins {
   remarkPlugins: MdxPluginList
   rehypePlugins: MdxPluginList
-  rehypeCodeOptions?: DefaultMDXOptions['rehypeCodeOptions']
 }
 
 /** 各功能 mdx.ts 可以导出的几样 */

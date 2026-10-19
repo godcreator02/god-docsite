@@ -1,12 +1,11 @@
-import { defineCollections, type DefaultMDXOptions } from 'fumadocs-mdx/config'
+import { defineCollections } from 'fumadocs-mdx/config'
 import { cardMdxOptions, cardSchema, type MdxPluginList } from '@godcreator/trajectory/site/collection'
 import { trajectoryHrefBase } from './href.ts'
 
-/** 站点的全站插件与代码高亮选项：建站器生成的集合汇总文件调用工厂时传入 */
+/** 站点的全站插件：建站器生成的集合汇总文件调用工厂时传入 */
 interface SitePlugins {
   remarkPlugins: MdxPluginList
   rehypePlugins: MdxPluginList
-  rehypeCodeOptions?: DefaultMDXOptions['rehypeCodeOptions']
 }
 
 /** 集合名单与 package.json 的 godDocsite.collections 一致；工厂把全站插件并进卡集合的 mdx 选项（集合写了 mdxOptions，全局插件对它不生效） */

@@ -147,7 +147,7 @@ $e(d)$ 是有效天数，只讲两层意思：**长空档折叠**——相邻两
 
 图上第 5–7 号。建站器把 `template/` 写进站点的 `app/features/trajectory/`。卡集合在 `mdx.ts` 里声明：读站点根下 `trajectory/` 的 `*.{md,mdx}`，正文按需加载，schema 是 `cardSchema`；这个目录要和 `docfirst.config.mjs` 的 `trajectory` 一致，两处各读各的目录。
 
-{/* ref file="../packages/trajectory/template/mdx.ts" hash="aa37d413504a" blob="e47fa6e48203" */}
+{/* ref file="../packages/trajectory/template/mdx.ts" hash="6ea94aed95c1" blob="1faf4fd087fc" */}
 
 两条路由：星轨盘页 `/trajectory` 占满窗口、不在整站布局里；卡页 `/trajectory/<卡身份>` 在整站布局里。两页的 loader 都只从卡集合取数据，不另读磁盘。侧栏横排里加一个「轨迹」入口；正文里指向卡页的链接，卡集合里有这张卡就显示成卡片，没有就标红。
 

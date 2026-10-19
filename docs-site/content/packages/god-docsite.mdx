@@ -13,7 +13,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 平台包 `@godcreator/god-docsite` 是每个站点的公共部分，别的包都不依赖它。它分两部分：
 
 - **模板与建站器**：`template/` 是唯一的站点模板，`./scaffold` 是建站器（`createSite` 建站、`addFeature` 加功能、`regenerateFeatureIndex` 重写汇总文件），负责把站点写出来
-- **运行时出口**：`./server`、`./react`、`./vite`、`./mdx` 等，由模板写出的站点文件调用，管页面树、布局与侧栏、搜索、推送、术语标注与代码块的行号
+- **运行时出口**：`./server`、`./react`、`./vite`、`./mdx` 等，由模板写出的站点文件调用，管页面树、布局与侧栏、搜索、推送与术语标注
 
 另有 `./identity`：站点根的身份文件 `docsite.json`（站点类别与布局代号）的读写，插件靠它认出平台建的站、分出类别，见下面「站点身份文件」一节。
 
@@ -30,7 +30,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 3. **读功能包**：功能包要先装进站点的 `node_modules`，集合名单读它 `package.json` 的 `godDocsite.collections`。
 4. **合并功能**：两个功能导出同名 MDX 组件时报错。
 5. **路由调 loader**：站点上下文 `site` 经参数传进去，平台与功能包都不 import 站点代码。
-6. **构建配置**：术语标注排在全站 remark 插件的最后；代码高亮选项每个集合都交给 fumadocs 的预设，见下面「代码块的行号」一节。
+6. **构建配置**：术语标注排在全站 remark 插件的最后。
 7. **推送**：协议的常量两边都从平台包的 `.` 出口取，见下面「推送通道」一节。
 8. **端口与可信来源**：`DOCSITE_DEV_ORIGIN` 由 vite 插件在开发服务监听后写、`PORT` 由 `docsite-serve` 设，`siteOrigin` 怎么按它们算见下面「vite 插件、端口与可信来源」一节。
 
@@ -43,7 +43,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `./identity` | `src/node/site-identity.ts` 站点身份文件的读写，纯 Node、不按自己模块的位置找文件，插件可以打包进去 | gwb-docsite、gwb-collab |
 | `./content-layout` | `src/node/content-layout.ts` 内容目录放法的规则，纯 Node，插件可以打包进去 | gwb-collab（提交审核前的站点检查）、本包的 vite 插件 |
 | `./vite` | `src/vite/` vite 插件 | 站点 `vite.config.ts` |
-| `./mdx` | `src/mdx/` 术语标注的 remark 插件、代码高亮选项 `siteRehypeCodeOptions` | 站点 `app/lib/mdx-plugins.ts` |
+| `./mdx` | `src/mdx/` 术语标注的 remark 插件 | 站点 `app/lib/mdx-plugins.ts` |
 | `./server` | `src/site/*.server.ts` 等服务端部分 | 站点路由文件、功能包模板 |
 | `./react` | `src/site/` 浏览器端组件 | 站点路由文件、功能包模板；TSX 页面取点了能放大的 `ImageZoom` |
 | `./tex` | TSX 页面里写公式的 `Tex` | 站点的 TSX 页面 |
@@ -115,13 +115,13 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `mdx.ts` | `remarkPlugins`、`rehypePlugins`、`collections`（集合工厂，名单写在包的 `package.json` 的 `godDocsite.collections`） | `mdx.generated.ts`；有集合的再进 `collections.generated.ts` | `source.config.ts`、`app/lib/mdx-plugins.ts` |
 | `styles.css` | 样式 | `styles.generated.css` | `app/app.css` |
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="126-185" hash="6562f85af21a" blob="452051efaaf3" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="126-185" hash="0005b519c4d9" blob="1f2d2a08a622" */}
 
 合并规则三条：
 
 - `feature.tsx` 会进浏览器：不能 import `.server` 模块或 Node 内置模块，`layoutData` 要的服务端数据只能经第二个参数 `base`（站点上下文）取；它的返回值以功能名为键并进布局数据。
 - 两个功能导出同名 MDX 组件时报错；侧栏入口按 `order` 排，同样大的按功能名。
-- 集合工厂收一份全站插件 `sitePlugins`（remark、rehype 插件与代码高亮选项 `rehypeCodeOptions`）并进自己的选项；`source.config.ts` 用 `export *` 再导出 `collections.generated.ts`，因为 fumadocs-mdx 要求那份文件只导出集合。
+- 集合工厂收一份全站插件 `sitePlugins` 并进自己的选项；`source.config.ts` 用 `export *` 再导出 `collections.generated.ts`，因为 fumadocs-mdx 要求那份文件只导出集合。
 
 {/* ref file="../packages/god-docsite/src/site/features.ts" lines="11-77" hash="164f2b6c87fa" blob="055ba60eb5de" */}
 
@@ -220,33 +220,9 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/core/reader-fonts.ts" lines="22-60" hash="e438de88ad7c" blob="0ad50cc5bf92" */}
 
-`<style>` 不在任何 `@layer` 里，比 Tailwind 主题层里的同名变量优先，直接盖掉默认值。
+`<style>` 不在任何 `@layer` 里，比 Tailwind 主题层里的同名变量优先，直接覆盖默认值。
 
 已经建好的站，`app/root.tsx` 归站点自己，模板改了不会自动跟上：在 `root.tsx` 里照模板加上 `loader` 与 `<style>` 那几行，再把平台包升到带 `readerFontsCss` 的版本。没加的站照常运行，只是不跟读者设的字体。
-
-## 代码块的行号
-
-站点的代码块默认带行号、从 1 起编号；开头写 `lineNumbers=N` 的从 N 起，写 `noLineNumbers` 的不带：
-
-````mdx
-```c lineNumbers=295
-int x;
-```
-
-```text noLineNumbers
-exit 0
-```
-````
-
-行号由 fumadocs 的代码高亮 `rehypeCode` 解析代码块开头那串标记（meta）时决定，平台的 `siteRehypeCodeOptions` 就是在 fumadocs 默认的解析外面包一层：认出 `noLineNumbers` 并把它从标记里去掉，其余照默认解析，没关掉的都补上行号。fumadocs 自己把 `lineNumbers` 带任何值都当成要行号，所以关掉要另起一个词，写法仿照它的 `noCopy`。`rehypeCode` 在所有 remark、rehype 插件之后运行，手写的代码块和插件生成的代码块都按这条规则走：生成代码块的插件知道行号对不上时，要自己写 `noLineNumbers`，不能靠不写（钉码的新旧行对比块就是这样，见 code-pin 包页）。
-
-{/* ref file="../packages/god-docsite/src/mdx/code-block-options.ts" lines="12-20" hash="7c3d7bcfeb1c" blob="992f8345171f" */}
-
-一个站里调用 fumadocs MDX 预设的有好几处：页面集合与全局配置（评论走它）在 `source.config.ts`，日志、轨迹卡这些集合在功能的集合工厂里，各自都有一份代码高亮选项。所以选项放进全站插件 `sitePlugins.rehypeCodeOptions`，由站点的 `app/lib/mdx-plugins.ts` 定义一次，每一处都交给自己的 `applyMdxPreset`，哪个集合里的代码块都一样：
-
-{/* ref file="../packages/god-docsite/template/app/lib/mdx-plugins.ts" lines="11-15" hash="a5fd8c285924" blob="ecddfcbcd331" */}
-
-已经建好的站，`mdx-plugins.ts` 与 `source.config.ts` 归站点自己，模板改了不会自动跟上：照模板在 `sitePlugins` 里加上 `rehypeCodeOptions`、在 `source.config.ts` 的两处 MDX 选项里传它，把平台包与功能包升到带这一项的版本，再重写汇总文件、补回功能的 `mdx.ts`。没加的站照常运行，代码块不带行号。
 
 ## 错误页
 

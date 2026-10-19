@@ -6,11 +6,10 @@ import { remarkCollabLinks } from '@godcreator/collab/mdx'
 
 type MdxPluginList = Extract<NonNullable<DefaultMDXOptions['remarkPlugins']>, unknown[]>
 
-/** 站点的全站插件（公式、术语，以及各功能的 remarkPlugins）与代码高亮选项：建站器生成的集合汇总文件调用工厂时传入 */
+/** 站点的全站插件（公式、术语，以及各功能的 remarkPlugins）：建站器生成的集合汇总文件调用工厂时传入 */
 interface SitePlugins {
   remarkPlugins: MdxPluginList
   rehypePlugins: MdxPluginList
-  rehypeCodeOptions?: DefaultMDXOptions['rehypeCodeOptions']
 }
 
 /** 进站点每个集合的 remark 插件：[文字](/tasks/<id>)、[](/calendar/<日期>)、[](repo:…) 换成记录链接、日志链接、repo: 链接组件 */
@@ -28,7 +27,6 @@ export const collections = {
       mdxOptions: applyMdxPreset({
         remarkPlugins: sitePlugins.remarkPlugins,
         rehypePlugins: (list) => [...sitePlugins.rehypePlugins, ...list],
-        rehypeCodeOptions: sitePlugins.rehypeCodeOptions,
       }),
     }),
 }

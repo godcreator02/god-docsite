@@ -1,0 +1,30 @@
+---
+born-at: 2026-10-20T08:20
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 代码块行号改回逐块写
+domain: 骨架
+---
+
+## 背景
+
+前一天做了「代码块默认带行号」，发了 god-docsite 0.1.11 等一批版本，SST 协作站也接上了。用户回头看觉得搞复杂了：要行号的代码块自己写一个 `lineNumbers` 就行，fumadocs 本来就支持，不需要平台定默认。
+
+supersedes:: [代码块默认带行号](2026-10-19-code-blocks-numbered-by-default.mdx)
+
+## 结论与边界
+
+- 平台不定默认：代码块要行号就在开头写 `lineNumbers`（`lineNumbers=N` 从 N 起），没写的不带，这是 fumadocs 原本的规则
+- 撤掉前一天加的全部东西：god-docsite 的 `siteRehypeCodeOptions`、全站插件里的 `rehypeCodeOptions` 一项与模板接线、collab 日志集合与 trajectory 卡集合对它的转交、code-pin 的 `noLineNumbers`。
+  code-pin 回到「行号对得上写 `lineNumbers=N`，对不上就不写」，在不定默认的规则下「不写」就是不要，正好是它要的
+- 没写语言的代码块要写成 ` ```text lineNumbers `：开头第一个词是语言名，直接写 `lineNumbers` 会被当成语言
+
+## 依据
+
+- 逐块写不用改平台、不用改已有的站，哪个站都能用；要不要行号由写这块代码的人决定，程序输出、一行的片段可以不写
+- 默认带行号的代价全在平台上：包之间多一个词的约定（`noLineNumbers`），每个站要接一份全站共用的代码高亮选项、旧站逐个接线，换来的只是少写一个词
+
+## 代价与遗留
+
+- god-docsite 0.1.11、code-pin 0.2.2、trajectory 0.1.1、collab 0.3.5 带着默认行号发出去了，下一版撤掉。装着 code-pin 0.2.2 的站，生成的代码块里多一个 fumadocs 不认的 `noLineNumbers`，不影响显示
+- SST 协作站的代码块要逐个补上 `lineNumbers`

@@ -141,11 +141,3 @@ test("cardMdxOptions：站点的全站插件并进来——remark 接在默认�
   assert.equal(rehypePlugins[0], rehypeSite);
   assert.equal(rehypePlugins.length, (plain.rehypePlugins ?? []).length + 1, "只多出站点那一个 rehype 插件");
 });
-
-test("cardMdxOptions：站点的代码高亮选项交给默认预设里的 rehypeCode", async () => {
-  const rehypeCodeOptions = { themes: { light: "github-light", dark: "github-dark" }, defaultLanguage: "c" } as const;
-  const options = await cardMdxOptions({ hrefBase: "/cards", rehypeCodeOptions })("bundler");
-  const rehypeCodeEntry = (options.rehypePlugins ?? []).find((plugin) => Array.isArray(plugin) && (plugin[0] as { name?: string }).name === "rehypeCode");
-  assert.ok(Array.isArray(rehypeCodeEntry), "默认预设里该有代码高亮 rehypeCode");
-  assert.equal(rehypeCodeEntry[1], rehypeCodeOptions);
-});

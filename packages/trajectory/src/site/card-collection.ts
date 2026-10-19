@@ -10,7 +10,7 @@
  */
 
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { applyMdxPreset, type DefaultMDXOptions } from "fumadocs-mdx/config";
+import { applyMdxPreset } from "fumadocs-mdx/config";
 import { readCardFile } from "../core/card.ts";
 import type { CardFileReading } from "../core/types.ts";
 import { remarkTrajectoryLinks } from "./remark-trajectory-links.ts";
@@ -61,17 +61,14 @@ export interface CardMdxOptions {
   remarkPlugins?: MdxPluginList;
   /** 站点的全站 rehype 插件（公式渲染这类）：排在默认预设前面，跟站点 docs 集合同一个位置 */
   rehypePlugins?: MdxPluginList;
-  /** 站点的代码高亮选项（代码块默认带行号这类）：交给默认预设里的 rehypeCode，卡里的代码块跟站点别的页一样渲 */
-  rehypeCodeOptions?: DefaultMDXOptions["rehypeCodeOptions"];
 }
 
 /** 卡集合的 mdx 选项：fumadocs 的默认预设（GFM、标题锚点、代码高亮）加上站点的全站插件，最后接上卡链接改写。
  * 集合级 mdxOptions 写成普通对象时 fumadocs-mdx 不套默认预设，所以一定经 applyMdxPreset；
  * 集合写了 mdxOptions，站点 source.config.ts 全局的 mdxOptions 对它整个不生效，全站插件只能经 remarkPlugins / rehypePlugins 再传一次 */
-export function cardMdxOptions({ hrefBase, remarkPlugins = [], rehypePlugins = [], rehypeCodeOptions }: CardMdxOptions): ReturnType<typeof applyMdxPreset> {
+export function cardMdxOptions({ hrefBase, remarkPlugins = [], rehypePlugins = [] }: CardMdxOptions): ReturnType<typeof applyMdxPreset> {
   return applyMdxPreset({
     remarkPlugins: (defaults) => [...defaults, ...remarkPlugins, [remarkTrajectoryLinks, { hrefBase }]],
     rehypePlugins: (defaults) => [...rehypePlugins, ...defaults],
-    rehypeCodeOptions,
   });
 }
