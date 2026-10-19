@@ -1,8 +1,8 @@
 /**
  * 一处钉在站点页面上的样子，写成 mdast 节点，放进 `codePin` 外框里：
- *   行段 / 整文件   一个 `code` 节点，meta 只写 fumadocs 认的 `title="…"` 与 `lineNumbers=N`（行号跟源文件对上）。
+ *   行段 / 整文件   一个 `code` 节点，meta 只写 `title="…"` 与行号：`lineNumbers=N`（行号跟源文件对上）或 `noLineNumbers`。
  *                   有变动且有对比时，改过的行标上 shiki 的 `[!code --]` / `[!code ++]`，旧行新行在同一块里，
- *                   不带 lineNumbers（块里夹着已经不存在的旧行）；没有行注释的语言退成一块 `diff`。
+ *                   写 noLineNumbers（块里夹着已经不存在的旧行）；没有行注释的语言退成一块 `diff`。
  *                   缺失摆确认时那段；位置不明不摆代码，只留一句说明。
  *   目录树          fumadocs 的 `<Files>` / `<Folder>` / `<File>`：根是一个展开的文件夹，名字按路径切成嵌套；
  *                   缺失只剩一个禁用的根文件夹说目录不在了。站点要在 MDX 组件里登记这三个组件。
@@ -43,17 +43,20 @@ export function whereOf(check: PinCheck): string {
   }
 }
 
-/** meta 的值要带引号：fumadocs 的 meta 解析只认 `key="字符串"` / `key=数字` / 裸 `key` */
-function codeNode(lang: string, value: string, title: string, start?: number): Code {
-  const meta = [`title="${title.replace(/"/g, "'")}"`, ...(start !== undefined ? [`lineNumbers=${start}`] : [])].join(" ");
-  return { type: "code", lang, meta, value };
+/**
+ * meta 的值要带引号：fumadocs 的 meta 解析只认 `key="字符串"` / `key=数字` / 裸 `key`。
+ * 行号总是写明：站点的代码块默认带行号（从 1 起），对不上源文件的块要写 `noLineNumbers` 关掉，不能靠不写
+ */
+function codeNode(lang: string, value: string, title: string, firstLine: number | null): Code {
+  const lineNumbers = firstLine === null ? "noLineNumbers" : `lineNumbers=${firstLine}`;
+  return { type: "code", lang, meta: `title="${title.replace(/"/g, "'")}" ${lineNumbers}`, value };
 }
 
 function diffNode(lang: string, diff: DiffLine[], title: string): Code {
   const comment = LINE_COMMENT[lang];
-  if (comment === undefined) return codeNode("diff", diffText(diff), title);
+  if (comment === undefined) return codeNode("diff", diffText(diff), title, null);
   const lines = diff.map(({ kind, text }) => (kind === "removed" ? `${text} ${comment("--")}` : kind === "added" ? `${text} ${comment("++")}` : text));
-  return codeNode(lang, lines.join("\n"), title);
+  return codeNode(lang, lines.join("\n"), title, null);
 }
 
 const jsxAttr = (name: string, value: string | null): MdxJsxAttribute => ({ type: "mdxJsxAttribute", name, value });
@@ -101,11 +104,11 @@ export function displayNodeOf(check: PinCheck): RootContent {
   const lang = langOf(target.file);
   if (check.status === "missing") {
     const old = (check.old ?? []).join("\n");
-    return codeNode(lang, old || NO_OLD, `${OLD_TITLE}（${where}）`);
+    return codeNode(lang, old || NO_OLD, `${OLD_TITLE}（${where}）`, null);
   }
   const current = (check.current ?? []).join("\n");
   if (check.status === "changed") {
-    if (check.reason === "unlocated") return codeNode("text", UNLOCATED_NOTE, `${where}${UNLOCATED_SUFFIX}`);
+    if (check.reason === "unlocated") return codeNode("text", UNLOCATED_NOTE, `${where}${UNLOCATED_SUFFIX}`, null);
     if (check.diff === undefined) return codeNode(lang, current, `${where} · ${STATUS_LABEL.changed}`, check.lines[0]);
     return diffNode(lang, check.diff, where);
   }

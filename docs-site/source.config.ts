@@ -10,7 +10,11 @@ export * from './app/features/collections.generated.ts'
 // 全局的 mdxOptions 管没写自己 mdxOptions 的集合（评论）与集合外被 import 的 mdx；
 // 集合写了自己的 mdxOptions，全局的对它就不生效，全站插件要在集合里再列一次
 export default defineConfig({
-  mdxOptions: { remarkPlugins: [remarkMath, ...featureRemarkPlugins], rehypePlugins: [rehypeKatex, ...featureRehypePlugins] },
+  mdxOptions: {
+    remarkPlugins: [remarkMath, ...featureRemarkPlugins],
+    rehypePlugins: [rehypeKatex, ...featureRehypePlugins],
+    rehypeCodeOptions: sitePlugins.rehypeCodeOptions,
+  },
 })
 
 export const docs = defineDocs({
@@ -23,6 +27,7 @@ export const docs = defineDocs({
     mdxOptions: applyMdxPreset({
       remarkPlugins: sitePlugins.remarkPlugins,
       rehypePlugins: (list) => [...sitePlugins.rehypePlugins, ...list],
+      rehypeCodeOptions: sitePlugins.rehypeCodeOptions,
     }),
   },
   // fumadocs-mdx 默认把所有 .json 当目录说明：页面同名文件夹里的 .json 附件会让那个文件夹变成一组，同名的那一页从侧栏消失

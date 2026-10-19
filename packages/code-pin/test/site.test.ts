@@ -34,12 +34,19 @@ function framesOf(text: string, outcome: (pin: Pin) => Outcome = () => FRESH): C
   return tree.children.filter((n): n is CodePin => n.type === "codePin");
 }
 
-/** fumadocs 从代码块 meta 里读的两样：标题、起始行号 */
-function shownOf(node: RootContent): { lang: string | null | undefined; title?: string; lineNumbers?: number; value: string } {
+/** 站点从代码块 meta 里读的几样：标题、起始行号、不带行号 */
+function shownOf(node: RootContent): { lang: string | null | undefined; title?: string; lineNumbers?: number; noLineNumbers?: true; value: string } {
   const code = node as Code;
   const title = /title="([^"]*)"/.exec(code.meta ?? "")?.[1];
-  const start = /lineNumbers=(\d+)/.exec(code.meta ?? "")?.[1];
-  return { lang: code.lang, ...(title !== undefined ? { title } : {}), ...(start !== undefined ? { lineNumbers: Number(start) } : {}), value: code.value };
+  const start = /\blineNumbers=(\d+)/.exec(code.meta ?? "")?.[1];
+  const off = /\bnoLineNumbers\b/.test(code.meta ?? "");
+  return {
+    lang: code.lang,
+    ...(title !== undefined ? { title } : {}),
+    ...(start !== undefined ? { lineNumbers: Number(start) } : {}),
+    ...(off ? { noLineNumbers: true as const } : {}),
+    value: code.value,
+  };
 }
 
 const statusOf = (frame: CodePin): unknown => frame.data?.hProperties?.dataPinStatus;
@@ -77,7 +84,7 @@ test("标题写今天的位置：行段跟随之后，标记上那几行已经�
   assert.deepEqual(shownOf(bodyOf(frame!)!), { lang: "ts", title: "src/greet.ts:7-8", lineNumbers: 7, value: CURRENT.join("\n") });
 });
 
-test("有变动：旧行新行渲在同一块里，用 shiki 的 [!code --] / [!code ++]，不带行号", () => {
+test("有变动：旧行新行渲在同一块里，用 shiki 的 [!code --] / [!code ++]，写明不带行号", () => {
   const diff = [
     { kind: "same", text: OLD[0]! },
     { kind: "removed", text: OLD[1]! },
@@ -86,7 +93,7 @@ test("有变动：旧行新行渲在同一块里，用 shiki 的 [!code --] / [!
   const [frame] = framesOf(`${mark(T)}\n`, () => ({ status: "changed", reason: "changed", lines: [2, 3], current: CURRENT, old: OLD, diff: [...diff] }));
   const shown = shownOf(bodyOf(frame!)!);
   assert.equal(statusOf(frame!), "changed");
-  assert.deepEqual([shown.lang, shown.title, shown.lineNumbers], ["ts", "src/greet.ts:2-3", undefined], "块里夹着已经不存在的旧行，行号对不上源文件");
+  assert.deepEqual([shown.lang, shown.title, shown.lineNumbers, shown.noLineNumbers], ["ts", "src/greet.ts:2-3", undefined, true], "块里夹着已经不存在的旧行，行号对不上源文件");
   assert.match(shown.value, /return `hi \$\{name\}`; \/\/ \[!code --\]/);
   assert.match(shown.value, /return `hello \$\{name\}`; \/\/ \[!code \+\+\]/);
 });
@@ -95,7 +102,7 @@ test("有变动但取不到旧内容：没有对比，退成一块当前段，�
   const [plain] = framesOf(`${mark(T)}\n`, () => ({ status: "changed", reason: "changed", lines: [2, 3], current: CURRENT }));
   assert.deepEqual(shownOf(bodyOf(plain!)), { lang: "ts", title: "src/greet.ts:2-3 · 有变动", lineNumbers: 2, value: CURRENT.join("\n") });
   const [lost] = framesOf(`${mark(T)}\n`, () => ({ status: "changed", reason: "unlocated", lines: [2, 3], current: CURRENT }));
-  assert.equal(shownOf(bodyOf(lost!)).value, UNLOCATED_NOTE);
+  assert.deepEqual([shownOf(bodyOf(lost!)).value, shownOf(bodyOf(lost!)).noLineNumbers], [UNLOCATED_NOTE, true]);
 });
 
 test("没有行注释的语言：对比退成一块 diff", () => {
@@ -113,12 +120,13 @@ test("没有行注释的语言：对比退成一块 diff", () => {
   const shown = shownOf(bodyOf(frame!)!);
   assert.equal(shown.lang, "diff");
   assert.equal(shown.value, '  {\n-   "a": 1\n+   "a": 2');
+  assert.equal(shown.noLineNumbers, true);
 });
 
 test("缺失：外框是红的，摆确认时那段；没有旧内容就说没有", () => {
   const [gone] = framesOf(`${mark(T)}\n`, () => ({ status: "missing", reason: "vanished", lines: [2, 3], current: null, old: OLD }));
   assert.equal(statusOf(gone!), "missing");
-  assert.deepEqual(shownOf(bodyOf(gone!)), { lang: "ts", title: "文档写下时这段是（src/greet.ts:2-3）", value: OLD.join("\n") });
+  assert.deepEqual(shownOf(bodyOf(gone!)), { lang: "ts", title: "文档写下时这段是（src/greet.ts:2-3）", noLineNumbers: true, value: OLD.join("\n") });
   const [blank] = framesOf(`${mark(T)}\n`, () => ({ status: "missing", reason: "file-missing", lines: [2, 3], current: null }));
   assert.equal(shownOf(bodyOf(blank!)).value, "（没有旧内容）");
 });

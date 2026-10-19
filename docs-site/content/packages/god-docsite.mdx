@@ -115,7 +115,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `mdx.ts` | `remarkPlugins`、`rehypePlugins`、`collections`（集合工厂，名单写在包的 `package.json` 的 `godDocsite.collections`） | `mdx.generated.ts`；有集合的再进 `collections.generated.ts` | `source.config.ts`、`app/lib/mdx-plugins.ts` |
 | `styles.css` | 样式 | `styles.generated.css` | `app/app.css` |
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="126-185" hash="0005b519c4d9" blob="1f2d2a08a622" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="126-185" hash="6562f85af21a" blob="452051efaaf3" */}
 
 合并规则三条：
 
@@ -240,11 +240,11 @@ exit 0
 
 行号由 fumadocs 的代码高亮 `rehypeCode` 解析代码块开头那串标记（meta）时决定，平台的 `siteRehypeCodeOptions` 就是在 fumadocs 默认的解析外面包一层：认出 `noLineNumbers` 并把它从标记里去掉，其余照默认解析，没关掉的都补上行号。fumadocs 自己把 `lineNumbers` 带任何值都当成要行号，所以关掉要另起一个词，写法仿照它的 `noCopy`。`rehypeCode` 在所有 remark、rehype 插件之后运行，手写的代码块和插件生成的代码块都按这条规则走：生成代码块的插件知道行号对不上时，要自己写 `noLineNumbers`，不能靠不写（钉码的新旧行对比块就是这样，见 code-pin 包页）。
 
-{/* ref file="../packages/god-docsite/src/mdx/code-block-options.ts" lines="12-20" */}
+{/* ref file="../packages/god-docsite/src/mdx/code-block-options.ts" lines="12-20" hash="7c3d7bcfeb1c" blob="992f8345171f" */}
 
 一个站里调用 fumadocs MDX 预设的有好几处：页面集合与全局配置（评论走它）在 `source.config.ts`，日志、轨迹卡这些集合在功能的集合工厂里，各自都有一份代码高亮选项。所以选项放进全站插件 `sitePlugins.rehypeCodeOptions`，由站点的 `app/lib/mdx-plugins.ts` 定义一次，每一处都交给自己的 `applyMdxPreset`，哪个集合里的代码块都一样：
 
-{/* ref file="../packages/god-docsite/template/app/lib/mdx-plugins.ts" lines="11-15" */}
+{/* ref file="../packages/god-docsite/template/app/lib/mdx-plugins.ts" lines="11-15" hash="a5fd8c285924" blob="ecddfcbcd331" */}
 
 已经建好的站，`mdx-plugins.ts` 与 `source.config.ts` 归站点自己，模板改了不会自动跟上：照模板在 `sitePlugins` 里加上 `rehypeCodeOptions`、在 `source.config.ts` 的两处 MDX 选项里传它，把平台包与功能包升到带这一项的版本，再重写汇总文件、补回功能的 `mdx.ts`。没加的站照常运行，代码块不带行号。
 

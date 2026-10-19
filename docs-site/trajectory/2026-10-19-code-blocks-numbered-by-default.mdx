@@ -1,0 +1,42 @@
+---
+born-at: 2026-10-19T22:56
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 代码块默认带行号
+domain: 骨架
+---
+
+## 背景
+
+用户要站点的代码块带行号，而且所有站都默认带。fumadocs 本来就支持行号，但要在每个代码块开头写 `lineNumbers`：不写就没有行号。
+SST 协作站上约 200 个手写代码块都没写；钉码（code-pin）生成的代码块行号能对上源文件时写 `lineNumbers=N`，新旧行混排、只剩旧内容、位置不明这三种情况故意不写，靠「不写」表示「不要行号」。
+另外一个站里调用 fumadocs MDX 预设的有四处（页面集合、全局配置、日志集合、轨迹卡集合），代码高亮选项各用各的默认值。
+
+## 结论与边界
+
+- 默认规则写在 fumadocs 代码高亮 `rehypeCode` 解析代码块标记（meta）的那一步：平台包 `./mdx` 导出 `siteRehypeCodeOptions`，在 fumadocs 默认的 `parseMetaString` 外面包一层，
+  认出 `noLineNumbers` 就不带行号，其余没写的都补上行号，`lineNumbers=N` 照旧从 N 起。规则不看语言、不看行数：除了写明 `noLineNumbers` 的，全都带
+- 「不要行号」只能明确写出来，「不写」不再表示任何意思。code-pin 的三种对不上的块改成写 `noLineNumbers`
+- 代码高亮选项收成一份：全站插件 `SiteMdxPlugins` 加一项可选的 `rehypeCodeOptions`，站点 `app/lib/mdx-plugins.ts` 定义一次，四处都交给自己的 `applyMdxPreset`。
+  以后换主题、加别的代码块默认设置也只改这一处
+- 这一项是可选的，没接上的站照常运行、只是不带行号，所以 god-docsite、code-pin、trajectory、collab 都只升 y。已经建好的站要照模板手动接上
+- 不管 TSX 交互组件里手写的 `<pre>`：那些由组件自己排版
+
+## 依据
+
+- `rehypeCode` 对每个代码块都调用 `parseMetaString`，没写标记时传空字符串，没写语言按 `plaintext` 处理（fumadocs-core 16.17.1 的 `rehype-code.core`）；fumadocs 把 `lineNumbers` 带任何值（包括 `false`）都当成要行号
+- 单元测试 `packages/god-docsite/test/code-block-options.test.ts` 走真实的 `rehypeCode`，看 `<pre>` 上的 `data-line-numbers` 与 `data-line-numbers-start`；code-pin 的 `test/site.test.ts` 断言三种块写了 `noLineNumbers`
+- `pnpm test:e2e`：133 项通过，唯一失败是另一个会话同时在改的 `full-test/site/app/root.tsx`，与这次无关
+
+## 否掉的候选
+
+- 每个代码块手写 `lineNumbers`：要改约 200 处，新写的块也会忘
+- 站点 `mdx-components` 里把 `pre` 换成默认带行号的版本：一行就够，但运行时分不出哪些块写了关掉行号
+- 默认加行号的 remark 插件排在各功能插件前面，只处理手写的块，钉码生成的块自然碰不到：code-pin 不用改，但正确与否靠插件的先后顺序，有人调换顺序或新加一个生成代码块的插件就悄悄出错；评论走的全局配置也接不上
+- 按语言或行数排除（`text` 输出块、三行以下的片段不加）：用户选了更简单的规则，除了写明 `noLineNumbers` 的全都带
+
+## 代价与遗留
+
+- 程序输出的 `text` 块和一行的片段也带行号
+- fumadocs-mdx 的类型要求 `rehypeCodeOptions` 是完整选项（主题必填），所以 `siteRehypeCodeOptions` 先展开 fumadocs 的默认选项再覆盖 `parseMetaString`
+- 已经建好的站要逐个接上：升级平台包与功能包、改 `mdx-plugins.ts` 与 `source.config.ts`、重写汇总文件

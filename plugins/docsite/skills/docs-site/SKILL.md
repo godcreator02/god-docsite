@@ -49,6 +49,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
   生成正本里用到的组件才要在 `docfirst.config.mjs` 的 `components` 给一条机读规则，名册外的组件 `pnpm doc` 报红、render 拒绝渲染
 - **术语表**是站点根的 `glossary.json`（每条 `term` / `aliases` / `def` / `href`），不标术语的页写在 `app/lib/mdx-plugins.ts`
 - **图片**放进页面的同名文件夹，Markdown 图片 `![说明](./push/x.png)` 不用登记；**公式**模板已经接好（remark-math + rehype-katex），直接写
+- **代码块默认带行号**、从 1 起：开头写 `lineNumbers=N` 从 N 起，写 `noLineNumbers` 不带。这条规则在 `app/lib/mdx-plugins.ts` 的 `rehypeCodeOptions`，没有这一项的旧站照模板补上
 - 站用到的包都写进站自己的 `package.json`：pnpm 不让代码 import 没声明的依赖
 
 ## 托管与查看
