@@ -131,7 +131,7 @@ export function registerCommands({ commands, docsite, isRegistered, list, openSi
       usage:
         '{ dir }：站点目录的绝对路径。启动前核对：站点根有身份文件 docsite.json 且写对了（没有就是平台之外建的站、或有身份文件之前建的站，拒绝并写明怎么补；format 不是这一版平台认的那一代也拒绝）、node_modules 里装着 @godcreator/god-docsite、scripts.dev 没写死 --port；起不来把开发服务的输出报出来。' +
         '端口先试这个站上次用的（记在 gwb-data 里），被占了由平台的 vite 插件在 10000–49151 里随机挑一个空闲的；地址以回执的 url 为准。' +
-        '启动时经环境变量交给站点本 home 的身份码（DOCSITE_IDENTITY_CODE）与这次生成的推送令牌（DOCSITE_FEED_TOKEN）。已在运行或正在启动就回现状。回 { url, pid, alreadyRunning }。要看页面把 url 给 VS Code 插件打开',
+        '启动时经环境变量交给站点本 home 的身份码（DOCSITE_IDENTITY_CODE）、这次生成的推送令牌（DOCSITE_FEED_TOKEN）与阅读字体文件的路径（DOCSITE_READER_FONTS_FILE，三项字体在设置 font-body / font-heading / font-mono 里选，改了刷新页面生效）。已在运行或正在启动就回现状。回 { url, pid, alreadyRunning }。要看页面把 url 给 VS Code 插件打开',
       effect: 'write',
     },
     async (args) => {

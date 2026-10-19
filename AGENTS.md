@@ -21,7 +21,7 @@
 | `plugins/collab/` | gwb 插件 `@godcreator/gwb-collab`：协作仓与别的仓两套操作、通知交给站点/窗格/QQ、复制给 AI 的提示词、项目与任务命令，站点交给 gwb-docsite 建与常驻（项目加进列表时登记、移出时撤销）；`collab.site.init` 在加协作功能、启动服务之前建好仓根 `collab/` 与 `site/journal/`（站点运行时写入它们），加完协作功能后把站点首页 `app/routes/home.tsx` 换成 collab 包 `templates/home.tsx`（打包时带进插件），仓里还没有自动合并工作流时照 collab 包的模板写出 `.gitea/workflows/collab-auto-merge.yaml`（版本范围填打包时的 collab 版本） |
 | `full-test/` | 本仓的测试站：协作仓形态（`collab/records/` 测试数据 + `site/`），`site/` 是基础站装上全部功能（collab、code-pin、trajectory、explainer、word-report），依赖 `workspace:^` 直连本仓的包、不 init git；e2e 用的页面（评论定位回归页、TSX 页、HTML 页、术语与公式、钉码页与被钉的 `src/greet.ts`、轨迹卡）都在它里面；gwb-docsite 托管 |
 | `docs-site/` | 全仓文档站：说明、原理、维护者手册与随插件发布的说明书正本（outputs）；轨迹卡在站点根 `trajectory/` |
-| `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `full-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、report、all-features 五组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 full-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件。`dependency-rules.cjs` 是 dependency-cruiser 的规则：包之间的方向、包内分层、模块之间不许有环（`pnpm test:deps`） |
+| `tests/` | 全仓级的检查（各包自己的测试在各包里）。`e2e/` 是端到端检查：`run.mjs` 直接在 `full-test/site` 上启动 dev 与 build + start，各跑一轮浏览器检查（`checks/` 下 base、collab、docs、report、all-features 五组）；`pack.mjs` 是发版前的打包检查：各包 `pnpm pack`、测试站复制到系统临时目录按 `file:` 装好，跑同样的检查。`scaffold-check.mjs` 用建站器把 full-test 与 docs-site 生成到临时目录，和仓里比对建站器负责的文件。`dependency-rules.cjs` 是 dependency-cruiser 的规则：包之间的方向、包内分层、模块之间不许有环（`pnpm test:deps`）。`font-family-check.mjs` 查各包有没有写死字体名：组件只用阅读字体的三个变量 `--font-sans` / `--font-heading` / `--font-mono`（`pnpm test:fonts`） |
 | `scripts/` | `migrate-comments-to-threads.mjs`：把旧格式的评论文件迁成评论串文件夹的一次性数据迁移工具 |
 | `probes/` | 实验材料，一个实验一个目录，照目录里 README 第一行就能重新运行；引用的旧包名保持原样 |
 
@@ -47,7 +47,7 @@
   | --- | --- | --- |
   | 快 | 各包的单元测试 | 默认：各包 `pnpm test` / `pnpm check`，仓根 `pnpm test` / `pnpm check`。仓根 `pnpm check` 一分钟左右，其中测试半分钟 |
   | 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`：包里跑本包的，仓根逐个包跑（`--workspace-concurrency=1`），近三分钟 |
-  | 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold` | 显式命令，各几秒钟 |
+  | 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold`、`pnpm test:fonts` | 显式命令，各几秒钟 |
   | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令，见下 |
   | 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`，只在下面写的几种时候跑 |
 
@@ -64,13 +64,14 @@
   | 包里会显示在站点上的行为（组件、路由、样式） | 再 `pnpm build` 后 `pnpm test:e2e --skip-build`，一分半 |
   | 包的 `package.json` 的 `exports`、`files`、依赖 | 再跑 `pnpm test:pack` |
   | 平台模板或功能包的 `template/` | 再跑 `pnpm test:scaffold`，几秒 |
+  | 包里的样式或组件写了字体 | 再跑 `pnpm test:fonts`，一秒 |
   | 包之间或包内分层的 import | 再 `pnpm build` 后 `pnpm test:deps`，几秒 |
   | 插件 | 插件的 `check`，碰到慢测试再跑 `test:slow`；再用 `devkit.dev` 装进隔离 home 看一眼。测试站不加载插件、`test:pack` 不打包插件，e2e 与 `test:pack` 对插件查不出东西 |
   | 升 git，或改了 gwb-collab 的 `src/organization/setup/`、`src/other-repos/fetch/` | 再跑 `plugins/collab` 的 `pnpm test:verified` |
   | 升大家共用的依赖（fumadocs、react-router、vite、catalog 里的版本） | 全量 `pnpm verify`，再 `pnpm test:pack`：这时哪个包都可能坏 |
 
   从干净的工作树发版只是因为别的会话有没提交的文件、`devkit.release` 要求工作区干净：检出后只 `pnpm install --frozen-lockfile`，不跑检查，构建与产物核对 `devkit.release` 自己做。
-  全量 `pnpm verify` 是 `pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
+  全量 `pnpm verify` 是 `pnpm build` → `pnpm check` → `pnpm test:slow` → `pnpm test:deps` → `pnpm test:scaffold` → `pnpm test:fonts` → `pnpm test:e2e`（`--skip-build`，不再重复构建），
   要五六分钟，最耗时的是 `pnpm test:slow`（gwb-collab 一分多钟、gwb-docsite 那条真建站的四十秒）与构建。
   `pnpm test:e2e` 不建站、不装依赖，直接测 full-test，一分钟左右；dev 一轮写评论、任务、临时内容页，start 一轮核对只读（页面上没有写入口、直接提交被拒、文件不变）；
   站里新建的东西都带本次运行编号，每轮跑完删掉，

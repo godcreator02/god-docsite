@@ -1,4 +1,7 @@
 .report-document { line-height: 1.8; overflow-wrap: anywhere; }
+/* 报告正文照导出 Word 用的模板 engine/templates/project-report.dotx 排：正文 Times New Roman + 宋体，标题 Times New Roman + 黑体。不跟读者设的阅读字体 */
+.report-document { font-family: 'Times New Roman', SimSun, serif; }
+.report-document :is(h1, h2, h3, h4, h5, h6) { font-family: 'Times New Roman', SimHei, sans-serif; }
 .report-document h2, .report-document h3, .report-document h4, .report-document [id] { scroll-margin-top: 6rem; }
 .report-fields { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; font-size: .9em; }
 .report-fields dt { color: var(--color-fd-muted-foreground); }

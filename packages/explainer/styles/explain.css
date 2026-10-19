@@ -26,7 +26,8 @@
   --dx-line: var(--color-fd-border, #e2e8f0);
   --dx-fg: var(--color-fd-foreground, #0f172a);
   --dx-dim: var(--color-fd-muted-foreground, #64748b);
-  --dx-mono: 'Sarasa Mono SC', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  /* 代码字体跟着站点的 --font-mono 走（读者在 gwb 设置里选的阅读字体也写在它上面） */
+  --dx-mono: var(--font-mono);
   --dx-c: var(--dx-accent);
   margin: 20px 0 28px;
   display: grid;

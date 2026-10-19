@@ -13,7 +13,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 仓根的脚本：
 
-{/* ref file="../package.json" lines="6-17" hash="55c2536c1600" blob="cb11fdd10b70" */}
+{/* ref file="../package.json" lines="6-18" hash="cf5e1c0961df" blob="62a0eb490280" */}
 
 ## 测试分级
 
@@ -23,7 +23,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | --- | --- | --- |
 | 快 | 各包的单元测试 | 默认：各包 `pnpm test` / `pnpm check`，仓根 `pnpm test` / `pnpm check`。仓根 `pnpm check` 一分钟左右，其中测试半分钟 |
 | 慢 | 各包里的 `*.slow.test.ts` | 只有显式 `pnpm test:slow`：包里跑本包的，仓根逐个包跑，近三分钟 |
-| 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold` | 显式命令，各几秒钟 |
+| 全仓·快 | `pnpm test:deps`、`pnpm test:scaffold`、`pnpm test:fonts` | 显式命令，各几秒钟 |
 | 全仓·慢 | `pnpm test:e2e`、`pnpm test:pack` | 显式命令 |
 | 行为假设 | `plugins/collab` 的 `tests/verified/` | `pnpm test:verified`：升 git 或关键依赖、动了被测的模块、有人明确要求时才跑 |
 
@@ -44,6 +44,7 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 | 包的 `package.json` 的 `exports`、`files`、依赖 | `pnpm test:pack`：把包打成 tarball 装进测试站的副本，查漏打包的文件、写错的出口，近三分钟 |
 | 包之间或包内 `core/`、`node/`、`site/`、`cli/` 之间的 import | 先 `pnpm build`，再仓根 `pnpm test:deps`：按 `tests/dependency-rules.cjs` 查依赖方向、分层与环，没有豁免清单，报出来的都要改掉 |
 | 平台模板或功能包的模板 | `pnpm test:scaffold`：比对测试站、本站和建站器生成的是否一致，几秒钟 |
+| 包里的样式或组件写了字体 | `pnpm test:fonts`：查 `packages/` 下有没有写死字体名，组件只用阅读字体的三个变量（见平台包页「阅读字体」），一秒 |
 | 插件 | 插件的 `check`，碰到慢测试再跑 `test:slow`；再用 `devkit.dev` 装进隔离 home 看一眼。测试站不加载插件，`test:pack` 也不打包插件，这两项对插件查不出东西 |
 | 升 git，或 gwb-collab 的 `src/organization/setup/`、`src/other-repos/fetch/` | `plugins/collab` 里 `pnpm test:verified` |
 | 本站的页面或被钉的代码 | 在 `docs-site/` 里 `pnpm doc`（就是 `docfirst check`），按说明书 [docs-site](/docs/outputs/skills/docs-site) 处理黄灯 |

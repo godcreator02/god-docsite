@@ -1,3 +1,4 @@
+import path from 'node:path'
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 空的类型 import 只为让这几个包的 `declare module 'cordis'` 生效，ctx 上才有各服务的类型
 import type {} from '@godcreator/gwb-commands'
@@ -12,6 +13,7 @@ import { devServerLauncher } from './dev-server.js'
 import { addedByCommand, HostedSites } from './hosted-sites.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { runPnpm } from './pnpm.js'
+import { listInstalledFontFamilies, readerFontsFileName, readerFontsFrom, readerFontSettings, writeReaderFontsFile } from './reader-fonts.js'
 import { addSiteFeature } from './scaffold/add-feature.js'
 import { createDocsite } from './scaffold/create.js'
 import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
@@ -75,9 +77,23 @@ export function apply(ctx: GwbContext): void {
     return code
   }
 
+  // 阅读字体：三项设置的清单是本机字体；值变了就重写给站点读的文件，一次写完再写下一次
+  for (const { key, title, description } of readerFontSettings) {
+    ctx.effect(() => settings.define({ key, type: 'string', title, description, options: listInstalledFontFamilies }))
+  }
+  const readerFontsFile = path.join(ctx.gwbData.dir, readerFontsFileName)
+  let readerFontsWriting = Promise.resolve()
+  const writeReaderFonts = (): void => {
+    readerFontsWriting = readerFontsWriting
+      .then(() => writeReaderFontsFile(readerFontsFile, readerFontsFrom((key) => settings.get(key))))
+      .catch((error: unknown) => log.warn(`阅读字体文件 ${readerFontsFile} 没写成，托管的站点照旧用上一次的字体：${error instanceof Error ? error.message : String(error)}`))
+  }
+  writeReaderFonts()
+  for (const { key } of readerFontSettings) ctx.effect(() => settings.watch(key, writeReaderFonts))
+
   const dataStore = { readDoc: (doc: string) => ctx.gwbData.readDoc(doc), writeDoc: (doc: string, value: unknown) => ctx.gwbData.writeDoc(doc, value) }
   const ports = new SitePorts(dataStore, async (port) => (await loadPlatformScaffold()).isPortFree(port))
-  const host = new SiteHost({ log, launchDevServer: devServerLauncher(ctx.logger('gwb-docsite-dev')), identityCode, ports })
+  const host = new SiteHost({ log, launchDevServer: devServerLauncher(ctx.logger('gwb-docsite-dev'), readerFontsFile), identityCode, ports })
   // 内核不等卸载回调里的异步操作，工作台退出时异步的停止来不及跑完：卸载时同步停；没经卸载就退出的，在退出事件里同步停
   const stopSitesNow = () => host.stopAllNow()
   ctx.effect(() => {

@@ -1,6 +1,6 @@
 ---
 title: gwb-docsite：文档站插件
-description: gwb 工作台插件这一层：一张接缝图看它夹在工作台、平台包、站点开发服务、gwb-collab 之间各经什么接；docfirst.create 从空目录建站的七步（前四步就是普通的 init）；常驻的站记在哪、站点窗格列什么、「打开」怎么用 Chrome 应用窗口一个站只开一个窗口；一个站的 running / stopped / failed 由哪些事件转换；一次 start 怎么定端口；给别的插件的服务 gwbDocsite；打包与随包说明书
+description: gwb 工作台插件这一层：一张接缝图看它和工作台、平台包、站点开发服务、gwb-collab 之间各经什么接；阅读字体的三项设置怎么交给站点；docfirst.create 从空目录建站的七步（前四步就是普通的 init）；常驻的站记在哪、站点窗格列什么、「打开」怎么用 Chrome 应用窗口一个站只开一个窗口；一个站的 running / stopped / failed 由哪些事件转换；一次 start 怎么定端口；给别的插件的服务 gwbDocsite；打包与随包说明书
 icon: Plug
 ---
 
@@ -9,23 +9,37 @@ import { DocsiteSeams } from './gwb-docsite/seams'
 import { CreateSteps } from './gwb-docsite/create-steps'
 import { SiteStates } from './gwb-docsite/site-states'
 
-gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/god-docsite` 之间的一层。站点模板、建站器、开发服务的端口挑法都在平台包里；插件做的是把它们接到工作台上：命令与服务 `gwbDocsite`、托管站点的开发服务、本 home 的身份码、随包的四份说明书。命令怎么用看说明书 [docsite](/docs/outputs/skills/docsite) 与 [docs-site](/docs/outputs/skills/docs-site)，这一页讲它的结构，给要改它的人看。
+gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/god-docsite` 之间的一层。站点模板、建站器、开发服务的端口挑法都在平台包里；插件做的是把它们接到工作台上：命令与服务 `gwbDocsite`、托管站点的开发服务、本 home 的身份码与阅读字体、随包的四份说明书。命令怎么用看说明书 [docsite](/docs/outputs/skills/docsite) 与 [docs-site](/docs/outputs/skills/docs-site)，这一页讲它的结构，给要改它的人看。
 
-先看一张图，把插件夹在哪几方之间、各经什么接摆清楚；后面每一节开头都会写它在图上的位置。
+先看一张图，把插件和哪几方相连、各经什么接摆清楚；后面每一节开头都会写它在图上的位置。
 
 <DocsiteSeams />
 
 第 1 号（注册命令）：插件 inject 工作台的命令服务，注册 `docsite.*` 十五条与 `docfirst.create`；`gwbSkills` 是可选的注入，有它时才把随包的 `skills/` 目录注册给工作台；`gwbShell` 也是可选的注入，有它时才注册站点窗格。第 2、3 号见「服务 gwbDocsite」，第 4 号见「建站与加功能」，第 5、6 号见「托管开发服务」，第 7、8 号见「推送与评论」，第 9 号见「站点窗格」。
 
-插件自己的状态有三样：设置里只有本 home 的身份码 `identity-code`；gwb-data 里有常驻站点的登记表 `hosted-sites` 与每个站上次用的端口 `site-ports`。身份码是人会去看、换电脑时要手填的，放设置；另外两样都是插件运行时自己维护的，放 gwb-data：
+插件自己的状态：设置里有本 home 的身份码 `identity-code` 与阅读字体三项 `font-body`、`font-heading`、`font-mono`；gwb-data 里有常驻站点的登记表 `hosted-sites`、每个站上次用的端口 `site-ports`，数据目录里还有给站点读的阅读字体文件 `reader-fonts.json`。人会去看、会去改的放设置；插件运行时自己维护的放 gwb-data：
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="48-57" hash="ceabc6e44d53" blob="e93a9842f5cc" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="50-59" hash="ceabc6e44d53" blob="c2ccb8dccbfb" */}
 
-图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令（`docsite.site.open` 打开窗口用的函数在这里接上本机 Chrome）、说明书与站点窗格。
+图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码、写阅读字体文件并监听三项字体设置，造出端口记录 `SitePorts`、进程表 `SiteHost`、常驻表 `HostedSites`，组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令（`docsite.site.open` 打开窗口用的函数在这里接上本机 Chrome）、说明书与站点窗格。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="59-141" hash="8d4e34d5ef48" blob="e93a9842f5cc" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="61-157" hash="3b5cd1f70231" blob="c2ccb8dccbfb" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。每次启动开发服务时现读，所以改了设置只影响之后启动的开发服务。
+
+## 阅读字体
+
+正文、标题、代码三种字体是每个人自己的阅读设置，不是站点的设置：在 gwb 设置里选一次，这个 home 托管的所有站都用它。三项都是带选项的 string 设置（gwb-settings 0.4.3 起），设置窗格里画成下拉框，清单是本机装了的字体，写入时不在清单里就拒绝；没设就是站点默认字体。
+
+清单每次现列：用 pwsh 7 运行 WPF 的系统字体列表，取每个字体族 en-us 的名字，去掉 WPF 自己的组合字体（`Global ` 开头的几项）与放不进 CSS 的名字。选它而不选注册表或 GDI 的字体名，是因为它一个字体族只出一项、不截断长名，用户目录与随应用装的字体都在，Chrome 认的比例最高，实验见 `probes/2610192151_local-font-family-names/`。只做了 Windows，别的系统上列清单直接报错。
+
+{/* ref file="../plugins/docsite/src/reader-fonts.ts" lines="22-44" hash="7bbb8ced72a4" blob="1af479119254" */}
+
+三项的值写成插件数据目录里的 `reader-fonts.json`，格式由平台包定（`ReaderFontsFile`：`format` 加 `body`、`heading`、`mono`，没设是 `null`）。插件加载时写一次，三项各 `watch` 一次、变了就重写；几次写入排队，一次写完再写下一次。先写同目录的临时文件再改名，站点不会读到写了一半的文件；Windows 上站点正好在读时改名会被拒，隔一下再试，最多 5 次。没写成只报一行警告，站点照旧用上一次的字体：
+
+{/* ref file="../plugins/docsite/src/index.ts" lines="80-92" hash="5b6f6d3a27d7" blob="c2ccb8dccbfb" */}
+
+启动开发服务时用环境变量 `DOCSITE_READER_FONTS_FILE` 交出这个文件的路径（见「一次 start 怎么走」），站点每次请求读它，所以改了字体刷新页面就生效，不用重启站点。站点那边怎么读、写成哪几个 CSS 变量，见[平台包](/packages/god-docsite)页的「阅读字体」。
 
 ## 建站与加功能
 
@@ -93,11 +107,11 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 {/* ref file="../plugins/docsite/src/site-ports.ts" lines="19-62" hash="0ba7a9be47b8" blob="0cb5b5c21893" */}
 
-启动时经环境变量交给开发服务两样：本 home 的身份码 `DOCSITE_IDENTITY_CODE`（站点按它在 `people.json` 里认人，没有它站点只读），这次启动现生成的推送令牌 `DOCSITE_FEED_TOKEN`；然后等输出里出现 `Local:` 那一行的地址，60 秒内没等到就停掉、报错。
+启动时经环境变量交给开发服务三样：本 home 的身份码 `DOCSITE_IDENTITY_CODE`（站点按它在 `people.json` 里认人，没有它站点只读），这次启动现生成的推送令牌 `DOCSITE_FEED_TOKEN`，阅读字体文件的路径 `DOCSITE_READER_FONTS_FILE`；然后等输出里出现 `Local:` 那一行的地址，60 秒内没等到就停掉、报错。
 
-开发服务的输出一块一条写进 gwb 日志，日志名 `gwb-docsite-dev`，开头是站点目录：stderr 记 warn，Vite 的「Internal server error」、服务端渲染的报错都从这里出来，页面打开是「Error」时用 `logger.query` 按这个名字查；stdout 记 debug，默认不写进 gwb.log，改一个文件就刷一行的「page reload」不会把日志刷满。插件另在内存里留最后 4000 字，启动失败、退出时的报错原话从那里取。
+开发服务的输出一块一条写进 gwb 日志，日志名 `gwb-docsite-dev`，开头是站点目录：stderr 记 warn，Vite 的「Internal server error」、服务端渲染的报错都从这里出来，页面打开是「Error」时用 `logger.query` 按这个名字查；stdout 记 debug，默认不写进 gwb.log，改一个文件就输出一行的「page reload」不会把日志写满。插件另在内存里留最后 4000 字，启动失败、退出时的报错原话从那里取。
 
-{/* ref file="../plugins/docsite/src/dev-server.ts" lines="155-168" hash="60e364b8c09a" blob="48bea96ae7d0" */}
+{/* ref file="../plugins/docsite/src/dev-server.ts" lines="155-168" hash="01094a965eab" blob="8f60bb908798" */}
 
 跑起来以后记下这次的端口；几个站同时记时排队写，后写的不覆盖先写的。记不下来只报一行警告，照样运行，下次重新挑（有意设计的降级）。选一种情况看看：
 
@@ -105,7 +119,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 启动前核对不过时不启动进程、直接抛错，状态转成 `failed`，`error` 记下拒绝的原话；开发服务没能启动、启动后退出也是 `failed`。
 
-进程自己退出了（不是 `stop` 停的）就过一会儿自动重启：协作站常驻在后台，崩了往往要等人打开时才发现，所以不等人。连续崩溃时依次等 2 秒、10 秒、60 秒，`error` 末尾写着几秒后第几次；一次运行超过 5 分钟才退出的不算连续，重新从 2 秒算；三次用完就停在 `failed`、写明不再自动重启，免得一个起不来的站反复占资源。自动重启那一次没起来也算一次崩溃。人手动 `start` 取消等待、马上启动，`stop` 取消等着的重启；两者都把连续崩溃的次数清零。人手动 `start` 时起不来不自动重试：那多半是站点本身的问题，要人看。
+进程自己退出了（不是 `stop` 停的）就过一会儿自动重启：协作站常驻在后台，崩溃后往往要等人打开时才发现，所以不等人。连续崩溃时依次等 2 秒、10 秒、60 秒，`error` 末尾写着几秒后第几次；一次运行超过 5 分钟才退出的不算连续，重新从 2 秒算；三次用完就停在 `failed`、写明不再自动重启，免得一个起不来的站反复占资源。自动重启那一次没起来也算一次崩溃。人手动 `start` 取消等待、马上启动，`stop` 取消等着的重启；两者都把连续崩溃的次数清零。人手动 `start` 时起不来不自动重试：那多半是站点本身的问题，要人看。
 
 `start` 的复用、核对、定端口、启动、记端口、崩溃后排重启，完整算法在一段里：
 
@@ -151,4 +165,5 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 | 快 | `tests/site-list.test.ts` | `docsite.site.list` 怎么合成一张表、站名怎么取，窗格一行的来源、站名与能不能「不再托管」 |
 | 快 | `tests/chrome-app.test.ts` | 找 Chrome 的位置、应用窗口身份、一个站一个窗口（找窗口与启动都是假的） |
 | 快 | `tests/scaffold-create.test.ts`、`scaffold-add-feature.test.ts`、`docfirst/*.test.ts` | 真的平台建站器、假的 pnpm 与首页检查（`tests/site-fixtures.ts`） |
-| 慢 | `tests/real-site.slow.test.ts` | 在临时目录真建站、装依赖、启动、写评论、推送、重启沿用端口、加功能、`pnpm build`；要先在仓根 `pnpm build` |
+| 快 | `tests/reader-fonts.test.ts` | 字体清单怎么整理、三项设置拼成文件内容、原子写入后站点按同一份格式读得出来 |
+| 慢 | `tests/real-site.slow.test.ts` | 在临时目录真建站、装依赖、启动（首页的 `<head>` 里有阅读字体文件写的变量）、写评论、推送、重启沿用端口、加功能、`pnpm build`；要先在仓根 `pnpm build` |

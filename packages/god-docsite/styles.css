@@ -76,6 +76,20 @@ a:has([data-docsite-sidebar-hidden-page]) {
 @source './dist';
 
 /*
+ * 阅读字体：正文 --font-sans、标题 --font-heading、代码 --font-mono。各包的组件只用这三个变量或同名的 Tailwind 类，不写字体名。
+ * 读者设了字体时，根路由把它写成不在任何 layer 里的 :root 变量（readerFontsCss），盖掉这里与 Tailwind 的默认值
+ */
+@theme {
+  --font-heading: var(--font-sans);
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/*
  * 宽屏布局：fumadocs 的 docs 布局在窗口比 97rem 宽时整体居中，左侧栏左边、目录右边各空出一截。
  * 这里让布局铺满窗口：左侧栏贴左边，本页目录那一列贴右边、宽度固定，正文在中间那一列里居中。
  */

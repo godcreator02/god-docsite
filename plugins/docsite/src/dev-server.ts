@@ -1,6 +1,6 @@
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { feedTokenEnvName, feedTokenHeader, feedUrlOf } from '@godcreator/god-docsite'
+import { feedTokenEnvName, feedTokenHeader, feedUrlOf, readerFontsFileEnvName } from '@godcreator/god-docsite'
 import { identityCodeEnvName } from '@godcreator/identity/node'
 import { DocsiteRejected } from './errors.js'
 
@@ -153,18 +153,18 @@ export function subscribeFeed(siteUrl: string, token: string, channel: string, l
 }
 
 /**
- * 在站点目录里运行 pnpm dev，环境变量交给它身份码与这次启动生成的推送令牌，等它在输出里报出地址。
+ * 在站点目录里运行 pnpm dev，环境变量交给它身份码、这次启动生成的推送令牌与阅读字体文件的路径（站点每次请求读它），等它在输出里报出地址。
  * 给了 port 就带上 --port（平台的 vite 插件加 strictPort，被占就起不来），没给由平台的 vite 插件随机挑；报出的地址端口和给的不同就拒绝。
  * 先退出或超时都抛 DocsiteRejected，写明开发服务的输出。
  * 输出一块一条写进 outputLog：stderr 记 warn（Vite 与服务端渲染的报错从这里出来），stdout 记 debug
  */
-export const devServerLauncher = (outputLog: DevOutputLog): LaunchDevServer => (siteDir, identityCode, port) => {
+export const devServerLauncher = (outputLog: DevOutputLog, readerFontsFile: string): LaunchDevServer => (siteDir, identityCode, port) => {
   const token = randomUUID()
   const child = spawn('pnpm', port === null ? ['dev'] : ['dev', '--port', String(port)], {
     cwd: siteDir,
     shell: true,
     windowsHide: true,
-    env: { ...process.env, [identityCodeEnvName]: identityCode, [feedTokenEnvName]: token },
+    env: { ...process.env, [identityCodeEnvName]: identityCode, [feedTokenEnvName]: token, [readerFontsFileEnvName]: readerFontsFile },
   })
   let output = ''
   let reportedUrl = false

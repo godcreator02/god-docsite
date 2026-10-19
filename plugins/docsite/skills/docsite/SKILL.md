@@ -56,7 +56,7 @@ docsite.site.remove  {"dir":…}   去掉常驻登记，在运行就停掉；没
 - 启动前核对：站点根有身份文件 `docsite.json` 且写对了，`node_modules` 里装着 `@godcreator/god-docsite`，`scripts.dev` 没写 `--port`（写了就拒绝，照报错去掉）
 - 身份文件写明站点的类别与布局代号，平台建站时写，只有两项：`{ "kind": "base" | "docs" | "collab", "format": 1 }`。
   没有它的站拒绝托管（旧包 `@godcreator/docsite-kit` 上的站、有身份文件之前建的站）：平台建的站照报错手动补一份，别的站先迁到平台；`format` 不是 `1` 也拒绝，照平台包的 `template/` 升级站点后再改
-- 启动时经环境变量交给站点本 home 的身份码 `DOCSITE_IDENTITY_CODE` 与这次的推送令牌 `DOCSITE_FEED_TOKEN`
+- 启动时经环境变量交给站点本 home 的身份码 `DOCSITE_IDENTITY_CODE`、这次的推送令牌 `DOCSITE_FEED_TOKEN` 与阅读字体文件的路径 `DOCSITE_READER_FONTS_FILE`
 - `failed` 时 `error` 写着退出码与最后几行输出。进程自己退出了会自动重启：连续崩溃时依次等 2 秒、10 秒、60 秒，`error` 末尾写着几秒后第几次；连续三次重启都没撑过 5 分钟就不再重启，`error` 写着「不再自动重启」，查明原因修好后 `docsite.site.start`。等着重启时 `docsite.site.stop` 取消这次重启
 - 常驻的站只记在 gwb-data 的文档 `hosted-sites` 里，不在设置里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
   不想要某个协作站就移出项目列表（`collab.project.remove`），单 `docsite.site.remove` 的话 gwb-collab 下次加载又登记回来
@@ -85,6 +85,16 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 - agent 没有身份码、不能在网页上传：人做好一张 128×128 的 webp，直接放成 `public/avatars/<agent 的 id>.webp`
 - 只写文件，要别人也看到得提交；协作仓里成员只能提交自己的头像，别人的与 agent 的由项目负责人提交
 - 早建的站没有上传入口：照平台包 `template/` 的 `app/routes/layout.tsx` 改用 `publicPeopleWithAvatars`，再 `docsite.feature.add` 身份包 `@godcreator/identity` 补上 `app/features/identity/`（见「升级已有站点」）
+
+## 阅读字体
+
+正文、标题、代码字体是每个人自己的阅读设置，这个 home 托管的所有站都用它；站点本身不指定字体，没设就是站点默认字体。
+
+- 三项设置在 gwb-docsite 分区：`font-body`（正文）、`font-heading`（标题，没设跟正文一样）、`font-mono`（代码与讲解组件里的等宽文字）。
+  人在设置窗格的下拉框里选；agent 先 `settings.options {"section":"docsite","key":"font-body"}` 看本机装了哪些字体，再 `settings.set`，不在清单里的名字会被拒绝。回到默认用 `settings.delete`
+- 改了以后刷新已打开的页面就生效，不用重启站点。只对工作台托管的开发服务生效：手动 `pnpm dev`、发布版都是默认字体
+- 早建的站不跟读者的字体：照平台包 `template/` 的 `app/root.tsx` 加上 `loader` 与 `<head>` 里的 `<style>` 那几行，平台包升到带 `readerFontsCss` 的版本（见「升级已有站点」）
+- 写组件时字体只用 `font-sans` / `font-heading` / `font-mono` 三个类或同名变量，不写字体名
 
 ## 评论
 
