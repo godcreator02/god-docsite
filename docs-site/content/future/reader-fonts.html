@@ -1,0 +1,407 @@
+<title>阅读字体</title>
+<style>
+/* 单栏文档；颜色按「gwb 插件 / 平台包与站点 / 磁盘上的文件 / 浏览器」编码，全页一致 */
+:root {
+  --bg: #f4f6f4;
+  --surface: #ffffff;
+  --surface-2: #eaeeeb;
+  --fg: #18211d;
+  --muted: #56645d;
+  --line: #d3dbd6;
+  --accent: #1d6b58;
+  --gwb: #7a4a8c;      --gwb-bg: #eee3f2;
+  --kit: #1d6b58;      --kit-bg: #dcefe8;
+  --file: #9a620e;     --file-bg: #f5e9d4;
+  --browser: #2b5ea8;  --browser-bg: #dfe8f6;
+  --font-body: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --font-mono: "Cascadia Code", Consolas, ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121815; --surface: #1a221e; --surface-2: #222c27;
+    --fg: #e3ebe6; --muted: #9aa9a1; --line: #33413a; --accent: #5cc4a6;
+    --gwb: #c99be0;     --gwb-bg: #33233c;
+    --kit: #5cc4a6;     --kit-bg: #1d3830;
+    --file: #e0aa58;    --file-bg: #3a2c16;
+    --browser: #8db2ec; --browser-bg: #1f2c42;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121815; --surface: #1a221e; --surface-2: #222c27;
+  --fg: #e3ebe6; --muted: #9aa9a1; --line: #33413a; --accent: #5cc4a6;
+  --gwb: #c99be0;     --gwb-bg: #33233c;
+  --kit: #5cc4a6;     --kit-bg: #1d3830;
+  --file: #e0aa58;    --file-bg: #3a2c16;
+  --browser: #8db2ec; --browser-bg: #1f2c42;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15.5px; line-height: 1.75;
+  padding-inline: 20px; padding-block: 40px 80px;
+}
+main { max-width: 52rem; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 52px; }
+section { display: grid; gap: 14px; min-width: 0; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.4rem; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin-top: 6px; }
+p { margin: 0; max-width: 46em; }
+ul, ol { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; max-width: 46em; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+.label { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); }
+header { display: grid; gap: 12px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); }
+.status { color: var(--accent); font-weight: 600; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13.5px; }
+nav.toc a { text-decoration: none; color: var(--muted); }
+nav.toc a:hover { color: var(--accent); }
+.summary { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); padding: 18px 20px; display: grid; gap: 10px; border-radius: 6px; }
+.summary p { max-width: none; }
+.scroll { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--surface); }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font-weight: 600; background: var(--surface-2); white-space: nowrap; }
+pre { margin: 0; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; overflow-x: auto; }
+pre .c { color: var(--muted); }
+.seam { display: grid; grid-template-columns: 2em 1fr; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; }
+.seam-no { font-weight: 700; color: var(--accent); font-size: 1.15rem; line-height: 1.4; }
+.seam-body { display: grid; gap: 8px; min-width: 0; }
+.seam-body h3 { margin: 0; }
+.tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+.t-gwb { color: var(--gwb); background: var(--gwb-bg); }
+.t-kit { color: var(--kit); background: var(--kit-bg); }
+
+figure { margin: 0; display: grid; gap: 8px; }
+figcaption { font-size: 13px; color: var(--muted); }
+svg.map { width: 100%; min-width: 600px; height: auto; display: block; }
+svg.map .box { stroke-width: 1.5; }
+svg.map .gwb { fill: var(--gwb-bg); stroke: var(--gwb); }
+svg.map .kit { fill: var(--kit-bg); stroke: var(--kit); }
+svg.map .file { fill: var(--file-bg); stroke: var(--file); stroke-dasharray: 6 4; }
+svg.map .browser { fill: var(--browser-bg); stroke: var(--browser); }
+svg.map .title { fill: var(--fg); font-size: 15px; font-weight: 700; font-family: var(--font-body); }
+svg.map .line { fill: var(--muted); font-size: 13px; font-family: var(--font-body); }
+svg.map .mono { fill: var(--muted); font-size: 12px; font-family: var(--font-mono); }
+svg.map .call { stroke: var(--fg); stroke-width: 1.6; fill: none; }
+svg.map .disk { stroke: var(--file); stroke-width: 1.6; fill: none; stroke-dasharray: 6 4; }
+svg.map .no circle { fill: var(--surface); stroke: var(--accent); stroke-width: 1.6; }
+svg.map .no text { fill: var(--accent); font-size: 13px; font-weight: 700; font-family: var(--font-body); text-anchor: middle; dominant-baseline: central; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; border: 1.5px solid; }
+
+@media (max-width: 560px) {
+  body { padding-inline: 16px; font-size: 15px; }
+  h1 { font-size: 1.65rem; }
+  .seam { grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
+
+<main>
+
+<header>
+  <span class="label">god-docsite · 在途方案（做完删，结论移进现状页）</span>
+  <h1>阅读字体：一处设置，所有托管的站生效</h1>
+  <div class="meta">
+    <span>2026-10-19</span>
+    <span class="status">设计说明，等确认后实现</span>
+    <span>依据：实验 <code>probes/2610192151_local-font-family-names/</code></span>
+  </div>
+  <nav class="toc" aria-label="目录">
+    <a href="#goal">要做什么</a>
+    <a href="#map">总图</a>
+    <a href="#seams">逐条接缝</a>
+    <a href="#css">CSS 约定</a>
+    <a href="#fonts-list">字体清单从哪来</a>
+    <a href="#steps">实施顺序与版本</a>
+    <a href="#check">检查与验收</a>
+    <a href="#risks">风险与边界</a>
+    <a href="#decided">已定的决定</a>
+  </nav>
+</header>
+
+<section id="goal">
+  <h2>要做什么</h2>
+  <div class="summary">
+    <p><b>正文、标题、代码三种字体由每个人自己选，选一次，这台电脑上 gwb 托管的所有站都生效。</b>站点本身不指定字体：没设的人看到的还是现在的系统默认字体。比如自己把三项都设成更纱等宽（<code>Sarasa Mono SC</code>），别人设他们自己装的字体。</p>
+    <p>设置放在 gwb-docsite 的设置里，在 gwb 设置窗格的下拉框里选，下拉框列出本机装了的字体。gwb-docsite 把三项写成一个文件，启动站点时用环境变量告诉站点文件在哪；站点每次请求读这个文件，把三个 CSS 变量写进页面。平台和各功能包的组件只认这三个变量，所以全部跟着变。改了设置，刷新页面生效。</p>
+  </div>
+  <p>fumadocs 自己的 CSS 不设字体（<code>@fumadocs/base-ui</code> 16.17.1 里只有代码块用了 <code>font-mono</code> 类），全靠 Tailwind 的基础样式：<code>html</code> 用 <code>--font-sans</code>，<code>code</code>、<code>pre</code>、<code>kbd</code> 用 <code>--font-mono</code>。所以正文和代码只要换这两个变量，fumadocs 的组件就跟着变；标题另加一个变量 <code>--font-heading</code>。</p>
+</section>
+
+<section id="map">
+  <h2>总图</h2>
+  <figure>
+    <div class="scroll">
+    <svg class="map" viewBox="0 0 760 650" role="img" aria-label="阅读字体从 gwb 设置到浏览器的接缝图：gwb-settings、baseui 设置窗格、gwb-docsite、reader-fonts.json 文件、站点进程、浏览器，七条编号接缝">
+      <defs>
+        <marker id="arrow-call" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: var(--fg)" /></marker>
+        <marker id="arrow-disk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: var(--file)" /></marker>
+      </defs>
+
+      <rect class="box gwb" x="20" y="20" width="310" height="104" rx="8" />
+      <text class="title" x="36" y="48">gwb-settings（设置服务）</text>
+      <text class="mono" x="36" y="74">define({ …, options })</text>
+      <text class="mono" x="36" y="94">watch(key, listener)</text>
+      <text class="mono" x="36" y="114">settings.options · settings.set 校验</text>
+
+      <rect class="box gwb" x="430" y="20" width="310" height="104" rx="8" />
+      <text class="title" x="446" y="48">baseui 设置窗格</text>
+      <text class="line" x="446" y="76">有选项的设置项画成下拉框</text>
+      <text class="line" x="446" y="100">第一项「默认」＝ 清掉这一项</text>
+
+      <rect class="box gwb" x="20" y="190" width="310" height="112" rx="8" />
+      <text class="title" x="36" y="218">gwb-docsite</text>
+      <text class="mono" x="36" y="244">font-body · font-heading · font-mono</text>
+      <text class="line" x="36" y="268">选项：WPF 列出的本机字体</text>
+      <text class="line" x="36" y="290">启动站点时交出文件路径</text>
+
+      <rect class="box file" x="430" y="198" width="310" height="86" rx="8" />
+      <text class="title" x="446" y="226">reader-fonts.json</text>
+      <text class="line" x="446" y="250">在 gwb-docsite 的数据目录里</text>
+      <text class="mono" x="446" y="272">{ format, body, heading, mono }</text>
+
+      <rect class="box kit" x="430" y="370" width="310" height="112" rx="8" />
+      <text class="title" x="446" y="398">站点进程（dev）</text>
+      <text class="mono" x="446" y="424">readerFontsCss()</text>
+      <text class="line" x="446" y="448">平台包每次请求读文件</text>
+      <text class="line" x="446" y="470">root.tsx 把它写进 &lt;head&gt;</text>
+
+      <rect class="box browser" x="20" y="550" width="720" height="84" rx="8" />
+      <text class="title" x="36" y="578">浏览器</text>
+      <text class="mono" x="36" y="602">:root { --font-sans; --font-heading; --font-mono }</text>
+      <text class="line" x="36" y="624">→ Tailwind 基础样式、fumadocs 组件、各功能包的组件都只认这三个变量</text>
+
+      <path class="call" d="M175 190 V128" marker-end="url(#arrow-call)" />
+      <path class="call" d="M430 72 H334" marker-end="url(#arrow-call)" />
+      <path class="disk" d="M330 244 H426" marker-end="url(#arrow-disk)" />
+      <path class="call" d="M175 302 V426 H426" marker-end="url(#arrow-call)" />
+      <path class="disk" d="M585 370 V288" marker-end="url(#arrow-disk)" />
+      <path class="call" d="M585 482 V546" marker-end="url(#arrow-call)" />
+
+      <g class="no"><circle cx="175" cy="157" r="12" /><text x="175" y="157">1</text></g>
+      <g class="no"><circle cx="382" cy="72" r="12" /><text x="382" y="72">2</text></g>
+      <g class="no"><circle cx="378" cy="244" r="12" /><text x="378" y="244">3</text></g>
+      <g class="no"><circle cx="300" cy="426" r="12" /><text x="300" y="426">4</text></g>
+      <g class="no"><circle cx="585" cy="329" r="12" /><text x="585" y="329">5</text></g>
+      <g class="no"><circle cx="585" cy="514" r="12" /><text x="585" y="514">6</text></g>
+      <g class="no"><circle cx="712" cy="578" r="12" /><text x="712" y="578">7</text></g>
+    </svg>
+    </div>
+    <div class="legend">
+      <span><span class="swatch" style="background: var(--gwb-bg); border-color: var(--gwb)"></span>gwb 插件</span>
+      <span><span class="swatch" style="background: var(--kit-bg); border-color: var(--kit)"></span>平台包与站点</span>
+      <span><span class="swatch" style="background: var(--file-bg); border-color: var(--file); border-style: dashed"></span>磁盘上的文件（虚线是读写文件）</span>
+      <span><span class="swatch" style="background: var(--browser-bg); border-color: var(--browser)"></span>浏览器</span>
+    </div>
+    <figcaption>实线是调用或启动参数，虚线是读写磁盘上的文件。编号和下一节的接缝一一对应。</figcaption>
+  </figure>
+</section>
+
+<section id="seams">
+  <h2>逐条接缝</h2>
+
+  <div class="seam"><div class="seam-no">1</div><div class="seam-body">
+    <h3>gwb-docsite 声明三项设置 <span class="tag t-gwb">gwb-settings 新增</span></h3>
+    <p>设置服务的声明 <code>SettingDef</code> 加一个可选字段 <code>options</code>，服务接口加一个方法 <code>watch</code>：</p>
+<pre><span class="c">// gwb-base-plugins/plugins/settings/src/registry.ts</span>
+interface SettingDef {
+  …
+  <span class="c">/** 只能配 type: 'string'。界面画成下拉框；settings.set 写入时值必须在清单里 */</span>
+  options?: () => Promise&lt;readonly string[]&gt;
+}
+
+<span class="c">// gwb-base-plugins/plugins/settings/src/index.ts</span>
+interface GwbSettingsApi {
+  …
+  <span class="c">/** 自己声明过的一项写进文件之后（不管经命令、界面还是 set），回调拿到 get 会回的值；调用方卸载时自动退订 */</span>
+  watch(key: string, listener: (value: unknown) =&gt; void): () =&gt; void
+}</pre>
+    <p><code>options</code> 配在 <code>string</code> 以外的类型上，<code>define</code> 直接报错。<code>watch</code> 只认调用方自己声明过的键，没声明过就报错，跟 <code>set</code> 的规矩一样。</p>
+    <p>gwb-docsite 在分区 <code>docsite</code>（身份码 <code>identity-code</code> 也在这个分区）声明三项：</p>
+    <div class="scroll"><table>
+      <thead><tr><th>键</th><th>标题</th><th>没设时</th></tr></thead>
+      <tbody>
+        <tr><td><code>font-body</code></td><td>正文字体</td><td>站点默认（Tailwind 的 <code>--font-sans</code>）</td></tr>
+        <tr><td><code>font-heading</code></td><td>标题字体</td><td>跟正文字体一样</td></tr>
+        <tr><td><code>font-mono</code></td><td>代码字体</td><td>站点默认（Tailwind 的 <code>--font-mono</code>）</td></tr>
+      </tbody>
+    </table></div>
+    <p>三项都是 <code>type: 'string'</code>，不写 <code>default</code>，<code>options</code> 都是同一个函数：现列本机字体（见<a href="#fonts-list">字体清单从哪来</a>）。</p>
+  </div></div>
+
+  <div class="seam"><div class="seam-no">2</div><div class="seam-body">
+    <h3>设置窗格与 agent 怎么选 <span class="tag t-gwb">gwb-settings、baseui 新增</span></h3>
+    <ul>
+      <li><code>settings.all</code> 的行，声明里带 <code>options</code> 的加一个字段 <code>hasOptions: true</code>（函数没法交给页面，清单另取）</li>
+      <li>新命令 <code>settings.options {section, key}</code>（effect 是 read）：调那一项的 <code>options()</code>，回字符串数组。没声明这一项、或声明里没有 <code>options</code>，报错</li>
+      <li><code>settings.set</code>：声明里有 <code>options</code> 的，先 <code>await options()</code>，值不在清单里就拒绝，报错里写明用 <code>settings.options</code> 查能填什么。列清单放在写入队列外面做，不让列字体的半秒卡住别的写入</li>
+      <li><code>settings.delete</code> 不查清单：删掉就是回到默认</li>
+      <li>baseui 的设置窗格：<code>hasOptions</code> 的行画成下拉框，窗格打开时调 <code>settings.options</code> 取清单；第一项是「默认（不设置）」，选它调 <code>settings.delete</code>。<code>acceptSetting</code> 收下 <code>hasOptions</code> 这个布尔字段</li>
+    </ul>
+    <p>agent 经 MCP 走同一套：先 <code>settings.options</code> 看清单，再 <code>settings.set</code>，拼错的名字会被拒绝。</p>
+  </div></div>
+
+  <div class="seam"><div class="seam-no">3</div><div class="seam-body">
+    <h3>gwb-docsite 写字体文件 <span class="tag t-gwb">gwb-docsite 新增</span></h3>
+    <p>文件放在 gwb-docsite 自己的数据目录：<code>join(ctx.gwbData.dir, 'reader-fonts.json')</code>。格式由 gwb-docsite 定，带版本号：</p>
+<pre>{ "format": 1, "body": "Sarasa Mono SC", "heading": null, "mono": "Sarasa Mono SC" }</pre>
+    <ul>
+      <li>每项是字体族名，或 <code>null</code>（没设）</li>
+      <li>插件启动时按当前设置写一次；三项各 <code>watch</code> 一次，变了就重写</li>
+      <li>先写同目录的临时文件再改名（原子写入），站点不会读到写了一半的文件</li>
+      <li>不用 <code>gwbData.writeDoc</code>：这个文件是给站点进程读的，是 gwb-docsite 和站点之间的约定；<code>writeDoc</code> 在磁盘上存成什么样是 gwb-data 内部的事</li>
+    </ul>
+  </div></div>
+
+  <div class="seam"><div class="seam-no">4</div><div class="seam-body">
+    <h3>启动站点时交出文件路径 <span class="tag t-gwb">gwb-docsite 新增</span></h3>
+    <p><code>docsite.site.start</code>（以及经它启动的 <code>add</code>、<code>open</code>、gwb-collab 托管的协作站）启动开发服务时，在已有的 <code>DOCSITE_IDENTITY_CODE</code>、<code>DOCSITE_FEED_TOKEN</code> 旁边多给一个环境变量：</p>
+<pre>DOCSITE_READER_FONTS_FILE=&lt;gwb-docsite 数据目录&gt;\reader-fonts.json</pre>
+    <p>不管有没有设字体都给：文件里全是 <code>null</code> 时站点照默认显示。改字体不用重启站点，因为站点每次请求都读文件。</p>
+  </div></div>
+
+  <div class="seam"><div class="seam-no">5</div><div class="seam-body">
+    <h3>站点读文件 <span class="tag t-kit">平台包新增</span></h3>
+    <p>平台包 <code>@godcreator/god-docsite/server</code> 导出 <code>readerFontsCss(): string | null</code>：</p>
+    <ul>
+      <li>没有环境变量 <code>DOCSITE_READER_FONTS_FILE</code>：回 <code>null</code>。手动 <code>pnpm dev</code>、发布版、e2e 测试站都是这样，用默认字体</li>
+      <li>有环境变量：读文件，按修改时间缓存。文件不在、不是 JSON、<code>format</code> 不是 1、某项不是字符串或 <code>null</code>、名字里有 <code>" ' \ ; { } &lt; &gt;</code> 或换行，<b>直接报错</b>并写明文件路径和哪一项不对。不悄悄改用默认字体：文件是 gwb-docsite 写的，格式不对就是 gwb-docsite 的问题，要马上看得到</li>
+      <li>回的 CSS 只写设了的项，名字后面接上 Tailwind 默认的那串字体做后备（字体里没有的字，比如英文字体里的中文，浏览器逐字往后找）：</li>
+    </ul>
+<pre>:root {
+  --font-sans: "Sarasa Mono SC", ui-sans-serif, system-ui, sans-serif, <span class="c">…（Tailwind 默认的其余几项）</span>;
+  --font-mono: "Sarasa Mono SC", ui-monospace, SFMono-Regular, <span class="c">…</span>;
+}</pre>
+  </div></div>
+
+  <div class="seam"><div class="seam-no">6</div><div class="seam-body">
+    <h3>写进页面 <span class="tag t-kit">平台模板改动</span></h3>
+    <p>变量要放在根路由：布局路由 <code>routes/layout</code> 不包首页（<code>index('routes/home.tsx')</code>）和功能的独立页面（<code>featureStandaloneRoutes</code>）。平台模板的 <code>app/root.tsx</code> 加一个 loader，<code>Layout</code> 在 <code>&lt;head&gt;</code> 里输出 <code>&lt;style&gt;</code>：</p>
+<pre>import { readerFontsCss } from '@godcreator/god-docsite/server'
+
+export function loader() {
+  return { readerFontsCss: readerFontsCss() }
+}
+
+export function Layout({ children }) {
+  <span class="c">// 出错页也用 Layout 渲染，那时没有 loader 数据</span>
+  const fonts = useRouteLoaderData&lt;typeof loader&gt;('root')?.readerFontsCss
+  …
+  &lt;head&gt; … {fonts &amp;&amp; &lt;style dangerouslySetInnerHTML={{ __html: fonts }} /&gt;} &lt;/head&gt;
+}</pre>
+    <p>根路由的 loader 在站内跳页时不重新运行（React Router 默认只在参数或查询串变了、或提交表单后重新运行），所以改了字体要刷新页面。这是接受的代价。</p>
+    <p><code>root.tsx</code> 是站点自己的文件，平台模板改了，已经建好的站不会自动跟上：docs-site 与 full-test 用建站器重新生成，SST 协作站（<code>chb-dab-sst/collab/site</code>）和别的仓的站手动加这几行，平台的说明页写明升级步骤。</p>
+  </div></div>
+
+  <div class="seam"><div class="seam-no">7</div><div class="seam-body">
+    <h3>各包的组件只认三个变量 <span class="tag t-kit">平台包与功能包</span></h3>
+    <p>见下一节。</p>
+  </div></div>
+</section>
+
+<section id="css">
+  <h2>CSS 约定</h2>
+  <p>约定写在平台包的 <code>styles.css</code>（每个站都经 <code>app.css</code> 引入它），功能包不用知道字体是从 gwb 来的：</p>
+<pre>@theme {
+  --font-heading: var(--font-sans);
+}
+@layer base {
+  h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
+}</pre>
+  <ul>
+    <li><code>@theme</code> 里声明 <code>--font-heading</code>，同时得到 Tailwind 的 <code>font-heading</code> 类。它默认等于 <code>--font-sans</code>，所以只设了正文字体时标题跟着正文走</li>
+    <li>根路由输出的 <code>&lt;style&gt;</code> 不在任何 <code>@layer</code> 里，比 Tailwind 主题层里的同名变量优先，直接盖掉默认值</li>
+    <li>h1–h6 那条规则让页面标题、正文标题、评论与协作界面里用标题标签写的小标题都用标题字体</li>
+  </ul>
+  <p>各包的组件只写 <code>font-sans</code>、<code>font-heading</code>、<code>font-mono</code> 三个类，或 <code>var(--font-sans)</code> 等三个变量，不写字体名。现在要改的只有一处：</p>
+  <div class="scroll"><table>
+    <thead><tr><th>位置</th><th>现在</th><th>改成</th></tr></thead>
+    <tbody>
+      <tr><td><code>packages/explainer/styles/explain.css:29</code></td><td><code>--dx-mono: 'Sarasa Mono SC', ui-monospace, 'Cascadia Mono', Consolas, monospace</code></td><td><code>--dx-mono: var(--font-mono)</code></td></tr>
+      <tr><td><code>packages/trajectory/styles/star.css:39</code></td><td><code>var(--font-sans, system-ui, …)</code></td><td>不用改，已经跟着变量走</td></tr>
+      <tr><td>collab 的 <code>font-mono</code> 类</td><td>Tailwind 类</td><td>不用改</td></tr>
+    </tbody>
+  </table></div>
+  <p>两处例外，<b>不跟</b>阅读字体：</p>
+  <ul>
+    <li><b>KaTeX 公式</b>用它自己的字体，不动</li>
+    <li><b>word-report 的报告页</b>照 Word 排版，固定用报告自己的字体：在 <code>packages/word-report/styles/report.css</code> 里给报告正文的容器写定字体，取导出 Word 用的 <code>.dotx</code> 模板里的那几种（实现时从模板读出来写进去）。现在报告页是跟着站点字体走的，这一步把它固定下来</li>
+  </ul>
+</section>
+
+<section id="fonts-list">
+  <h2>字体清单从哪来</h2>
+  <p>下拉框里的名字必须正好是 Chrome 在 CSS <code>font-family</code> 里认的名字，否则选了也不生效。实验 <code>probes/2610192151_local-font-family-names/</code> 在本机把六种来源各列一遍，逐个放进 Chrome 155 无头模式量宽度：</p>
+  <div class="scroll"><table>
+    <thead><tr><th>来源</th><th>名字数</th><th>Chrome 认</th><th>问题</th></tr></thead>
+    <tbody>
+      <tr><td>注册表 Fonts 键的值名</td><td>262</td><td>140</td><td>字重、斜体写在名字里（<code>Sarasa Mono SC Bold</code>）；随应用装的字体（Cascadia）根本不在注册表里</td></tr>
+      <tr><td>.NET <code>InstalledFontCollection</code>（GDI 族名）</td><td>203</td><td>180</td><td>字重拆成单独的族（<code>Sarasa Mono SC Light</code>），长名截到 31 个字符</td></tr>
+      <tr><td>字体文件 name 表的族名</td><td>122</td><td>118</td><td>要先从注册表找文件，跟注册表一样漏字体</td></tr>
+      <tr><td><b>WPF <code>Fonts.SystemFontFamilies</code></b>（en-us 名字）</td><td>136</td><td>131</td><td>不认的 5 个里 4 个是 WPF 自己的组合字体 <code>Global User Interface</code> 等，按 <code>Global </code> 开头去掉；剩 1 个是字体本身的问题</td></tr>
+    </tbody>
+  </table></div>
+  <p>用 WPF：一个字体族一项，不拆字重，用户目录里装的更纱、随应用装的 Cascadia 都在。gwb-docsite 用 pwsh 7 运行：</p>
+<pre>Add-Type -AssemblyName PresentationCore
+[System.Windows.Media.Fonts]::SystemFontFamilies |
+  % { $_.FamilyNames[[System.Windows.Markup.XmlLanguage]::GetLanguage('en-us')] }</pre>
+  <p>本机列一遍 0.48 秒。不缓存：每次 <code>options()</code> 现列，装了新字体马上能选到。去掉空名字和 <code>Global </code> 开头的，按名字排序、去重。</p>
+</section>
+
+<section id="steps">
+  <h2>实施顺序与版本</h2>
+  <p>四个仓按依赖顺序做，每一步在自己的仓里检查、提交。升版本号之前先读 skill「gwb-release」；下面都是加功能，按它只升 y。</p>
+  <div class="scroll"><table>
+    <thead><tr><th>顺序</th><th>仓</th><th>改什么</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>igldu-gwbkernel/gwb-base-plugins</code></td><td>gwb-settings：<code>options</code>、<code>watch</code>、<code>hasOptions</code>、<code>settings.options</code>、<code>settings.set</code> 校验，测试与插件页、说明书</td></tr>
+      <tr><td>2</td><td><code>igldu-gwbkernel/gwb-ui-plugins</code></td><td>baseui 设置窗格的下拉框</td></tr>
+      <tr><td>3</td><td><code>oz47p-docsite-kit/god-docsite</code></td><td>平台包（<code>styles.css</code> 约定、<code>readerFontsCss</code>、模板 <code>root.tsx</code>）、explainer 的 <code>--dx-mono</code>、word-report 固定字体、检查脚本、gwb-docsite（三项设置、字体文件、环境变量）、docs-site 与 full-test 重新生成、说明页</td></tr>
+      <tr><td>4</td><td><code>b2o8l-sst-mmc-2026/chb-dab-sst</code></td><td>协作站 <code>site/app/root.tsx</code> 手动加 loader 与 <code>&lt;style&gt;</code>，升平台包</td></tr>
+    </tbody>
+  </table></div>
+  <p>gwb-docsite 的 peer 范围要包含带 <code>options</code> 与 <code>watch</code> 的 gwb-settings 版本。</p>
+</section>
+
+<section id="check">
+  <h2>检查与验收</h2>
+  <ul>
+    <li><b>gwb-settings 单元测试</b>：<code>options</code> 配在非 string 上报错；<code>settings.set</code> 收清单外的值被拒、清单内的写入；<code>settings.delete</code> 不查清单；<code>watch</code> 在命令写入、自己 <code>set</code>、<code>delete</code> 后各收到一次，值和 <code>get</code> 一致，卸载后不再收到</li>
+    <li><b>平台包单元测试</b>：<code>readerFontsCss</code> 没有环境变量回 <code>null</code>；三项全 <code>null</code> 回 <code>null</code>；只设一项只出那一个变量；格式不对的几种情况各报错</li>
+    <li><b>防止再写死字体的检查</b>：仓根 <code>tests/</code> 加一个脚本，扫描 <code>packages/*/</code> 的 css 与 tsx：<code>font-family</code> 声明，以及名字里带 <code>font</code> 或 <code>mono</code> 的 CSS 变量定义，值里只许出现 <code>var(…)</code>、<code>inherit</code> 和通用字体名（<code>monospace</code>、<code>sans-serif</code> 这类）。word-report 的 <code>report.css</code> 是唯一合法写字体名的地方，脚本里写明它和理由</li>
+    <li><b>e2e</b>：base 组加一轮，启动 full-test 的开发服务时给 <code>DOCSITE_READER_FONTS_FILE</code> 指向本次运行新建的临时文件，查正文、标题、代码的计算字体是文件里写的那几个；不给环境变量的那轮保持默认</li>
+    <li><b>在隔离 home 里看一遍</b>（<code>devkit.dev</code>）：设置窗格里三个下拉框能选到 <code>Sarasa Mono SC</code>；选完刷新托管的站，正文、标题、代码都变了；选「默认」后刷新回到原样</li>
+    <li><b>讲解组件的图</b>：在 docs-site 上把三项都设成更纱后，把用了 <code>--dx-mono</code> 的图逐张看一遍（浅色、深色、375 宽），标签不超出方框</li>
+  </ul>
+</section>
+
+<section id="risks">
+  <h2>风险与边界</h2>
+  <ul>
+    <li><b>只对 gwb-docsite 托管的开发服务生效</b>。手动 <code>pnpm dev</code>、发布版（build + start）、e2e 不给环境变量时，都是默认字体</li>
+    <li><b>字体跟着开发服务走，不跟着看的人走</b>。别人在局域网里打开你的开发服务，看到的是你设的字体；按现在的做法每个人在自己电脑上开自己的开发服务，两者一一对应</li>
+    <li><b>讲解组件的图按现在的字宽画的</b>，换成更宽的字体（更纱等宽）标签可能超出方框，验收时逐张看，超出的改图的尺寸</li>
+    <li><b>只做了 Windows</b>：列字体靠 WPF。别的系统上 <code>options()</code> 直接报错，写明这个平台还不支持</li>
+    <li>清单里偶尔有 Chrome 不认的字体（本机 1 个：<code>HYZhongHei</code>），选了它浏览器用后备字体。不另做过滤</li>
+  </ul>
+</section>
+
+<section id="decided">
+  <h2>已定的决定</h2>
+  <ul>
+    <li>字体是每个人自己的阅读设置，不是站点的设置；站点不带字体文件，只用本机装了的字体</li>
+    <li>做成 gwb-docsite 的设置（用户：「这样一处设置全局生效」），不用站点里的 cookie 或 localStorage</li>
+    <li>gwb 设置窗格加下拉框（用户：「可以增加下拉框功能」）；值必须在清单里，拼错的名字写不进去</li>
+    <li>环境变量只交一个文件路径，文件放在 gwb-data 给 gwb-docsite 的数据目录里（用户：「就放 gwbdata」），格式由 gwb-docsite 定、带版本号</li>
+    <li>改了字体刷新页面生效，不推送给已经打开的页面</li>
+    <li>三个变量的约定写在平台包，不单独开字体功能包</li>
+    <li>报告页不跟阅读字体，固定用 Word 模板的字体</li>
+  </ul>
+</section>
+
+</main>
