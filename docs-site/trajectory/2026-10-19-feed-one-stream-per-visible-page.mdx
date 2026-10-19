@@ -1,0 +1,46 @@
+---
+born-at: 2026-10-19T21:30
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 推送一页一条流、隐藏就断开
+domain: 骨架
+---
+
+## 背景
+
+协作站在 Chrome 里开三页就打不开了：点链接、刷新的请求一直转圈，VS Code 内置浏览器、Node 请求、别的端口的站都正常。
+原因是 Chrome 对同一个协议、主机、端口的 HTTP/1.1 连接，整个浏览器配置合起来最多 6 条；协作站每页的通知栏调两次 `useSiteFeed`（频道 `collab`、`collab-submit`），
+每个频道一条 `EventSource` 长连接一直占着，三页就是 6 条，之后的页面请求只能排队。Vite 热更新的 WebSocket 不算在这 6 条里。
+
+pivots-from:: [推送走资源路由](2026-10-14-feed-sse-resource-route.md)
+
+## 结论与边界
+
+- 推送路由的订阅地址最后一段可以写逗号隔开的几个频道（`/__docsite/feed/collab,collab-submit`），一条事件流收这几个频道，每条事件的 data 是 `{"channel":频道,"data":值}`。
+  只写一个频道时格式不变（data 是值本身），读现在的值与推送仍是一次一个频道，所以 gwb-docsite 的推送与带令牌的订阅都不用改，平台包只升 y
+- 浏览器一页一个推送客户端：这页的全部 `useSiteFeed` 合用一条事件流，页面隐藏（`visibilitychange`）时断开，重新显示时再连
+- 一个站占的连接数就是「看得见的页数」，一般是一两个窗口各一条，不再随标签数增长
+
+能这么做的前提是频道只留最新一份、连上先发现在的值：后台页断开期间推了什么不用补，重新显示一连上就是最新的。
+边界：几个窗口并排都看得见时各占一条；同一页里后来新要的频道会让这条流重连一次，要的频道只增不减。
+
+## 依据
+
+- 改之前：用户的 Chrome 开着几页 SST 协作站，`Get-NetTCPConnection` 数到 Chrome 对 41976 端口 6 条，正好是上限
+- 改之后在本仓 full-test 站（dev）开 6 页：页面请求的地址是 `/__docsite/feed/collab,collab-submit`；Chrome 对这个端口一共 7 条（6 页各一条热更新 WebSocket，加看得见的那页一条事件流），
+  同时再发 3 个页面请求 308 ms 全部 200。关到 3 页、都在后台时 3 条，其中一页切到前台时 4 条（页面里记下的 `visibilitychange` 时刻对得上）
+- `pnpm test:e2e`：134 项全过，包括「通知经推送通道到达通知栏」；单元测试 `packages/god-docsite/test/feed.test.ts`、`feed-client.test.ts`
+
+## 否掉的候选
+
+- 只把几个频道合成一条流：每页 1 条，开 6 页照样占满
+- 同一浏览器的各标签页用 Web Locks 选出一页持有连接，再经 BroadcastChannel 转发给其余页：整个浏览器只占 1 条，但要处理持有连接的页被冻结、被丢弃，换人时的空档，
+  以及经局域网 IP 用 http 打开时没有 Web Locks 的退路，代码量是现在的几倍。频道只留最新一份，后台页断开本来就不丢东西，用不着一直连着再靠转发同步
+- SharedWorker 合用连接：同上，还要多发一份 worker 脚本
+- dev 下改走 Vite 热更新的 WebSocket：build + start 的发布版也要推送，那里没有 Vite
+- 改成隔几秒查一次现在的值：通知栏和一键提交的状态会慢几秒，后台页还会一直空查
+- 换 HTTP/2（没有 6 条的限制）：开发服务要跑 TLS 证书，代价太大
+
+## 代价与遗留
+
+切回一个后台页时要重连一次，通知栏在这一下之前显示的是隐藏前的值，连上马上更新。

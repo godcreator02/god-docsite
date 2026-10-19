@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { feedTokenEnvName, feedTokenHeader, feedUrlOf, isFeedChannel } from '../src/core/feed.js'
+import { feedStreamUrlOf, feedTokenEnvName, feedTokenHeader, feedUrlOf, isFeedChannel } from '../src/core/feed.js'
 import { feedAction, feedLoader, publishSiteFeed, siteFeedHasLauncher, siteFeedValue } from '../src/site/feed.server.js'
 
 const originalToken = process.env[feedTokenEnvName]
@@ -72,6 +72,26 @@ describe('推送通道', () => {
     await new Promise((resolve) => setTimeout(resolve, 10))
     publishSiteFeed('t-stream', { n: 2 })
     expect(await received).toEqual([{ n: 1 }, { n: 2 }])
+  })
+
+  it('逗号隔开的几个频道合在一条事件流里，每条事件带上频道名；只写一个频道时事件就是值本身', async () => {
+    expect(feedStreamUrlOf(['t-list-a', 't-list-b'])).toBe('/__docsite/feed/t-list-a,t-list-b')
+    expect(feedStreamUrlOf(['t-list-a'])).toBe(feedUrlOf('t-list-a'))
+    expect(() => feedStreamUrlOf([])).toThrow(/至少/)
+    publishSiteFeed('t-list-a', { n: 1 })
+    const abort = new AbortController()
+    const request = new Request('http://site/x', { headers: { accept: 'text/event-stream' }, signal: abort.signal })
+    const received = eventsOf(feedLoader(loaderArgs(request, 't-list-a,t-list-b')), 3, abort)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    publishSiteFeed('t-list-b', { n: 2 })
+    publishSiteFeed('t-list-a', { n: 3 })
+    expect(await received).toEqual([
+      { channel: 't-list-a', data: { n: 1 } },
+      { channel: 't-list-b', data: { n: 2 } },
+      { channel: 't-list-a', data: { n: 3 } },
+    ])
+    expect(() => feedLoader(loaderArgs(new Request('http://site/x', { headers: { accept: 'text/event-stream' } }), 't-list-a,a b'))).toThrow(Response)
+    expect(() => feedLoader(loaderArgs(new Request('http://site/x'), 't-list-a,t-list-b'))).toThrow(Response)
   })
 
   it('带着令牌订阅的算启动方在听，断开就不算；浏览器的订阅不算；令牌不对 403', async () => {

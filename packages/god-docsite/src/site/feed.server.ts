@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
-import { feedTokenEnvName, feedTokenHeader, isFeedChannel } from '../core/feed.js'
+import { feedChannelListSeparator, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedStreamEnvelope } from '../core/feed.js'
 
 type FeedListener = (data: unknown) => void
 /** launchers 记每个频道有几个带着令牌订阅的连接（启动方），浏览器的订阅不算 */
@@ -50,33 +50,51 @@ function subscribe(channel: string, listener: FeedListener): () => void {
 
 function channelOf(params: LoaderFunctionArgs['params']): string {
   const channel = params['channel']
-  if (channel === undefined || !isFeedChannel(channel)) throw textResponse(404, `频道名 ${String(channel)} 不对：只用字母、数字、_、-`)
+  if (channel === undefined || !isFeedChannel(channel)) throw textResponse(404, `频道名 ${String(channel)} 不对：只用字母、数字、_、-；读现在的值、推送一次只能一个频道`)
   return channel
+}
+
+/** 订阅地址最后一段里的频道：一个频道，或逗号隔开的几个（listed 为 true，事件 data 要带上频道名） */
+function streamChannelsOf(params: LoaderFunctionArgs['params']): { channels: string[]; listed: boolean } {
+  const segment = params['channel']
+  if (segment === undefined) throw textResponse(404, '订阅地址缺频道名')
+  const channels = [...new Set(segment.split(feedChannelListSeparator))]
+  const wrong = channels.find((channel) => !isFeedChannel(channel))
+  if (wrong !== undefined) throw textResponse(404, `频道名 ${wrong} 不对：只用字母、数字、_、-，几个频道用逗号隔开`)
+  return { channels, listed: segment.includes(feedChannelListSeparator) }
 }
 
 function textResponse(status: number, text: string) {
   return new Response(text, { status, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
 }
 
-/** 一个频道的事件流：先发现在的值（推过才有），之后每推一次发一次，对方断开时退订；launcher 是带着令牌订阅的启动方 */
-function eventStreamOf(channel: string, signal: AbortSignal, launcher: boolean): Response {
+/**
+ * 几个频道合在一条事件流里：先发各频道现在的值（推过才有），之后每推一次发一次，对方断开时退订；
+ * listed 时每条事件的 data 是 { channel, data }，否则是值本身。launcher 是带着令牌订阅的启动方
+ */
+function eventStreamOf(channels: readonly string[], listed: boolean, signal: AbortSignal, launcher: boolean): Response {
   const encoder = new TextEncoder()
   let unsubscribe = () => {}
   let closed = false
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
-      const send = (data: unknown) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
+      const write = (data: unknown) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
+      const senderOf = (channel: string): FeedListener =>
+        listed ? (data) => write({ channel, data } satisfies FeedStreamEnvelope) : write
       controller.enqueue(encoder.encode(': connected\n\n'))
       const hub = feedHub()
-      if (hub.latest.has(channel)) send(hub.latest.get(channel))
-      const unsubscribeListener = subscribe(channel, send)
-      if (launcher) countLauncher(channel, 1)
+      const unsubscribeListeners = channels.map((channel) => {
+        const send = senderOf(channel)
+        if (hub.latest.has(channel)) send(hub.latest.get(channel))
+        return subscribe(channel, send)
+      })
+      if (launcher) for (const channel of channels) countLauncher(channel, 1)
       let unsubscribed = false
       unsubscribe = () => {
         if (unsubscribed) return
         unsubscribed = true
-        unsubscribeListener()
-        if (launcher) countLauncher(channel, -1)
+        for (const unsubscribeListener of unsubscribeListeners) unsubscribeListener()
+        if (launcher) for (const channel of channels) countLauncher(channel, -1)
       }
       signal.addEventListener('abort', () => {
         unsubscribe()
@@ -97,17 +115,20 @@ function eventStreamOf(channel: string, signal: AbortSignal, launcher: boolean):
 
 /**
  * 推送通道的资源路由 loader（路由 `__docsite/feed/:channel`）：请求头要 text/event-stream（EventSource）时回事件流，
- * 否则回这个频道现在的值的 JSON（还没推过是 null）。事件流的请求头带了令牌就算启动方在听（siteFeedHasLauncher），令牌不对 403
+ * 地址最后一段可以是逗号隔开的几个频道；否则回这个频道现在的值的 JSON（还没推过是 null）。
+ * 事件流的请求头带了令牌就算启动方在听（siteFeedHasLauncher），令牌不对 403
  */
 export function feedLoader({ request, params }: LoaderFunctionArgs): Response {
-  const channel = channelOf(params)
-  if (!request.headers.get('accept')?.includes('text/event-stream')) return Response.json(siteFeedValue(channel) ?? null, { headers: { 'Cache-Control': 'no-cache' } })
+  if (!request.headers.get('accept')?.includes('text/event-stream')) {
+    return Response.json(siteFeedValue(channelOf(params)) ?? null, { headers: { 'Cache-Control': 'no-cache' } })
+  }
+  const { channels, listed } = streamChannelsOf(params)
   const token = request.headers.get(feedTokenHeader)
-  if (token === null) return eventStreamOf(channel, request.signal, false)
+  if (token === null) return eventStreamOf(channels, listed, request.signal, false)
   const expected = process.env[feedTokenEnvName]
   if (!expected) return textResponse(403, `站点进程没有 ${feedTokenEnvName}：只有启动方给了令牌的站认启动方的订阅`)
   if (token !== expected) return textResponse(403, `${feedTokenHeader} 不对`)
-  return eventStreamOf(channel, request.signal, true)
+  return eventStreamOf(channels, listed, request.signal, true)
 }
 
 /**

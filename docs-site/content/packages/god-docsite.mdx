@@ -149,9 +149,15 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 同一地址 GET 回这个频道现在的值（还没推过是 null）；协议的常量两边都从平台包的 `.` 出口取。
 
+订阅地址的最后一段可以写逗号隔开的几个频道（`/__docsite/feed/collab,collab-submit`），一条事件流收这几个频道，每条事件的 data 是 `{"channel":频道,"data":值}`；只写一个频道时 data 就是值本身，gwb-docsite 订阅用的就是这种。读现在的值、推送一次只能一个频道。
+
+浏览器这边，一页里所有 `useSiteFeed` 合用一条事件流，页面隐藏时断开、重新显示时再连。原因是 Chrome 对同一个协议、主机、端口的 HTTP/1.1 连接整个浏览器合起来最多 6 条，长连接占着名额，再点链接、刷新的请求只能排队，站点就像打不开了；这样一个站只占「看得见的页数」条。频道只留最新一份、连上先发现在的值，所以后台页断开不丢状态。一页里后来新要的频道会让这条流重连一次，要的频道只增不减。
+
+{/* ref file="../packages/god-docsite/src/site/feed-client.ts" lines="20-73" hash="839f5e46ba42" blob="27c69dfbc069" */}
+
 反过来，站点要启动方替它做事时也走这条通道：启动方（gwb-docsite）带着同一个令牌订阅事件流，站点就知道有人在听这个频道（`siteFeedHasLauncher`）；站点自己的服务端代码用 `publishSiteFeed` 往频道里写一份请求，在听的启动方收到后去做，做到哪一步再推回同一个频道。浏览器订阅不带令牌，不算启动方；令牌不对 403。协作站的一键提交就是这样：网页写 `requested`，gwb-collab 接手提交审核，再推回 `running`、`merged`（见 collab 包页）。
 
-{/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="98-111" hash="90e8090a4811" blob="18a760bcfa2d" */}
+{/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="116-132" hash="026e9981743c" blob="875911db68fd" */}
 
 ## vite 插件、端口与可信来源
 

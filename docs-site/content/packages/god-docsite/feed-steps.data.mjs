@@ -14,18 +14,21 @@ export const actors = [
   { id: 'browser', name: '浏览器' },
 ];
 
-/* ref file="../packages/god-docsite/src/core/feed.ts" lines="1-8" hash="e5791a988a60" blob="0a7ba1d93eff" */
+/* ref file="../packages/god-docsite/src/core/feed.ts" lines="1-12" hash="d7c6b77ce97f" blob="8ecbf76d0f5b" */
 
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="113-133" hash="ec19335418dd" blob="18a760bcfa2d" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="134-154" hash="ec19335418dd" blob="875911db68fd" */
 
 /** 第 3 步的频道表：站点进程里每个频道只留最新一份 */
 /* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="30-41" hash="abd786ebeea0" blob="18a760bcfa2d" */
 
 /** 第 4、5 步：loader 读初始值、浏览器订阅事件流 */
-/* ref file="../packages/god-docsite/src/site/use-site-feed.ts" lines="1-16" hash="9dd20fa265b3" blob="ede7dacdd948" */
+/* ref file="../packages/god-docsite/src/site/use-site-feed.ts" lines="1-12" hash="26a8047943b2" blob="6261f759a484" */
+
+/** 第 5 步：一页的几个频道合成一条事件流，几个频道时 data 带上频道名 */
+/* ref file="../packages/god-docsite/src/site/feed-client.ts" lines="75-87" hash="2e257a626f3a" blob="27c69dfbc069" */
 
 /** 第 5 步的事件流：连上先发现在的值，之后每推一次发一次 */
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="61-111" hash="e92a659880ee" blob="18a760bcfa2d" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="71-132" hash="07058ec69f8d" blob="875911db68fd" */
 
 export const steps = [
   {
@@ -81,19 +84,20 @@ export const steps = [
   },
   {
     title: '浏览器订阅事件流',
-    text: '浏览器 useSiteFeed(频道, 初始值) 连事件流：连上先收到现在的值，之后每次推送都收到，页面跟着变、不用刷新。',
+    text: '浏览器 useSiteFeed(频道, 初始值) 订阅：一页里的几个频道合成一条事件流，连上先收到各频道现在的值，之后每次推送都收到，页面跟着变、不用刷新；页面隐藏时断开，重新显示时再连。',
     active: ['site', 'browser'],
     flows: [
-      { from: 'browser', to: 'site', label: '连事件流（EventSource）' },
+      { from: 'browser', to: 'site', label: '连事件流（EventSource，一页一条）' },
       { from: 'site', to: 'browser', label: '先发现值，之后每次推送' },
     ],
-    cardTitle: "useSiteFeed('collab', 初始值)",
+    cardTitle: "useSiteFeed('collab') 与 useSiteFeed('collab-submit')",
     lines: [
-      { tone: 'none', text: "new EventSource('/__docsite/feed/collab')" },
+      { tone: 'none', text: "new EventSource('/__docsite/feed/collab,collab-submit')" },
       { tone: 'none', text: '事件流：' },
       { tone: 'none', text: ': connected' },
-      { tone: 'none', text: 'data: <第二份>   ← 连上先收到现在的值' },
-      { tone: 'good', text: '之后每推一次：data: <新的一份>' },
+      { tone: 'none', text: 'data: {"channel":"collab","data":<第二份>}   ← 连上先收到现在的值' },
+      { tone: 'good', text: '之后每推一次：data: {"channel":频道,"data":<新的一份>}' },
+      { tone: 'none', text: '页面隐藏 → 断开；重新显示 → 再连，先收到现在的值' },
     ],
   },
 ];
