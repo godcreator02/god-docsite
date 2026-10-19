@@ -3,10 +3,14 @@ import { CollabFormatError, isRecordId, newRecordId, parsePeople, peopleLookupOf
 import { peopleText } from './fixtures.js'
 
 describe('记录 id', () => {
-  it('14 位本地时间加 - 加 7 位小写字母数字', () => {
-    const id = newRecordId(new Date(2026, 8, 25, 14, 32, 1), 'k3f9x2a')
+  it('14 位东八区时间加 - 加 7 位小写字母数字', () => {
+    const id = newRecordId(new Date('2026-09-25T14:32:01+08:00'), 'k3f9x2a')
     expect(id).toBe('20260925143201-k3f9x2a')
     expect(isRecordId(id)).toBe(true)
+  })
+
+  it('美国晚上建的记录，id 里也是东八区的时刻', () => {
+    expect(newRecordId(new Date('2026-10-17T20:28:05-07:00'), 'k3f9x2a')).toBe('20261018112805-k3f9x2a')
   })
 
   it('不给随机段时自己生成，格式照样对', () => {

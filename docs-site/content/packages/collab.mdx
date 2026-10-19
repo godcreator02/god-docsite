@@ -13,7 +13,7 @@ import { SiteRoutes } from './collab/site-routes'
 
 协作站没有服务器端数据库：任务与模块就是协作仓里 `collab/records/` 下的 JSON 文件，跟页面一起经 git 同步。collab 包规定这些文件长什么样、网站能怎么改它们、合并请求进 main 之前查什么，也提供站点上的任务页、日历、日志页。git、Gitea、通知从哪来都归 gwb-collab 插件，这个包自己不跑 git——合并检查除外，它只调 git 读。
 
-先看一张图，把数据从哪来、经过这个包的哪一块、到哪去摆清楚；后面每一节开头都会写它在图上的位置。
+先看一张图，讲清数据从哪来、经过这个包的哪一块、到哪去；后面每一节开头都会写它在图上的位置。
 
 <CollabSeams />
 
@@ -46,9 +46,9 @@ import { SiteRoutes } from './collab/site-routes'
 
 记录只有两种：任务 `task` 与模块 `module`。模块只有截止日、不存状态，完没完成由归进它的任务算。
 
-{/* ref file="../packages/collab/src/core/records.ts" lines="8-34" hash="989f4a552850" blob="a137d8a2caff" */}
+{/* ref file="../packages/collab/src/core/records.ts" lines="9-35" hash="989f4a552850" blob="76e7ac5ff4e8" */}
 
-记录 id 是作者电脑上的本地时间 14 位加 `-` 加 7 位小写字母数字，文件名就是 `records/<id>.json`。新建一条就是新加一个文件，两个人各建各的不会碰到同一个文件。
+记录 id 是东八区（UTC+8）时间 14 位加 `-` 加 7 位小写字母数字，文件名就是 `records/<id>.json`；时间用 `@godcreator/utc8-time` 算，作者电脑设成哪个时区都一样。2026-10-19 以前建的记录，id 里是作者电脑当时的本地时间，不改名。新建一条就是新加一个文件，两个人各建各的不会碰到同一个文件。
 
 这一页的例子取自测试夹具 `packages/collab/test/fixtures.ts` 第 4–17 行：人员列表里有 `godcreator`（负责人）、`bob-test`（小王）、`carol-test`（小李）和 agent `claude`；`godcreator` 建了任务 `20260925160530-t5v9w3d`「补 ADC 通道对比」，owner 是 `carol-test`、截止 `2026-10-10`；还有模块 `20260920090000-m1a2b3c`「采样板」。这条任务写成文件就是：
 
@@ -70,7 +70,7 @@ import { SiteRoutes } from './collab/site-routes'
 
 合不上时文件里留着 git 的冲突标记。解码时先找标记，找到就报出是第几行，让人（或 AI）按两边的意思改好，不猜；认不出的字段、认不出的类型都报错。
 
-{/* ref file="../packages/collab/src/core/records.ts" lines="156-175" hash="22c11b85693b" blob="a137d8a2caff" */}
+{/* ref file="../packages/collab/src/core/records.ts" lines="155-174" hash="22c11b85693b" blob="76e7ac5ff4e8" */}
 
 ## 模块分组
 
@@ -115,13 +115,13 @@ import { SiteRoutes } from './collab/site-routes'
 | 改字段 | 作者能改自己记录里除 `id`、`type`、`author` 以外的任何字段；别人只能改 `fieldsAnyoneMayChange` 里那几个 | `carol-test` 改 `godcreator` 那条任务的 `detail`：被拒，说明里列出别人的 task 记录只能改 status、owner、due、title、module |
 | 删除 | 作者本人或项目负责人；模块下还有没一起删的任务就拒绝；有一条删不了，整次一个文件都不删 | 负责人只删模块「采样板」、不删归进它的任务「选 ADC」：被拒 |
 
-{/* ref file="../packages/collab/src/core/records.ts" lines="56-60" hash="3cae888877fe" blob="a137d8a2caff" */}
+{/* ref file="../packages/collab/src/core/records.ts" lines="57-61" hash="3cae888877fe" blob="76e7ac5ff4e8" */}
 
 {/* ref file="../packages/collab/src/core/write-rules.ts" lines="44-51" hash="9ee96d52a371" blob="65347254ae19" */}
 
 {/* ref file="../packages/collab/src/core/write-rules.ts" lines="117-130" hash="ca367ee1f35a" blob="65347254ae19" */}
 
-一次写入从表单到磁盘走五步、在哪一步被拒，用同一个例子摆出来——`carol-test`（不是作者）改 `godcreator` 那条任务，改 `status` 走通、改 `detail` 在第 2 步停下：
+一次写入从表单到磁盘走五步、在哪一步被拒，用同一个例子列出来——`carol-test`（不是作者）改 `godcreator` 那条任务，改 `status` 走通、改 `detail` 在第 2 步停下：
 
 <WriteSteps />
 

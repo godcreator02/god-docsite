@@ -200,7 +200,7 @@ export function PageProperty({ target, editable, pageUrl, pages }: EditablePrope
   )
 }
 
-/** 记录 id 开头 14 位是建它时的本地时间：2026-10-02 20:46 */
+/** 记录 id 开头 14 位是建它时的东八区时间：2026-10-02 20:46 */
 function createdAtOf(recordId: string) {
   const digits = recordId.slice(0, 14)
   return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)} ${digits.slice(8, 10)}:${digits.slice(10, 12)}`

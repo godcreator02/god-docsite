@@ -36,6 +36,9 @@ catalogs:
     '@godcreator/gwb-skills':
       specifier: ^0.4.12
       version: 0.4.13
+    '@godcreator/utc8-time':
+      specifier: ^0.1.0
+      version: 0.1.0
     '@mdx-js/mdx':
       specifier: 3.1.1
       version: 3.1.1
@@ -510,6 +513,9 @@ importers:
       '@godcreator/identity':
         specifier: workspace:^
         version: link:../identity
+      '@godcreator/utc8-time':
+        specifier: 'catalog:'
+        version: 0.1.0
       lucide-react:
         specifier: 'catalog:'
         version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
@@ -583,6 +589,9 @@ importers:
       '@godcreator/identity':
         specifier: workspace:^
         version: link:../identity
+      '@godcreator/utc8-time':
+        specifier: 'catalog:'
+        version: 0.1.0
       diff-match-patch:
         specifier: 'catalog:'
         version: 1.0.5
@@ -1613,6 +1622,9 @@ packages:
       '@godcreator/gwb-commands': ^0.6.0
       '@godcreator/gwb-kernel-desktop': ^0.10.0
       cordis: ^4.0.0-rc.10
+
+  '@godcreator/utc8-time@0.1.0':
+    resolution: {integrity: sha512-P3mzas1uIVNKCfL7S0sdHKUgCKW1CnU7zzIzyQmMxZqxZ7YDNwK6J22el6jmG+OnkShQIAwmZFAzLzAwZ+AuKQ==, tarball: https://git.tianshen02.online:28377/api/packages/godcreator/npm/%40godcreator%2Futc8-time/-/0.1.0/utc8-time-0.1.0.tgz}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -5046,6 +5058,8 @@ snapshots:
       '@godcreator/gwb-commands': 0.6.1(@godcreator/gwb-kernel-desktop@0.10.1(cordis@4.0.0-rc.10))(cordis@4.0.0-rc.10)
       '@godcreator/gwb-kernel-desktop': 0.10.1(cordis@4.0.0-rc.10)
       cordis: 4.0.0-rc.10(@cordisjs/plugin-include@1.1.0)(@cordisjs/plugin-loader@1.0.0-rc.7)
+
+  '@godcreator/utc8-time@0.1.0': {}
 
   '@img/colour@1.1.0': {}
 

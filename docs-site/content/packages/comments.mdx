@@ -12,7 +12,7 @@ import { PageText } from './comments/page-text'
 import { StableIds } from './comments/stable-ids'
 import { WhereItLands } from './comments/where-it-lands'
 
-评论不进数据库，是站点目录 `comments/` 下的文件，跟着 git 同步，和正文一起审阅。先看一张图，把评论文件在哪、经哪一份 action 写、怎么读回、浏览器里怎么找回位置摆清楚；后面每一节开头都会写它在图上的位置。
+评论不进数据库，是站点目录 `comments/` 下的文件，跟着 git 同步，和正文一起审阅。先看一张图，讲清评论文件在哪、经哪一份 action 写、怎么读回、浏览器里怎么找回位置；后面每一节开头都会写它在图上的位置。
 
 <CommentsSeams />
 
@@ -24,9 +24,9 @@ import { WhereItLands } from './comments/where-it-lands'
 
 ## 磁盘上：一串一个文件夹
 
-评论目录下一串一个文件夹，文件夹名就是串 id；串头是 `index.mdx`，回复各一个 `<回复 id>.mdx`，同目录还能放附件。串 id 与回复 id 同一个形状：`20261012t153000-ab12`（本机时刻到秒，加几位随机的小写字母数字）。id 先过形状校验再拼路径，不会被拼出评论目录以外的路径。
+评论目录下一串一个文件夹，文件夹名就是串 id；串头是 `index.mdx`，回复各一个 `<回复 id>.mdx`，同目录还能放附件。串 id 与回复 id 同一个形状：`20261012t153000-ab12`（东八区时刻到秒，加几位随机的小写字母数字；2026-10-19 以前写的评论是写评论那台电脑的本地时刻，不改名）。id 先过形状校验再拼路径，不会被拼出评论目录以外的路径。
 
-{/* ref file="../packages/comments/src/core/comment-file.ts" lines="4-11" hash="1ba19392edd4" blob="b7004ae5ad12" */}
+{/* ref file="../packages/comments/src/core/comment-file.ts" lines="5-12" hash="1ba19392edd4" blob="82a80abcbbe9" */}
 
 每个文件是 frontmatter 加 MDX 正文；作者只存人员 id（`author`），名字显示时再按名单换。
 
@@ -54,7 +54,7 @@ anchor: "{\"quote\":\"第二段话。\",\"start\":15,\"end\":20,\"snapshot\":\"�
 
 串头 frontmatter 的 `status` 是 `open` 或 `resolved`（不写等于 `open`）；`resolved` 时 `resolvedBy`（人员 id）与 `resolvedAt`（ISO 时刻）都要有，`open` 时两项都不能有；回复不能带这三项。标为已解决、重新打开只改串头的这三项，别的字段与正文原样写回；已经是这个状态再标一次拒绝（409），写明是谁在什么时候标的：
 
-{/* ref file="../packages/comments/src/core/comment-file.ts" lines="66-84" hash="baea6782a133" blob="b7004ae5ad12" */}
+{/* ref file="../packages/comments/src/core/comment-file.ts" lines="65-83" hash="baea6782a133" blob="82a80abcbbe9" */}
 
 <StatusCases />
 
@@ -88,7 +88,7 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 {/* ref file="../packages/comments/src/site/action.server.ts" lines="126-143" hash="afdd150dbaa0" blob="9272f5e66da8" */}
 
-建串时串头写 `page`、`author`、`createdAt`、`status: open`，批了东西再加 `anchor`；站点的第一条评论连评论目录一起建。`createdAt` 是 UTC 的 ISO 时刻，id 里的时刻是本机时间，两者在 UTC+8 的机器上差 8 小时（测试站的预置评论 `20261001t120000-seed1` 的 `createdAt` 是 `2026-10-01T04:00:00.000Z`）。回复只写 `author`、`createdAt`；删回复删一个文件，删串删整个文件夹（含附件）。写完不编译：评论是 fumadocs-mdx 集合里的文件，集合自己的文件监视会重新生成入口。
+建串时串头写 `page`、`author`、`createdAt`、`status: open`，批了东西再加 `anchor`；站点的第一条评论连评论目录一起建。`createdAt` 是 UTC 的 ISO 时刻，id 里的时刻是东八区，两者差 8 小时（测试站的预置评论 `20261001t120000-seed1` 的 `createdAt` 是 `2026-10-01T04:00:00.000Z`）。回复只写 `author`、`createdAt`；删回复删一个文件，删串删整个文件夹（含附件）。写完不编译：评论是 fumadocs-mdx 集合里的文件，集合自己的文件监视会重新生成入口。
 
 ## 读回：从集合条目到评论串
 
@@ -100,7 +100,7 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 {/* ref file="../packages/comments/src/core/threads.ts" lines="52-94" hash="f867c2391e1b" blob="05c994a44769" */}
 
-串头的 `page` 有两种写法：内容页写页面在 docs 集合里的路径（`plan/index.mdx`），功能包页面写地址（`/tasks`）。站点之外要拿它拼链接的（gwb-collab 的通知），用 `pageAddressOf` 换成站内地址：`/` 开头的原样返回，路径照 fumadocs 的 `getSlugs` 去掉扩展名、`index` 落到所在目录、括号分组目录不进地址，再逐段 `encodeURI`。
+串头的 `page` 有两种写法：内容页写页面在 docs 集合里的路径（`plan/index.mdx`），功能包页面写地址（`/tasks`）。站点之外要拿它拼链接的（gwb-collab 的通知），用 `pageAddressOf` 换成站内地址：`/` 开头的原样返回，路径照 fumadocs 的 `getSlugs` 去掉扩展名、`index` 对应所在目录、括号分组目录不进地址，再逐段 `encodeURI`。
 
 {/* ref file="../packages/comments/src/core/page-address.ts" hash="a7323e9f5118" blob="f2d1af612a7c" */}
 

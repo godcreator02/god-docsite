@@ -22,7 +22,7 @@ description: 说明书 collab 的附件 references/collab-repo.md 的正本：�
 
 ## 写日志
 
-项目日志是 `site/journal/<YYYY-MM-DD>.mdx`，全项目一天一篇，网站「日历」里点那一天就是这一页。
+项目日志是 `site/journal/<YYYY-MM-DD>.mdx`，全项目一天一篇，网站「日历」里点那一天就是这一页。日期按东八区（UTC+8）算，从 gwb 的 `time.now` 取（说明书 `time`），不看本机时区。
 
 - 替人做完一件实际的工作（画完一版图、测完一段链路、定下一个参数），或人说「记进日志」时，在干活那一天的日志页后面续写一段：先读那一页现有的内容，没有就新建
 - 提到任务、模块写 `<RecordLink id="记录 id" />`，id 在 `collab/records/` 里找；提到某一页写普通链接 `[标题](/页面地址)`。不用 `import`，不写 frontmatter，标题就是日期

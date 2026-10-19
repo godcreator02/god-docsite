@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@godcreator/identity": "workspace:^",
+    "@godcreator/utc8-time": "catalog:",
     "diff-match-patch": "catalog:",
     "yaml": "catalog:"
   },

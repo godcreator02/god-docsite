@@ -1,3 +1,4 @@
+import { formatUtc8 } from '@godcreator/utc8-time'
 import { isPlainObject } from './plain-object.js'
 
 /** 协作记录（记录文件、人员列表）格式不对时抛出；消息写明错在哪，给人和 AI 直接看 */
@@ -81,15 +82,13 @@ function randomIdSuffix() {
   return Array.from(bytes, (byte) => idSuffixAlphabet[byte % idSuffixAlphabet.length]).join('')
 }
 
-/** 14 位作者电脑上的本地时间（年月日时分秒）加 `-` 加 7 位小写字母数字；时间只给人看，不参与任何判断 */
+/** 14 位东八区（UTC+8）时间（年月日时分秒）加 `-` 加 7 位小写字母数字，不随作者电脑的时区变；时间只给人看，不参与任何判断 */
 export function newRecordId(now: Date = new Date(), suffix: string = randomIdSuffix()): string {
   if (!idSuffixPattern.test(suffix)) throw new CollabFormatError(`id 的随机段必须是 7 位小写字母数字，收到 ${suffix}`)
-  const pad = (value: number, width = 2) => String(value).padStart(width, '0')
-  const localTime = `${pad(now.getFullYear(), 4)}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
-  return `${localTime}-${suffix}`
+  return `${formatUtc8(now, 'yyyyMMddHHmmss')}-${suffix}`
 }
 
-/** 读出 id 里记的本地时刻，形如 `2026-09-25 14:32:01` */
+/** 读出 id 里记的东八区时刻，形如 `2026-09-25 14:32:01`；2026-10-19 以前建的记录记的是作者电脑的本地时刻 */
 export function recordTime(id: string): string {
   const match = recordIdPattern.exec(id)
   if (!match) throw new CollabFormatError(`不是记录 id：${id}`)
@@ -137,7 +136,7 @@ function checkRecord(value: unknown): CollabRecord {
   if (unknownKey) throw new CollabFormatError(`${type} 记录里认不出的字段 ${unknownKey}`)
 
   if (value.id === undefined) throw new CollabFormatError('缺少字段 id')
-  if (!isRecordId(value.id)) throw new CollabFormatError(`id 格式不对：${JSON.stringify(value.id)}（应为 14 位本地时间加 - 加 7 位小写字母数字）`)
+  if (!isRecordId(value.id)) throw new CollabFormatError(`id 格式不对：${JSON.stringify(value.id)}（应为 14 位东八区时间加 - 加 7 位小写字母数字）`)
   if (value.author === undefined) throw new CollabFormatError('缺少字段 author')
   if (!isNonEmptyString(value.author)) throw new CollabFormatError('字段 author 必须是非空字符串')
 

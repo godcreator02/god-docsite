@@ -66,6 +66,7 @@
   "dependencies": {
     "@godcreator/comments": "workspace:^",
     "@godcreator/identity": "workspace:^",
+    "@godcreator/utc8-time": "catalog:",
     "lucide-react": "catalog:",
     "react-markdown": "catalog:",
     "remark-gfm": "catalog:",

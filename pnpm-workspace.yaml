@@ -20,6 +20,7 @@ catalog:
   '@godcreator/gwb-shell': ^0.15.11
   '@godcreator/gwb-skills': ^0.4.12
   '@godcreator/gwb-unit-folder': ^0.7.22
+  '@godcreator/utc8-time': ^0.1.0
   '@mdx-js/mdx': 3.1.1
   '@noble/hashes': ^2.4.0
   '@react-router/dev': ^8.4.0

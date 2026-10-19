@@ -1,3 +1,4 @@
+import { formatUtc8 } from '@godcreator/utc8-time'
 import { parse } from 'yaml'
 import { reactionsField, reactionsOf, type Reactions } from './reactions.js'
 
@@ -20,11 +21,9 @@ export class CommentWriteRejected extends Error {
   }
 }
 
+/** id 里的时刻是东八区（UTC+8），不随写评论那台电脑的时区变 */
 export function newCommentId(now = new Date()): string {
-  const pad = (n: number, width: number) => String(n).padStart(width, '0')
-  const stamp =
-    `${pad(now.getFullYear(), 4)}${pad(now.getMonth() + 1, 2)}${pad(now.getDate(), 2)}` +
-    `t${pad(now.getHours(), 2)}${pad(now.getMinutes(), 2)}${pad(now.getSeconds(), 2)}`
+  const stamp = formatUtc8(now, 'yyyyMMddtHHmmss')
   const random = Math.random().toString(36).slice(2, 6)
   return `${stamp}-${random}`
 }

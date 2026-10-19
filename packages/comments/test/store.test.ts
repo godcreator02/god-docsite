@@ -25,11 +25,15 @@ afterAll(() => {
 
 describe('评论模型：id 与序列化', () => {
   it('newCommentId 符合形状且可排序', () => {
-    const a = newCommentId(new Date('2026-10-12T08:00:00'));
-    const b = newCommentId(new Date('2026-10-12T09:00:00'));
+    const a = newCommentId(new Date('2026-10-12T08:00:00+08:00'));
+    const b = newCommentId(new Date('2026-10-12T09:00:00+08:00'));
     expect(a).toMatch(COMMENT_ID_PATTERN);
     expect(b).toMatch(COMMENT_ID_PATTERN);
     expect(a < b).toBe(true);
+  });
+
+  it('美国晚上写的评论，id 里也是东八区的时刻', () => {
+    expect(newCommentId(new Date('2026-10-17T20:28:05-07:00'))).toMatch(/^20261018t112805-[0-9a-z]{2,8}$/);
   });
 
   it('frontmatter 值按 JSON 字符串写出，正文收尾', () => {
