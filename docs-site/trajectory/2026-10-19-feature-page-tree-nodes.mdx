@@ -1,0 +1,24 @@
+---
+born-at: 2026-10-19T16:25
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 功能每次请求给侧栏节点
+domain: god-docsite
+---
+
+## 背景
+
+论文库插件的阅读站，侧栏列的是在读的论文，数据在论文库（SQLite）里。平台的页面树只来自 `content/` 下的文件，功能能提供的 `pageTreePlugins` 只在建 fumadocs 的 source 时加工一次，`sidebarLinks` 是固定的入口，所以插件只能把侧栏写成 `content/meta.json`，再在每次改库以后重算、重写。论文库里一有 agent 批量判断作者，每一次判断都触发一次全库重算，而且这类副本只能靠猜「这次改动会不会影响侧栏」来决定要不要重算，猜少了显示旧的，猜多了白算。
+
+## 结论与边界
+
+- 功能目录加第五种文件 `layout.server.ts`，可导出 `pageTreeNodes(args, base)`：只在服务端运行，可以读文件、数据库；布局路由的 loader 每次请求都调，节点接在 `content/` 那棵页面树的末尾，也进站内地址到标题
+- 建站器认这个文件，生成第六份汇总文件 `layout.generated.server.ts`（文件名以 `.server.ts` 结尾，React Router 保证它不进浏览器）；模板的布局路由 import 它
+- 根 `$id` 按接好以后的整棵树算，节点变了侧栏就跟着更新，不用重启开发服务
+- 已经建好的站不会自动跟上模板：平台不写模板升级代码，模板改了由 agent 对照差异把站一次性改好
+
+## 否掉的候选
+
+- **在 `feature.tsx` 里导出**：`feature.tsx` 会进浏览器，不能 import Node 内置模块或 `.server` 模块，读不了数据库
+- **用 `pageTreePlugins` 加工页面树**：只在建 source 时跑一次，库改了侧栏不变
+- **写一段模板升级代码，让已建好的站自动跟上模板**：站点可以自己改模板写出的文件，升级代码要区分哪些能覆盖、哪些要合并，判断差异交给 agent 一次做完更可靠

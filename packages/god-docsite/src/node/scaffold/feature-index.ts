@@ -8,12 +8,13 @@ import { packageInNodeModules } from './installed-packages.js'
 export const featuresDirInSite = 'app/features'
 
 /** 功能目录里建站器认的文件：含其中任一个的子目录就算功能（只有 styles.css 的功能只进样式汇总） */
-const featureFiles = { routes: 'routes.ts', runtime: 'feature.tsx', mdx: 'mdx.ts', styles: 'styles.css' } as const
+const featureFiles = { routes: 'routes.ts', runtime: 'feature.tsx', layoutServer: 'layout.server.ts', mdx: 'mdx.ts', styles: 'styles.css' } as const
 
 /** 汇总文件，都在 app/features/ 下，每次重写；站点模板固定 import 它们 */
 export const featureIndexFiles = {
   routes: 'routes.generated.ts',
   runtime: 'runtime.generated.ts',
+  layoutServer: 'layout.generated.server.ts',
   mdx: 'mdx.generated.ts',
   collections: 'collections.generated.ts',
   styles: 'styles.generated.css',
@@ -31,6 +32,7 @@ interface SiteFeature {
   identifier: string
   hasRoutes: boolean
   hasRuntime: boolean
+  hasLayoutServer: boolean
   hasMdx: boolean
   hasStyles: boolean
   /** 功能包 package.json 的 godDocsite.collections：mdx.ts 的 collections 里各工厂的名字，也是站点里的集合名 */
@@ -83,7 +85,7 @@ function collectionsOfFeature(siteDir: string, feature: string): string[] {
   return declaredCollectionsOf(path.join(installed.dir, 'package.json'))
 }
 
-/** app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录，按名字排序 */
+/** app/features/ 下含 routes.ts、feature.tsx、layout.server.ts、mdx.ts 或 styles.css 的子目录，按名字排序 */
 function siteFeaturesIn(siteDir: string): SiteFeature[] {
   const featuresDir = path.join(siteDir, featuresDirInSite)
   const features: SiteFeature[] = []
@@ -103,6 +105,7 @@ function siteFeaturesIn(siteDir: string): SiteFeature[] {
       identifier,
       hasRoutes: has(featureFiles.routes),
       hasRuntime: has(featureFiles.runtime),
+      hasLayoutServer: has(featureFiles.layoutServer),
       hasMdx: has(featureFiles.mdx),
       hasStyles: has(featureFiles.styles),
       collections: has(featureFiles.mdx) ? collectionsOfFeature(siteDir, name) : [],
@@ -123,7 +126,7 @@ function assertUniqueCollections(features: readonly SiteFeature[], siteCollectio
   }
 }
 
-const generatedNotice = '建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录'
+const generatedNotice = '建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、layout.server.ts、mdx.ts 或 styles.css 的子目录'
 const tsHeader = `// ${generatedNotice}\n`
 
 function routesIndexOf(features: readonly SiteFeature[]): string {
@@ -147,6 +150,16 @@ function runtimeIndexOf(features: readonly SiteFeature[]): string {
     `import { siteFeatureRuntime } from '@godcreator/god-docsite/react'\n`,
     ...withRuntime.map((feature) => `import * as ${feature.identifier}Feature from './${feature.name}/${featureFiles.runtime}'\n`),
     `\nexport const featureRuntime = siteFeatureRuntime({${withRuntime.map((feature) => ` '${feature.name}': ${feature.identifier}Feature`).join(',')}${withRuntime.length > 0 ? ' ' : ''}})\n`,
+  ].join('')
+}
+
+function layoutServerIndexOf(features: readonly SiteFeature[]): string {
+  const withLayoutServer = features.filter((feature) => feature.hasLayoutServer)
+  return [
+    tsHeader,
+    `import { siteFeatureLayoutServer } from '@godcreator/god-docsite/server'\n`,
+    ...withLayoutServer.map((feature) => `import * as ${feature.identifier}LayoutServer from './${feature.name}/${featureFiles.layoutServer}'\n`),
+    `\nexport const featureLayoutServer = siteFeatureLayoutServer({${withLayoutServer.map((feature) => ` '${feature.name}': ${feature.identifier}LayoutServer`).join(',')}${withLayoutServer.length > 0 ? ' ' : ''}})\n`,
   ].join('')
 }
 
@@ -205,6 +218,7 @@ export function regenerateFeatureIndex(siteDir: string): FeatureIndex {
   const contents: Record<keyof typeof featureIndexFiles, string> = {
     routes: routesIndexOf(features),
     runtime: runtimeIndexOf(features),
+    layoutServer: layoutServerIndexOf(features),
     mdx: mdxIndexOf(features),
     collections: collectionsIndexOf(features),
     styles: stylesIndexOf(features),

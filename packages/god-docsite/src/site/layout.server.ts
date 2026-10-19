@@ -23,23 +23,28 @@ function treeLinkTitlesOf(nodes: readonly PageTree.Node[]): Array<[string, strin
 }
 
 /**
- * 站内地址到标题：页面树里的链接项、功能的侧栏入口（featureRuntime.sidebarLinks）与全部页面；
+ * 站内地址到标题：页面树里的链接项、功能这次请求给的页面树节点（featurePageTreeNodes）、功能的侧栏入口（featureRuntime.sidebarLinks）与全部页面；
  * 正文链接按它显示成带标题的卡片（交给 SiteLinksProvider）
  */
-export function sitePageTitles({ source }: Pick<DocsiteContext, 'source'>, sidebarLinks: readonly SidebarLink[]): Record<string, string> {
+export function sitePageTitles({ source }: Pick<DocsiteContext, 'source'>, sidebarLinks: readonly SidebarLink[], featureNodes: readonly PageTree.Node[] = []): Record<string, string> {
   return Object.fromEntries([
     ...treeLinkTitlesOf(source.getPageTree().children),
+    ...treeLinkTitlesOf(featureNodes),
     ...sidebarLinks.map((link): [string, string] => [link.url, link.name]),
     ...source.getPages().map((page): [string, string] => [page.url, page.data.title ?? page.url]),
   ])
 }
 
-/** 布局路由 loader 的平台部分：页面树（根 $id 是内容摘要）、站名（内容目录 meta.json 的 title）、站内地址到标题（含功能的侧栏入口） */
-export async function siteLayoutData({ source }: Pick<DocsiteContext, 'source'>, sidebarLinks: readonly SidebarLink[]): Promise<SiteLayoutData> {
-  const tree = source.getPageTree()
+/**
+ * 布局路由 loader 的平台部分：页面树（content/ 的那棵，末尾接上功能这次请求给的节点；根 $id 是内容摘要）、
+ * 站名（内容目录 meta.json 的 title）、站内地址到标题（含功能的节点与侧栏入口）
+ */
+export async function siteLayoutData({ source }: Pick<DocsiteContext, 'source'>, sidebarLinks: readonly SidebarLink[], featureNodes: readonly PageTree.Node[] = []): Promise<SiteLayoutData> {
+  const contentTree = source.getPageTree()
+  const tree: PageTree.Root = { ...contentTree, children: [...contentTree.children, ...featureNodes] }
   return {
     pageTree: withContentDigestId(await source.serializePageTree(tree)),
     siteName: typeof tree.name === 'string' ? tree.name : '',
-    pageTitles: sitePageTitles({ source }, sidebarLinks),
+    pageTitles: sitePageTitles({ source }, sidebarLinks, featureNodes),
   }
 }

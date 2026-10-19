@@ -76,17 +76,17 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/node/scaffold/add-feature.ts" lines="25-66" hash="d9cf99c74551" blob="5274e23e10ca" */}
 
-功能目录固定在 `app/features/`；建站器只认目录里的四种文件——`routes.ts`、`feature.tsx`、`mdx.ts`、`styles.css`，含其中任一个的子目录才算功能；五份汇总文件是 `routes.generated.ts`、`runtime.generated.ts`、`mdx.generated.ts`、`collections.generated.ts`、`styles.generated.css`，都在 `app/features/` 下。
+功能目录固定在 `app/features/`；建站器只认目录里的五种文件——`routes.ts`、`feature.tsx`、`layout.server.ts`、`mdx.ts`、`styles.css`，含其中任一个的子目录才算功能；六份汇总文件是 `routes.generated.ts`、`runtime.generated.ts`、`layout.generated.server.ts`、`mdx.generated.ts`、`collections.generated.ts`、`styles.generated.css`，都在 `app/features/` 下。
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="7-20" hash="a9cdf57d595c" blob="778f5b87a5f7" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="7-22" hash="f9e38a7ed3ee" blob="dcb136d8590a" */}
 
-`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含四种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写五份汇总文件。汇总文件每次都按目录重新生成，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步依次看一遍：
+`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含五种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写六份汇总文件。汇总文件每次都按目录重新生成，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步依次看一遍：
 
 <FeatureIndexSteps />
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="53-124" hash="0de9ddc50523" blob="1f2d2a08a622" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="57-130" hash="cb35263b3874" blob="dcb136d8590a" */}
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="200-218" hash="7aeec0bff430" blob="1f2d2a08a622" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="213-232" hash="f7f647cf5d3e" blob="dcb136d8590a" */}
 
 ## 站点身份文件
 
@@ -104,26 +104,30 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/node/site-identity.ts" lines="4-13" hash="8b4d76c28339" blob="a260faf0383b" */}
 
-## 功能目录里的四种文件
+## 功能目录里的五种文件
 
-这一节写给功能包作者。四种文件各能导出什么、平台怎么用：
+这一节写给功能包作者。五种文件各能导出什么、平台怎么用：
 
 | 文件 | 能导出 | 进哪份汇总文件 | 站点里谁用 |
 | --- | --- | --- | --- |
 | `routes.ts` | 默认导出（嵌在整站布局里的路由）、`standaloneRoutes`（布局之外、占满窗口） | `routes.generated.ts` | `app/routes.ts` |
 | `feature.tsx` | `FeatureRuntimeModule` 的六样，都可选：`mdxComponents`、`pageTreePlugins`、`linkKinds`、`sidebarLinks`、`layoutData`、`LayoutTop` | `runtime.generated.ts` → `siteFeatureRuntime` | 布局路由、`app/lib/source.ts`、`app/lib/mdx-components.tsx` |
+| `layout.server.ts` | `FeatureLayoutServerModule` 的 `pageTreeNodes`，可选：每次请求给出接在页面树末尾的节点 | `layout.generated.server.ts` → `siteFeatureLayoutServer` | 布局路由 |
 | `mdx.ts` | `remarkPlugins`、`rehypePlugins`、`collections`（集合工厂，名单写在包的 `package.json` 的 `godDocsite.collections`） | `mdx.generated.ts`；有集合的再进 `collections.generated.ts` | `source.config.ts`、`app/lib/mdx-plugins.ts` |
 | `styles.css` | 样式 | `styles.generated.css` | `app/app.css` |
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="126-185" hash="0005b519c4d9" blob="1f2d2a08a622" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="132-211" hash="98b80bd0e1c5" blob="dcb136d8590a" */}
 
-合并规则三条：
+合并规则四条：
 
 - `feature.tsx` 会进浏览器：不能 import `.server` 模块或 Node 内置模块，`layoutData` 要的服务端数据只能经第二个参数 `base`（站点上下文）取；它的返回值以功能名为键并进布局数据。
+- `layout.server.ts` 只在服务端运行，可以读文件、数据库：侧栏要随功能自己的数据现算时，让 `pageTreeNodes` 每次请求给出节点，不把侧栏写成 `content/` 下的 `meta.json` 再等它刷新。各功能的节点按功能名的先后接在 `content/` 那棵页面树的末尾，也进站内地址到标题；根 `$id` 按接好以后的整棵树算，节点变了侧栏就跟着更新。
 - 两个功能导出同名 MDX 组件时报错；侧栏入口按 `order` 排，同样大的按功能名。
 - 集合工厂收一份全站插件 `sitePlugins` 并进自己的选项；`source.config.ts` 用 `export *` 再导出 `collections.generated.ts`，因为 fumadocs-mdx 要求那份文件只导出集合。
 
 {/* ref file="../packages/god-docsite/src/site/features.ts" lines="11-77" hash="164f2b6c87fa" blob="055ba60eb5de" */}
+
+{/* ref file="../packages/god-docsite/src/site/feature-page-tree.server.ts" lines="5-38" hash="8d58a35272d0" blob="ec8d8bae1f8a" */}
 
 ## 三种页面进一棵页面树
 
