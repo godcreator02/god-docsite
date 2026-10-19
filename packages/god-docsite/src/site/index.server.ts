@@ -8,13 +8,6 @@ export { contentFileLoader } from './content-file.server.js'
 export { feedAction, feedLoader, publishSiteFeed, siteFeedHasLauncher, siteFeedValue } from './feed.server.js'
 export { siteOrigin, siteOriginEnvName } from './origin.server.js'
 export { withFeatureLayoutData, type FeatureLayoutDataOptions } from './feature-layout.server.js'
-export {
-  featurePageTreeNodes,
-  siteFeatureLayoutServer,
-  type FeatureLayoutServerModule,
-  type FeaturePageTreeNodesLoader,
-  type SiteFeatureLayoutServer,
-} from './feature-page-tree.server.js'
 export type {
   BaseSiteContext,
   DocsiteContext,

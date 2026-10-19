@@ -49,7 +49,6 @@ function installFakeFeature(siteDir: string, name: string, templateFiles: Record
 const demoTemplate = {
   'routes.ts': "export default []\n",
   'feature.tsx': 'export const mdxComponents = {}\n',
-  'layout.server.ts': 'export const pageTreeNodes = () => []\n',
   'mdx.ts': "export const remarkPlugins = []\nexport const collections = { demoNotes: () => ({}) }\n",
   'styles.css': "@import 'demo/styles.css';\n",
   'page.tsx': 'export default function Page() { return null }\n',
@@ -96,7 +95,6 @@ describe('createSite', () => {
     expect(workspace).not.toContain('overrides')
     expect(readFileSync(path.join(dir, 'app', 'features', 'routes.generated.ts'), 'utf8')).toContain('const featureRoutesModules: FeatureRoutesModule[] = []')
     expect(readFileSync(path.join(dir, 'app', 'features', 'runtime.generated.ts'), 'utf8')).toContain('siteFeatureRuntime({})')
-    expect(readFileSync(path.join(dir, 'app', 'features', 'layout.generated.server.ts'), 'utf8')).toContain('siteFeatureLayoutServer({})')
     expect(readFileSync(path.join(dir, 'app', 'features', 'collections.generated.ts'), 'utf8')).toContain('export {}')
     expect(readFileSync(path.join(dir, 'app', 'features', 'styles.generated.css'), 'utf8')).not.toContain('@import')
   })
@@ -143,8 +141,6 @@ describe('addFeature', () => {
     const indexText = (file: string) => readFileSync(path.join(featuresDir, file), 'utf8')
     expect(indexText('routes.generated.ts')).toContain("import * as demoFeatureRoutes from './demo-feature/routes.ts'")
     expect(indexText('runtime.generated.ts')).toContain("siteFeatureRuntime({ 'demo-feature': demoFeatureFeature })")
-    expect(indexText('layout.generated.server.ts')).toContain("import * as demoFeatureLayoutServer from './demo-feature/layout.server.ts'")
-    expect(indexText('layout.generated.server.ts')).toContain("siteFeatureLayoutServer({ 'demo-feature': demoFeatureLayoutServer })")
     expect(indexText('mdx.generated.ts')).toContain("import * as demoFeatureMdx from './demo-feature/mdx.ts'")
     expect(indexText('mdx.generated.ts')).toContain('const featureMdxModules: FeatureMdxModule[] = [demoFeatureMdx]')
     expect(indexText('collections.generated.ts')).toContain("import { sitePlugins } from '../lib/mdx-plugins.ts'")
@@ -184,16 +180,14 @@ describe('addFeature', () => {
     expect(() => addFeature({ siteDir, packageName: '@godcreator/bad-list' })).toThrow(/godDocsite 要写成/)
   })
 
-  it('regenerateFeatureIndex 只认含 routes.ts、feature.tsx、layout.server.ts、mdx.ts 或 styles.css 的子目录，按名字排序', () => {
+  it('regenerateFeatureIndex 只认含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录，按名字排序', () => {
     const siteDir = newSite()
     const featuresDir = path.join(siteDir, 'app', 'features')
     writeFile(path.join(featuresDir, 'zeta', 'feature.tsx'), 'export {}\n')
     writeFile(path.join(featuresDir, 'alpha', 'routes.ts'), 'export default []\n')
     writeFile(path.join(featuresDir, 'beta', 'styles.css'), '.beta {}\n')
-    writeFile(path.join(featuresDir, 'gamma', 'layout.server.ts'), 'export {}\n')
     writeFile(path.join(featuresDir, 'notes', 'readme.md'), '不是功能\n')
-    expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'beta', 'gamma', 'zeta'])
-    expect(readFileSync(path.join(featuresDir, 'layout.generated.server.ts'), 'utf8')).toContain("siteFeatureLayoutServer({ 'gamma': gammaLayoutServer })")
+    expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'beta', 'zeta'])
   })
 
   it('addBaseFeatures：模板跟着装的包里带 template/ 的补进功能目录（comments），没有的跳过（这里装的 identity 是没有 template/ 的假包），重复运行只补缺的；没装先报错', () => {
