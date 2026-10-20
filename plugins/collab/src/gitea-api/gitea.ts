@@ -249,14 +249,14 @@ export function isGiteaName(name: string): boolean {
   return giteaNamePattern.test(name) && name !== '.' && name !== '..'
 }
 
-/** 组织里全部仓的名字；组织私有，要令牌 */
+/** 组织里没归档的仓的名字；组织私有，要令牌。归档的仓是只读存档，不克隆进项目文件夹，本机删掉后也不再补回来 */
 export async function organizationRepoNames(http: GiteaHttp, organization: string): Promise<string[]> {
   const repos = await allPages(http, `/orgs/${organization}/repos`, {}, `列出组织 ${organization} 的仓`)
-  return repos.map((raw) => {
+  return repos.flatMap((raw) => {
     if (!isRecord(raw)) throw new CollabRejected(`Gitea 回的组织 ${organization} 的仓不是对象`)
     const name = fieldOf(raw, 'name', isString, '仓')
     if (!isGiteaName(name)) throw new CollabRejected(`Gitea 回的组织 ${organization} 里有个仓名 ${JSON.stringify(name)} 不能当目录名`)
-    return name
+    return fieldOf(raw, 'archived', isBoolean, `仓 ${name}`) ? [] : [name]
   })
 }
 

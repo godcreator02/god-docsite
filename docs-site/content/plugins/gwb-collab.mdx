@@ -26,7 +26,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 | 目录或文件 | 做什么 |
 | --- | --- |
 | `collab-repo/` | 协作仓那一套：监视本机状态（`sync/watch.ts`、`sync/local-state.ts`）、取回与自动同步（`sync/`）、提交审核（`submit/`）、读项目负责人（`leads.ts`）、核对协作仓的配置（`rules.ts`）、任务与模块的命令和「找我的」（`records/`）、完整刷新与收到消息时做哪几步（`events.ts`） |
-| `other-repos/` | 别的仓那一套：监视各仓 HEAD 与服务器同名分支的差（`fetch/watch.ts`、`fetch/head.ts`）、取回与补克隆组织里新加的仓（`fetch/`）、`collab.repos.update` 只做快进（`fetch/update.ts`）、读合并请求与 issue（`review.ts`）、核对配置（`rules.ts`）、`events.ts` |
+| `other-repos/` | 别的仓那一套：监视各仓 HEAD 与服务器同名分支的差（`fetch/watch.ts`、`fetch/head.ts`）、取回与补克隆组织里没归档、本机还没有的仓（`fetch/`）、`collab.repos.update` 只做快进（`fetch/update.ts`）、读合并请求与 issue（`review.ts`）、核对配置（`rules.ts`）、`events.ts` |
 | `organization/` | 组织级：`events/` 订阅 ntfy、认消息、合成一批再调度、完整刷新、各步出错的记录、组织 webhook、`leads changed`（细节见 [实时推送与执行器](/gitea/push)）；`setup/` 克隆组织、加入、项目列表、建仓、配仓的命令（配仓见 [权限怎么配](/gitea/permissions)） |
 | `notifications/` | 从各处此刻的状态算通知（`notifications-of.ts`）、交给站点与通知渠道（`project-notifications.ts`）、QQ 私聊（`qq-private-chat.ts`） |
 | `site-process/` | 站点交给 gwb-docsite 托管与推数据（`collab-sites.ts`）、`collab.site.init`、在 `site/` 里装依赖与跑类型检查（`dependencies.ts`） |
@@ -64,7 +64,7 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 {/* ref file="../plugins/collab/src/collab-repo/events.ts" lines="24-31" hash="8a862822b72b" blob="2f7d37c4b1e8" */}
 
-别的仓那边先补克隆组织里新加的仓，再对项目文件夹里每个仓并行做取回、读合并请求与 issue、核对配置。每一步出错不往外抛：按项目、按步名记下原话，那一步下次做成了就清掉；同一个项目同时只做一件，正在做时 `collab.check` 回 `busy`。这些原话合成一条「gwb 检查项目出错」的通知。收到 ntfy 消息时按消息说的仓只做那一处，见 [实时推送与执行器](/gitea/push) 的「收到消息以后」，这里不重复。
+别的仓那边先补克隆组织里没归档、本机还没有的仓（归档的仓是只读存档，本机删掉了也不补回来），再对项目文件夹里每个仓并行做取回、读合并请求与 issue、核对配置。每一步出错不往外抛：按项目、按步名记下原话，那一步下次做成了就清掉；同一个项目同时只做一件，正在做时 `collab.check` 回 `busy`。这些原话合成一条「gwb 检查项目出错」的通知。收到 ntfy 消息时按消息说的仓只做那一处，见 [实时推送与执行器](/gitea/push) 的「收到消息以后」，这里不重复。
 
 ## 自动同步：只快进
 

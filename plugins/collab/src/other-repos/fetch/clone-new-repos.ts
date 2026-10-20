@@ -37,7 +37,7 @@ export async function cloneReposInto(projectDir: string, repoNames: string[], so
   }
 }
 
-/** 组织里新加的、项目文件夹（协作仓的上一级，以组织命名）里还没有的仓，用令牌克隆进来，回克隆了哪些 */
+/** 组织里没归档、项目文件夹（协作仓的上一级，以组织命名）里还没有的仓，用令牌克隆进来，回克隆了哪些 */
 export async function cloneMissingRepos(collabRepo: string, source: OrganizationSource, remote: GitRemote): Promise<string[]> {
   const projectDir = projectDirOfCollabRepo(collabRepo)
   const missing = (await source.repoNames()).filter((name) => !existsSync(path.join(projectDir, name)))

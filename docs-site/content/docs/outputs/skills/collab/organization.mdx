@@ -13,7 +13,7 @@ description: 说明书 collab 的附件 references/organization.md 的正本：�
 1. 项目负责人把这个人加进组织的 `members` 团队，并在协作仓 `site/people.json` 里加一项 `{ "id": "<Gitea 用户名>", "name": "<显示名>", "gitea": "<Gitea 用户名>" }`，提交审核
 2. 装 VS Code 与 Git LFS（装完运行一次 `git lfs install`）；在 gwb 的插件管理里装 `gwb-gitea`、`gwb-docsite`、`gwb-collab`、`@cordisjs/plugin-timer`。gwb-docsite 第一次加载时给这个 home 生成身份码
 3. 人自己在 Gitea「设置 → 应用」生成令牌、勾全部权限，填进 gwb-gitea 的设置 `token`。令牌由人生成、由人填
-4. 问人项目放在哪个目录下，调 `collab.project.clone {url, parent}`（`url` 是 `https://<主机>/<组织>`）。它把本 home 的身份码加进 `site/people.json` 里自己那一项，回执 `joined` 为 `true` 时这一行改动要 `collab.submit` 提交审核，别人的站点才认得这台电脑。回执 `listed` 为 `false` 是账号还不在 `people.json` 里，项目没加进列表：让人找项目负责人加上，在协作仓里 `git pull` 拿到以后调 `collab.project.join {repo}` 与 `collab.project.add {repo}`
+4. 问人项目放在哪个目录下，调 `collab.project.clone {url, parent}`（`url` 是 `https://<主机>/<组织>`），它克隆组织里没归档的仓，归档的只读存档不克隆。它把本 home 的身份码加进 `site/people.json` 里自己那一项，回执 `joined` 为 `true` 时这一行改动要 `collab.submit` 提交审核，别人的站点才认得这台电脑。回执 `listed` 为 `false` 是账号还不在 `people.json` 里，项目没加进列表：让人找项目负责人加上，在协作仓里 `git pull` 拿到以后调 `collab.project.join {repo}` 与 `collab.project.add {repo}`
 
 换电脑、新开一个 home、换了身份码，也是 `collab.project.join {repo}` 再 `collab.submit`：一个人可以有几个身份码，各在自己那一项的 `codes` 里。
 

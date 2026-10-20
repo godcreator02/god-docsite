@@ -23,7 +23,7 @@ export function organizationOfUrl(url: string): { organization: string; organiza
   if (parsed.search !== '' || parsed.hash !== '') throw new CollabRejected(`${trimmed} 带了 ? 或 # 后面的部分；克隆项目${shape}`)
   const segments = parsed.pathname.split('/').filter((segment) => segment !== '')
   if (segments.length === 0) throw new CollabRejected(`${trimmed} 里没有组织名；克隆项目${shape}`)
-  if (segments.length > 1) throw new CollabRejected(`${trimmed} 像是仓的地址；克隆项目${shape}，会克隆组织里的全部仓`)
+  if (segments.length > 1) throw new CollabRejected(`${trimmed} 像是仓的地址；克隆项目${shape}，会克隆组织里没归档的仓`)
   const organization = decodeURIComponent(segments[0]!)
   if (!isGiteaName(organization)) throw new CollabRejected(`组织名 ${JSON.stringify(organization)} 只能含字母、数字与 _ . -`)
   return { organization, organizationUrl: `${parsed.origin}/${organization}` }
@@ -40,7 +40,7 @@ function collabRepoNameAmong(projectDir: string, organization: string, repoNames
 }
 
 /**
- * 用令牌把组织里全部仓克隆进 <parent>/<组织>/，看令牌的账号在不在协作仓的 site/people.json 里。
+ * 用令牌把组织里没归档的仓克隆进 <parent>/<组织>/，看令牌的账号在不在协作仓的 site/people.json 里。
  * 项目文件夹已经存在就拒绝
  */
 export async function cloneOrganization(parent: string, source: OrganizationSource, login: string, remote: GitRemote): Promise<OrganizationCloned> {

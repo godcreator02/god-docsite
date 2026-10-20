@@ -53,10 +53,10 @@ export function registerOrganizationSetupCommands(services: PluginServices, open
     {
       name: 'collab.project.clone',
       effect: 'write',
-      description: '用 gwb-gitea 的令牌克隆整个组织（一个项目）的全部仓，把本 home 的身份码加进协作仓的人员列表、加进项目列表、装好站点依赖；不经 Windows 凭据管理器',
+      description: '用 gwb-gitea 的令牌克隆整个组织（一个项目）里没归档的仓，把本 home 的身份码加进协作仓的人员列表、加进项目列表、装好站点依赖；不经 Windows 凭据管理器',
       usage:
         '{ url, parent }：url 是组织地址 https://<主机>/<组织>，要在 gwb-gitea 配的那个 Gitea 上，给仓的地址直接拒绝；parent 是把项目文件夹放在哪个目录下的绝对路径，要已经存在（问人放在哪）。' +
-        '在 <parent>/<组织>/ 新建项目文件夹（已存在就拒绝），经 gwb-gitea 列出组织的全部仓，逐个用令牌 git clone 进去，文件夹名就是仓名；中途某个仓克隆失败就停下，报出已经克隆了哪些、哪个失败、git 的原话。' +
+        '在 <parent>/<组织>/ 新建项目文件夹（已存在就拒绝），经 gwb-gitea 列出组织里没归档的仓（归档的是只读存档，不克隆），逐个用令牌 git clone 进去，文件夹名就是仓名；中途某个仓克隆失败就停下，报出已经克隆了哪些、哪个失败、git 的原话。' +
         '站点身份文件 site/docsite.json 写着 "kind": "collab" 的仓是协作仓，要正好一个，没有或不止一个就报错并写明是哪些仓。' +
         '令牌的 Gitea 账号不在 site/people.json 里时到这里为止，listed 为 false：请负责人加上，在协作仓里 git pull 拿到之后再调 collab.project.join 与 collab.project.add。' +
         '在里面就照 collab.project.join 把本 home 的身份码加进自己那一项，照 collab.project.add 加进列表，再在 site/ 里运行 pnpm install，装完在后台启动站点、常驻；身份码那一行改动要 collab.submit 提交审核。' +

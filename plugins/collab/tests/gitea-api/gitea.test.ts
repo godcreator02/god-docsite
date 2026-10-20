@@ -16,7 +16,7 @@ describe('Gitea 上的位置', () => {
 
 describe('Gitea 上的组织', () => {
   it('列出组织的仓：一页一页取完，只要仓名', async () => {
-    const all = Array.from({ length: 53 }, (_, index) => ({ name: `repo-${index}` }))
+    const all = Array.from({ length: 53 }, (_, index) => ({ name: `repo-${index}`, archived: false }))
     const requests: unknown[] = []
     const http: GiteaHttp = async (request) => {
       requests.push(request)
@@ -30,9 +30,19 @@ describe('Gitea 上的组织', () => {
     ])
   })
 
-  it('组织不存在或看不到：照 Gitea 的原话报出来；仓名不是合法的目录名也报', async () => {
+  it('归档的仓不算：它们是只读存档，不克隆进项目文件夹', async () => {
+    const repos = [
+      { name: 'collab', archived: false },
+      { name: 'legacy', archived: true },
+      { name: 'hil', archived: false },
+    ]
+    expect(await organizationRepoNames(replyWith(200, repos), 'chb-dab-sst')).toEqual(['collab', 'hil'])
+  })
+
+  it('组织不存在或看不到：照 Gitea 的原话报出来；仓名不是合法的目录名、没有 archived 字段也报', async () => {
     await expect(organizationRepoNames(replyWith(404, { message: 'org not found' }), 'nobody')).rejects.toThrow(/列出组织 nobody 的仓失败：Gitea 回 404，org not found/)
-    await expect(organizationRepoNames(replyWith(200, [{ name: '../evil' }]), 'hybrid-mmc')).rejects.toThrow(/仓名/)
+    await expect(organizationRepoNames(replyWith(200, [{ name: '../evil', archived: false }]), 'hybrid-mmc')).rejects.toThrow(/仓名/)
+    await expect(organizationRepoNames(replyWith(200, [{ name: 'collab' }]), 'hybrid-mmc')).rejects.toThrow(/archived/)
   })
 
   it('主人是不是组织：200 是，404 是个人账号，别的状态照实报错', async () => {
