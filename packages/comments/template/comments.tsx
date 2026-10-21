@@ -1,6 +1,7 @@
 import type { Route } from './+types/comments'
 import { useLoaderData } from 'react-router'
 import { DocsPage } from '@fumadocs/base-ui/layouts/docs/page'
+import { useSitePageTitles } from '@godcreator/god-docsite/react'
 import { sitePageRefs } from '@godcreator/god-docsite/server'
 import { CommentsTable } from '@godcreator/comments/site'
 import { commentsTableRowsOf, handleCommentWrite, threadsByPageOf } from '@godcreator/comments/site/server'
@@ -16,9 +17,11 @@ export async function action({ request }: Route.ActionArgs) {
   return handleCommentWrite({ request, commentsDir: site.commentsDir, people: site.people(), identity: site.identity(), trustedOrigin: site.trustedOrigin() })
 }
 
-/** 全站评论：一行一串的表格（只读；写评论去对应页面） */
+/** 全站评论：一行一串的表格（只读；写评论去对应页面）。功能页的行在 loader 里只有地址，标题按布局给的站内地址到标题换上 */
 export default function AllComments() {
-  const { rows } = useLoaderData<typeof loader>()
+  const { rows: loadedRows } = useLoaderData<typeof loader>()
+  const pageTitles = useSitePageTitles()
+  const rows = loadedRows.map((row) => ({ ...row, pageTitle: pageTitles[row.pageUrl] ?? row.pageTitle }))
   return (
     <DocsPage toc={[]} full>
       <title>全站评论</title>

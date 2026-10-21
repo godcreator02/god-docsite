@@ -29,7 +29,8 @@ export function SiteLinksProvider({ pageTitles, children }: { pageTitles: Readon
   return <PageTitlesContext value={pageTitles}>{children}</PageTitlesContext>
 }
 
-function usePageTitles() {
+/** 站内地址到标题（SiteLinksProvider 给的那一份，含各功能分区里的页）：功能页上要显示别的页的标题时用 */
+export function useSitePageTitles(): Readonly<Record<string, string>> {
   const pageTitles = use(PageTitlesContext)
   if (!pageTitles) throw new Error('站内链接要包在 SiteLinksProvider 里：整站布局 SiteLayout 已经包了；不在整站布局里的独立页面自己包一层，pageTitles 在 loader 里用 ./server 的 sitePageTitles 取')
   return pageTitles
@@ -77,7 +78,7 @@ function PageChip({ href, path, hash, pageTitle, children }: { href: string; pat
 
 /** 站里的一个地址：页面（含页面树里的入口）、内容目录里的文件，都不是就是找不到 */
 function SiteTargetChip({ href, path, hash, children }: { href: string; path: string; hash: string; children: ReactNode }) {
-  const pageTitle = usePageTitles()[path]
+  const pageTitle = useSitePageTitles()[path]
   if (pageTitle === undefined && path.startsWith(contentFileUrlPrefix)) {
     const file = path.slice(contentFileUrlPrefix.length)
     return (

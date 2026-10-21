@@ -126,7 +126,7 @@ export function threadsByPageOf({ entries, people }: PageThreadsOptions): Map<st
 export type CommentsTablePage = { key: string; title: string; url: string }
 
 /**
- * 全站评论表的行：内容页的串写那一页的标题与地址；功能包页面（报告页、协作页）的串归属键就是地址，标题也写地址。
+ * 全站评论表的行：内容页的串写那一页的标题与地址；功能包页面（报告页、协作页、论文页）的串归属键就是地址，标题先写地址，页面上按站内地址到标题的表换成标题。
  * 归属的内容页已经不在站里的串不列
  */
 export function commentsTableRowsOf(byPage: ReadonlyMap<string, PageThreadSummary[]>, contentPages: readonly CommentsTablePage[]): CommentsTableRow[] {

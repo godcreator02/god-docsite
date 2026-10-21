@@ -78,7 +78,7 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 图上第 1、2 号。全站的评论写入都提交到 `/comments`：这个路由既是全站评论页，它的 action 调 `handleCommentWrite`。路由文件由建站器写进站点的 `app/features/comments/`（只改本包 `template/`）：
 
-{/* ref file="../packages/comments/template/comments.tsx" lines="14-17" hash="8ea0ded43bb4" blob="391d3c0bb103" */}
+{/* ref file="../packages/comments/template/comments.tsx" lines="15-18" hash="8ea0ded43bb4" blob="96a5ad47ba66" */}
 
 表单字段是界面与 action 之间的外部契约：八种 `intent`（建串、回复、删回复、删串、标为已解决、重新打开、加表情、撤表情），每种只收自己那几个字段，多写一个字段就拒绝；`as` 只给 agent 经命令用，网页界面里不出现。返回 `{ ok: true, intent, threadId?, replyId? }` 或 `{ ok: false, error }`。
 
@@ -92,7 +92,7 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 ## 读回：从集合条目到评论串
 
-图上第 3 号。平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组，再用 `commentsTableRowsOf` 排成表格的行：内容页的串写那一页的标题，功能包页面（报告页、协作页）的串标题写地址，归属的内容页已经不在站里的串不列。
+图上第 3 号。平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组，再用 `commentsTableRowsOf` 排成表格的行：内容页的串写那一页的标题，功能包页面（报告页、协作页、论文页）的串在 loader 里只有地址，页面组件再用平台的 `useSitePageTitles`（布局给的站内地址到标题，含各功能分区里的页）换成标题；归属的内容页已经不在站里的串不列。
 
 {/* ref file="../packages/comments/src/site/threads.server.ts" lines="132-138" hash="9f4b7ea77281" blob="0bcbb0808645" */}
 
@@ -102,7 +102,7 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 {/* ref file="../packages/comments/src/core/threads.ts" lines="52-94" hash="f867c2391e1b" blob="05c994a44769" */}
 
-串头的 `page` 有两种写法：内容页写页面在 docs 集合里的路径（`plan/index.mdx`），功能包页面写地址（`/tasks`）。站点之外要拿它拼链接的（gwb-collab 的通知），用 `pageAddressOf` 换成站内地址：`/` 开头的原样返回，路径照 fumadocs 的 `getSlugs` 去掉扩展名、`index` 对应所在目录、括号分组目录不进地址，再逐段 `encodeURI`。
+串头的 `page` 有两种写法：内容页写页面在 docs 集合里的路径（`plan/index.mdx`），功能包页面写地址（`/tasks`）。站点之外要拿它拼链接的（gwb-collab 的通知）、按地址筛评论的（gwb-docsite 的 `docsite.comments` 的 `page` 写地址时），用 `pageAddressOf` 换成站内地址：`/` 开头的原样返回，路径照 fumadocs 的 `getSlugs` 去掉扩展名、`index` 对应所在目录、括号分组目录不进地址，再逐段 `encodeURI`。
 
 {/* ref file="../packages/comments/src/core/page-address.ts" hash="a7323e9f5118" blob="f2d1af612a7c" */}
 

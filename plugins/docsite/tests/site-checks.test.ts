@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createReply, createThread } from '@godcreator/comments/node'
-import { readComments } from '../src/comments.js'
+import { listComments, readComments } from '../src/comments.js'
 import { loadPlatformNode } from '../src/scaffold/platform.js'
 import { checkSite } from '../src/site-check.js'
 
@@ -63,6 +63,19 @@ describe('readComments：读一个评论目录', () => {
         replies: [{ author: 'tester', createdAt: '2026-10-21T11:00:00.000Z', body: '好' }],
       },
     ])
+  })
+})
+
+describe('listComments：page 也收页面地址', () => {
+  it('内容页的路径与地址都认得出同一串；功能页按地址认', async () => {
+    await write('people.json', JSON.stringify([{ id: 'tester', name: '测试员', codes: ['testcode0001'] }]))
+    const commentsDir = path.join(dir, 'comments')
+    await createThread(commentsDir, { page: '(guide)/setup/index.mdx', authorId: 'tester', body: '内容页', now: new Date('2026-10-21T10:00:00.000Z') })
+    await createThread(commentsDir, { page: '/papers/abc/paper', authorId: 'tester', body: '论文页', now: new Date('2026-10-21T10:01:00.000Z') })
+    const bodiesOf = async (page: string) => (await listComments(dir, { page })).map((thread) => thread.body)
+    expect(await bodiesOf('(guide)/setup/index.mdx')).toEqual(['内容页'])
+    expect(await bodiesOf('/setup')).toEqual(['内容页'])
+    expect(await bodiesOf('/papers/abc/paper')).toEqual(['论文页'])
   })
 })
 

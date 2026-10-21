@@ -108,7 +108,7 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 
 ## 评论
 
-- 读：`docsite.comments {"dir":…,"page"?:…,"about"?:…}`，读文件，不要站点在运行。`page` 是页面在 `content/` 里的路径（如 `writing/collapse-test.mdx`），
+- 读：`docsite.comments {"dir":…,"page"?:…,"about"?:…}`，读文件，不要站点在运行。`page` 是页面在 `content/` 里的路径（如 `writing/collapse-test.mdx`），或以 `/` 开头的页面地址（如 `/writing/collapse-test`，功能页如 `/papers/<UUID>/paper`），
   `about` 是人员 id，只列和他有关的（他发起的、正文或回复里 @ 了他的）。评论串在 `comments/<id>/`：`index.mdx` 是发起的那条，回复各一个 `.mdx`
 - 写：`docsite.comment.create {"dir":…,"page":…,"body":…,"anchor"?:…,"as"?:…}` 批整页，给 `anchor`（页面元素的 id）批那个元素；
   `docsite.comment.reply {"dir":…,"thread":…,"body":…,"as"?:…}`，`thread` 是 `docsite.comments` 回的 `id`。两条都要站点在运行。

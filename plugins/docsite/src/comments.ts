@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import type { CommentFileOnDisk, Reactions } from '@godcreator/comments'
+import { pageAddressOf, type CommentFileOnDisk, type Reactions } from '@godcreator/comments'
 import { readCommentThreads, type CommentThreadOnDisk } from '@godcreator/comments/node'
 import { mentionsOf, type Person } from '@godcreator/identity'
 import { sitePeople } from '@godcreator/identity/node'
@@ -62,7 +62,11 @@ export async function readComments(commentsDir: string): Promise<StoredThread[]>
   return threads.map(storedThreadOf)
 }
 
-/** 读站点目录里的评论（不要站点在运行）：按挂的页面、和谁有关筛。page 是页面在内容目录里的路径（如 "writing/collapse-test.mdx"） */
+
+/**
+ * 读站点目录里的评论（不要站点在运行）：按挂的页面、和谁有关筛。page 写页面在内容目录里的路径（如 "writing/collapse-test.mdx"），
+ * 或以 / 开头的页面地址（如 "/writing/collapse-test"，功能页如 "/papers/<UUID>/paper"）
+ */
 export async function listComments(siteDir: string, filter: CommentFilter): Promise<ListedThread[]> {
   let people: Person[]
   let threads: CommentThreadOnDisk[]
@@ -73,7 +77,7 @@ export async function listComments(siteDir: string, filter: CommentFilter): Prom
     throw new DocsiteRejected(messageOf(error))
   }
   return threads
-    .filter((thread) => filter.page === undefined || thread.head.page === filter.page)
+    .filter((thread) => filter.page === undefined || thread.head.page === filter.page || (filter.page.startsWith('/') && thread.head.page !== undefined && decodeURI(pageAddressOf(thread.head.page)) === decodeURI(filter.page)))
     .map((thread) => {
       if (!people.some((person) => person.id === thread.head.authorId)) throw new DocsiteRejected(`评论作者不在 people.json 里：${thread.head.path}（${thread.head.authorId}）`)
       const stored = storedThreadOf(thread)
