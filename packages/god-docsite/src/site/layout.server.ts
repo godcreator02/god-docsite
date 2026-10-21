@@ -3,6 +3,7 @@ import type * as PageTree from 'fumadocs-core/page-tree'
 import type { SerializedPageTree } from 'fumadocs-core/source/client'
 import type { SidebarLink } from './sidebar-links.js'
 import type { DocsiteContext, SiteLayoutData } from './site-context.js'
+import { loadSiteSections, sectionFolderOf, sectionPageTitlesOf, type FeatureSections } from './site-sections.js'
 
 /**
  * 序列化后的页面树，根的 $id 换成内容摘要。
@@ -34,12 +35,21 @@ export function sitePageTitles({ source }: Pick<DocsiteContext, 'source'>, sideb
   ])
 }
 
-/** 布局路由 loader 的平台部分：页面树（根 $id 是内容摘要）、站名（内容目录 meta.json 的 title）、站内地址到标题（含功能的侧栏入口） */
-export async function siteLayoutData({ source }: Pick<DocsiteContext, 'source'>, sidebarLinks: readonly SidebarLink[]): Promise<SiteLayoutData> {
-  const tree = source.getPageTree()
+/**
+ * 布局路由 loader 的平台部分：页面树（根 $id 是内容摘要）、站名（内容目录 meta.json 的 title）、站内地址到标题（含功能的侧栏入口）。
+ * 各功能的分区（featureSections，即 server.generated.ts 的汇总）每次请求现算，接在内容目录的顶层之后成 root 文件夹，分区里的页并进站内地址到标题
+ */
+export async function siteLayoutData<Site extends Pick<DocsiteContext, 'source'>>(
+  site: Site,
+  sidebarLinks: readonly SidebarLink[],
+  featureSections: readonly FeatureSections<Site>[],
+): Promise<SiteLayoutData> {
+  const tree = site.source.getPageTree()
+  const sections = await loadSiteSections(site, featureSections)
+  const treeWithSections: PageTree.Root = { ...tree, children: [...tree.children, ...sections.map(sectionFolderOf)] }
   return {
-    pageTree: withContentDigestId(await source.serializePageTree(tree)),
+    pageTree: withContentDigestId(await site.source.serializePageTree(treeWithSections)),
     siteName: typeof tree.name === 'string' ? tree.name : '',
-    pageTitles: sitePageTitles({ source }, sidebarLinks),
+    pageTitles: { ...sitePageTitles(site, sidebarLinks), ...Object.fromEntries(sectionPageTitlesOf(sections)) },
   }
 }

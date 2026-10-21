@@ -1,7 +1,7 @@
 'use client';
 /**
- * FeatureIndexSteps：五份汇总文件怎么随功能目录变。上面一行是这一步的调用与交回，中间左边是站点 app/features/
- * 里到这一步为止的功能目录（四种格子按文件着色，目录里没有的画调淡的灰格子），右边是五份汇总文件：
+ * FeatureIndexSteps：六份汇总文件怎么随功能目录变。上面一行是这一步的调用与交回，中间左边是站点 app/features/
+ * 里到这一步为止的功能目录（五种格子按文件着色，目录里没有的画调淡的灰格子），右边是六份汇总文件：
  * 写出空的与改了的展开画随功能变的行，没变的只画标题栏。下面一行图例。数据都在 feature-index-steps.data.mjs。
  */
 import type { JSX } from 'react';
@@ -94,7 +94,7 @@ function StepView({ step }: { step: FeatureIndexStep }): JSX.Element {
 
 export function FeatureIndexSteps(): JSX.Element {
   return (
-    <Stepper steps={steps} interval={6000} label="五份汇总文件怎么随功能目录变">
+    <Stepper steps={steps} interval={6000} label="六份汇总文件怎么随功能目录变">
       {(step) => <StepView key={step.id} step={step} />}
     </Stepper>
   );

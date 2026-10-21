@@ -97,6 +97,7 @@ describe('createSite', () => {
     expect(readFileSync(path.join(dir, 'app', 'features', 'runtime.generated.ts'), 'utf8')).toContain('siteFeatureRuntime({})')
     expect(readFileSync(path.join(dir, 'app', 'features', 'collections.generated.ts'), 'utf8')).toContain('export {}')
     expect(readFileSync(path.join(dir, 'app', 'features', 'styles.generated.css'), 'utf8')).not.toContain('@import')
+    expect(readFileSync(path.join(dir, 'app', 'features', 'server.generated.ts'), 'utf8')).toContain('export const featureSections: FeatureSections[] = []')
   })
 
   it('registry 装法：版本取各包自己 package.json 的 version', () => {
@@ -180,14 +181,27 @@ describe('addFeature', () => {
     expect(() => addFeature({ siteDir, packageName: '@godcreator/bad-list' })).toThrow(/godDocsite 要写成/)
   })
 
-  it('regenerateFeatureIndex 只认含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录，按名字排序', () => {
+  it('regenerateFeatureIndex 只认含 routes.ts、feature.tsx、mdx.ts、styles.css 或 site.server.ts 的子目录，按名字排序', () => {
     const siteDir = newSite()
     const featuresDir = path.join(siteDir, 'app', 'features')
     writeFile(path.join(featuresDir, 'zeta', 'feature.tsx'), 'export {}\n')
     writeFile(path.join(featuresDir, 'alpha', 'routes.ts'), 'export default []\n')
     writeFile(path.join(featuresDir, 'beta', 'styles.css'), '.beta {}\n')
+    writeFile(path.join(featuresDir, 'gamma', 'site.server.ts'), 'export const gammaSite = {}\n')
     writeFile(path.join(featuresDir, 'notes', 'readme.md'), '不是功能\n')
-    expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'beta', 'zeta'])
+    expect(regenerateFeatureIndex(siteDir).features).toEqual(['alpha', 'beta', 'gamma', 'zeta'])
+  })
+
+  it('site.server.ts 导出了 sections 才进服务端汇总', () => {
+    const siteDir = newSite()
+    const featuresDir = path.join(siteDir, 'app', 'features')
+    writeFile(path.join(featuresDir, 'paper-list', 'site.server.ts'), 'export const sections = () => []\n')
+    writeFile(path.join(featuresDir, 'collab', 'site.server.ts'), 'export const collabSite = {}\n')
+    regenerateFeatureIndex(siteDir)
+    const serverIndex = readFileSync(path.join(featuresDir, 'server.generated.ts'), 'utf8')
+    expect(serverIndex).toContain("import * as paperListServer from './paper-list/site.server.ts'")
+    expect(serverIndex).toContain("export const featureSections: FeatureSections[] = [{ feature: 'paper-list', sections: paperListServer.sections }]")
+    expect(serverIndex).not.toContain('collab')
   })
 
   it('addBaseFeatures：模板跟着装的包里带 template/ 的补进功能目录（comments），没有的跳过（这里装的 identity 是没有 template/ 的假包），重复运行只补缺的；没装先报错', () => {

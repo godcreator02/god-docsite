@@ -42,7 +42,7 @@ export const platformSeams = defineSeamGraph({
       pkg: './scaffold',
       role: 'rose',
       outside: false,
-      blurb: '纯 Node：复制模板写出站点，把功能包的文件补进功能目录，按功能目录现算五份汇总文件。不装依赖、不起服务。',
+      blurb: '纯 Node：复制模板写出站点，把功能包的文件补进功能目录，按功能目录现算六份汇总文件。不装依赖、不启动开发服务。',
       caps: [
         { id: 'create', name: '建站', ident: 'createSite' },
         { id: 'add', name: '加功能', ident: 'addFeature' },
@@ -125,7 +125,7 @@ export const platformSeams = defineSeamGraph({
       iface: "写文件：template/ → 站点 · app/features/<功能>/ · app/features/*.generated.*",
       convention: false,
       via: 'disk',
-      text: 'createSite 复制模板，写 package.json、people.json、pnpm-workspace.yaml；addFeature 把功能包的 template/ 补进功能目录，已有的文件不覆盖；regenerateFeatureIndex 每次重写五份汇总文件。',
+      text: 'createSite 复制模板，写 package.json、people.json、pnpm-workspace.yaml；addFeature 把功能包的 template/ 补进功能目录，已有的文件不覆盖；regenerateFeatureIndex 每次重写六份汇总文件。',
     },
     {
       n: 3,

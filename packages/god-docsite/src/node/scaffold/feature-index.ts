@@ -7,8 +7,11 @@ import { packageInNodeModules } from './installed-packages.js'
 /** 站点里放功能目录的地方，相对站点根 */
 export const featuresDirInSite = 'app/features'
 
-/** 功能目录里建站器认的文件：含其中任一个的子目录就算功能（只有 styles.css 的功能只进样式汇总） */
-const featureFiles = { routes: 'routes.ts', runtime: 'feature.tsx', mdx: 'mdx.ts', styles: 'styles.css' } as const
+/**
+ * 功能目录里建站器认的文件：含其中任一个的子目录就算功能（只有 styles.css 的功能只进样式汇总）。
+ * site.server.ts 只在服务端加载，导出了 sections 才进服务端汇总；没导出的（只给功能自己的路由组装上下文）不进
+ */
+const featureFiles = { routes: 'routes.ts', runtime: 'feature.tsx', mdx: 'mdx.ts', styles: 'styles.css', server: 'site.server.ts' } as const
 
 /** 汇总文件，都在 app/features/ 下，每次重写；站点模板固定 import 它们 */
 export const featureIndexFiles = {
@@ -17,7 +20,11 @@ export const featureIndexFiles = {
   mdx: 'mdx.generated.ts',
   collections: 'collections.generated.ts',
   styles: 'styles.generated.css',
+  server: 'server.generated.ts',
 } as const
+
+/** 功能 site.server.ts 里给侧栏分区的导出名 */
+const sectionsExportName = 'sections'
 
 /** 站点的全站 remark / rehype 插件（模板文件）：集合汇总把它传给各功能的集合工厂 */
 const siteMdxPluginsModule = '../lib/mdx-plugins.ts'
@@ -33,6 +40,8 @@ interface SiteFeature {
   hasRuntime: boolean
   hasMdx: boolean
   hasStyles: boolean
+  /** site.server.ts 导出了 sections：侧栏分区由它每次请求算出 */
+  hasSections: boolean
   /** 功能包 package.json 的 godDocsite.collections：mdx.ts 的 collections 里各工厂的名字，也是站点里的集合名 */
   collections: string[]
 }
@@ -83,7 +92,11 @@ function collectionsOfFeature(siteDir: string, feature: string): string[] {
   return declaredCollectionsOf(path.join(installed.dir, 'package.json'))
 }
 
-/** app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录，按名字排序 */
+function exportsSections(file: string): boolean {
+  return scanExports(readFileSync(file, 'utf8'), file).names.includes(sectionsExportName)
+}
+
+/** app/features/ 下含 routes.ts、feature.tsx、mdx.ts、styles.css 或 site.server.ts 的子目录，按名字排序 */
 function siteFeaturesIn(siteDir: string): SiteFeature[] {
   const featuresDir = path.join(siteDir, featuresDirInSite)
   const features: SiteFeature[] = []
@@ -105,6 +118,7 @@ function siteFeaturesIn(siteDir: string): SiteFeature[] {
       hasRuntime: has(featureFiles.runtime),
       hasMdx: has(featureFiles.mdx),
       hasStyles: has(featureFiles.styles),
+      hasSections: has(featureFiles.server) && exportsSections(path.join(dir, featureFiles.server)),
       collections: has(featureFiles.mdx) ? collectionsOfFeature(siteDir, name) : [],
     })
   }
@@ -123,7 +137,7 @@ function assertUniqueCollections(features: readonly SiteFeature[], siteCollectio
   }
 }
 
-const generatedNotice = '建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录'
+const generatedNotice = '建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts、styles.css 或 site.server.ts 的子目录'
 const tsHeader = `// ${generatedNotice}\n`
 
 function routesIndexOf(features: readonly SiteFeature[]): string {
@@ -180,6 +194,18 @@ function collectionsIndexOf(features: readonly SiteFeature[]): string {
   ].join('')
 }
 
+/** 只给布局路由的 loader 用：import 的都是 .server.ts，误进浏览器包时 React Router 直接报错 */
+function serverIndexOf(features: readonly SiteFeature[]): string {
+  const withSections = features.filter((feature) => feature.hasSections)
+  return [
+    tsHeader,
+    `import type { FeatureSections } from '@godcreator/god-docsite/server'\n`,
+    ...withSections.map((feature) => `import * as ${feature.identifier}Server from './${feature.name}/${featureFiles.server}'\n`),
+    `\n/** 各功能 site.server.ts 导出的 sections：布局路由的 loader 每次请求调一遍，并进侧栏 */\n`,
+    `export const featureSections: FeatureSections[] = [${withSections.map((feature) => `{ feature: '${feature.name}', ${sectionsExportName}: ${feature.identifier}Server.${sectionsExportName} }`).join(', ')}]\n`,
+  ].join('')
+}
+
 function stylesIndexOf(features: readonly SiteFeature[]): string {
   return [`/* ${generatedNotice} */\n`, ...features.filter((feature) => feature.hasStyles).map((feature) => `@import './${feature.name}/${featureFiles.styles}';\n`)].join('')
 }
@@ -208,6 +234,7 @@ export function regenerateFeatureIndex(siteDir: string): FeatureIndex {
     mdx: mdxIndexOf(features),
     collections: collectionsIndexOf(features),
     styles: stylesIndexOf(features),
+    server: serverIndexOf(features),
   }
   const files: string[] = []
   for (const [kind, text] of Object.entries(contents) as Array<[keyof typeof featureIndexFiles, string]>) {

@@ -1,5 +1,5 @@
 /*
- * FeatureIndexSteps 自己的画面：上调用行、中两栏（左功能目录、右五份汇总文件）、下图例。
+ * FeatureIndexSteps 自己的画面：上调用行、中两栏（左功能目录、右六份汇总文件）、下图例。
  * 卡片、胶囊与代码行（--dx-* 变量）由 @godcreator/explainer 提供，颜色只取那套变量。
  */
 .fi-stage { container-type: inline-size; display: grid; gap: 12px; }
@@ -18,7 +18,7 @@
 .fi-dir-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
 .fi-dir-name { font-family: var(--dx-mono); font-size: 12.5px; }
 
-/* 目录里固定四种文件的格子：有的是胶囊，没有的画调淡的灰格子 */
+/* 目录里固定五种文件的格子：有的是胶囊，没有的画调淡的灰格子 */
 .fi-cells { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 .fi-cell {
   font-family: var(--dx-mono);

@@ -1,0 +1,18 @@
+---
+born-at: 2026-10-21T17:30
+type: choice
+parent: [2026-10-21-feature-sections-reference-scan-probe]
+label: 侧栏分区进平台
+domain: 骨架
+---
+
+## 背景
+
+原型验证了功能在 `site.server.ts` 导出 `sections`、布局 loader 把分区并进页面树行得通，正式实现要定三件事：汇总文件怎么生成、多页条目在页面树里长什么样、分区排在哪里。
+
+## 选择
+
+- 建站器把 `site.server.ts` 认成第五种文件，导出了 `sections` 的才进第六份汇总文件 `server.generated.ts`；没导出的（协作、轨迹只给自己的路由组装上下文）不进。导没导出用建站器现有的 `scanExports` 读源码判断（读 `source.config.ts` 的集合名用的也是它），不让功能包另写声明。
+- 条目分三种：一页（`name` + `url`）、一组（`name` + `children`）、分隔线。一组做成不带 index 的文件夹，首页由功能作为第一个子项给出。否掉的是原型里「条目带 `url` 又带 `children`、首页同时当 index」：fumadocs 的上一页、下一页把首页算两次。
+- 分区接在内容目录的顶层之后，按 `order`、功能名、分区名排；「检索」由平台加在每个分区最上面，功能只给 `searchUrl`，各分区开头一致。
+- `siteLayoutData` 多收一个参数 `featureSections`，在里面调各功能的 `sections`。代价是独立页面用的 `sitePageTitles` 不含分区里的页：轨迹的磁盘页正文里指向论文页的链接不显示成带标题的卡片，等有独立页面要用到时再给它加。

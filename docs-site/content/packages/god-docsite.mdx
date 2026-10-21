@@ -1,6 +1,6 @@
 ---
 title: god-docsite：平台包
-description: 站点的公共部分：模板与建站器写出站点，每次按功能目录重新生成五份汇总文件；运行时把 MDX、TSX、HTML 三种页面合进一棵页面树，提供布局与侧栏、搜索、llms、推送通道与术语标注；vite 插件管端口、可信来源与内容目录。功能包经站点 app/features/ 里的文件接入，平台包不依赖任何功能包
+description: 站点的公共部分：模板与建站器写出站点，每次按功能目录重新生成六份汇总文件；运行时把 MDX、TSX、HTML 三种页面合进一棵页面树，提供布局与侧栏、搜索、llms、推送通道与术语标注；vite 插件管端口、可信来源与内容目录。功能包经站点 app/features/ 里的文件接入，平台包不依赖任何功能包
 icon: LayoutTemplate
 ---
 
@@ -26,7 +26,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 图上画不出的几点：
 
 1. **建站与加功能**：插件从装好的平台包目录加载 `./scaffold`，不把它打包进插件。
-2. **写出站点**：`addFeature` 补文件时已有的不覆盖，五份汇总文件每次重写。
+2. **写出站点**：`addFeature` 补文件时已有的不覆盖，六份汇总文件每次重写。
 3. **读功能包**：功能包要先装进站点的 `node_modules`，集合名单读它 `package.json` 的 `godDocsite.collections`。
 4. **合并功能**：两个功能导出同名 MDX 组件时报错。
 5. **路由调 loader**：站点上下文 `site` 经参数传进去，平台与功能包都不 import 站点代码。
@@ -76,17 +76,17 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/node/scaffold/add-feature.ts" lines="25-66" hash="d9cf99c74551" blob="5274e23e10ca" */}
 
-功能目录固定在 `app/features/`；建站器只认目录里的四种文件——`routes.ts`、`feature.tsx`、`mdx.ts`、`styles.css`，含其中任一个的子目录才算功能；五份汇总文件是 `routes.generated.ts`、`runtime.generated.ts`、`mdx.generated.ts`、`collections.generated.ts`、`styles.generated.css`，都在 `app/features/` 下。
+功能目录固定在 `app/features/`；建站器只认目录里的五种文件——`routes.ts`、`feature.tsx`、`mdx.ts`、`styles.css`、`site.server.ts`，含其中任一个的子目录才算功能；六份汇总文件是 `routes.generated.ts`、`runtime.generated.ts`、`mdx.generated.ts`、`collections.generated.ts`、`styles.generated.css`、`server.generated.ts`，都在 `app/features/` 下。
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="7-20" hash="a9cdf57d595c" blob="778f5b87a5f7" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="7-34" hash="50aef65b5e80" blob="98f876f836b7" */}
 
-`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含四种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；然后重写五份汇总文件。汇总文件每次都按目录重新生成，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步依次看一遍：
+`regenerateFeatureIndex` 是核心：扫 `app/features/` 下的子目录，含五种文件之一的才算功能，按名字排序；有 `mdx.ts` 的去站点依赖里找功能名对得上的那个包，读它 `package.json` 的 `godDocsite.collections`；集合名要全站唯一，与 `source.config.ts` 自己的集合也不能重名；`site.server.ts` 里导出了 `sections` 的才进服务端汇总；然后重写六份汇总文件。汇总文件每次都按目录重新生成，所以加一个功能不用改模板，平台包也不用知道有哪些功能包。下面把本站建出来的六步依次看一遍：
 
 <FeatureIndexSteps />
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="53-124" hash="0de9ddc50523" blob="1f2d2a08a622" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="71-152" hash="76c38716cee3" blob="98f876f836b7" */}
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="200-218" hash="7aeec0bff430" blob="1f2d2a08a622" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="226-245" hash="58d2e13e8f28" blob="98f876f836b7" */}
 
 ## 站点身份文件
 
@@ -105,9 +105,9 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 {/* ref file="../packages/god-docsite/src/node/site-identity.ts" lines="5-16" hash="496fbe6153e7" blob="19583e4461db" */}
 
-## 功能目录里的四种文件
+## 功能目录里的五种文件
 
-这一节写给功能包作者。四种文件各能导出什么、平台怎么用：
+这一节写给功能包作者。五种文件各能导出什么、平台怎么用：
 
 | 文件 | 能导出 | 进哪份汇总文件 | 站点里谁用 |
 | --- | --- | --- | --- |
@@ -115,16 +115,34 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `feature.tsx` | `FeatureRuntimeModule` 的六样，都可选：`mdxComponents`、`pageTreePlugins`、`linkKinds`、`sidebarLinks`、`layoutData`、`LayoutTop` | `runtime.generated.ts` → `siteFeatureRuntime` | 布局路由、`app/lib/source.ts`、`app/lib/mdx-components.tsx` |
 | `mdx.ts` | `remarkPlugins`、`rehypePlugins`、`collections`（集合工厂，名单写在包的 `package.json` 的 `godDocsite.collections`） | `mdx.generated.ts`；有集合的再进 `collections.generated.ts` | `source.config.ts`、`app/lib/mdx-plugins.ts` |
 | `styles.css` | 样式 | `styles.generated.css` | `app/app.css` |
+| `site.server.ts` | `sections`（侧栏分区，见下面「侧栏分区」）；别的导出只给功能自己的路由 import，汇总文件不管 | 导出了 `sections` 才进 `server.generated.ts` | 布局路由的 loader |
 
-{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="126-185" hash="0005b519c4d9" blob="1f2d2a08a622" */}
+{/* ref file="../packages/god-docsite/src/node/scaffold/feature-index.ts" lines="154-238" hash="b7db776ccfdf" blob="98f876f836b7" */}
 
 合并规则三条：
 
 - `feature.tsx` 会进浏览器：不能 import `.server` 模块或 Node 内置模块，`layoutData` 要的服务端数据只能经第二个参数 `base`（站点上下文）取；它的返回值以功能名为键并进布局数据。
 - 两个功能导出同名 MDX 组件时报错；侧栏入口按 `order` 排，同样大的按功能名。
 - 集合工厂收一份全站插件 `sitePlugins` 并进自己的选项；`source.config.ts` 用 `export *` 再导出 `collections.generated.ts`，因为 fumadocs-mdx 要求那份文件只导出集合。
+- `site.server.ts` 只在服务端加载、可以读盘；`server.generated.ts` 只由布局路由的 loader 用，它 import 的都是 `.server.ts`，浏览器端误引用时 React Router 直接报错。
 
 {/* ref file="../packages/god-docsite/src/site/features.ts" lines="11-77" hash="164f2b6c87fa" blob="055ba60eb5de" */}
+
+## 侧栏分区
+
+功能要在侧栏里列不在 `content/` 里的东西（论文库的论文、资料库的视频）时，在 `site.server.ts` 导出 `sections(site)`，回若干个分区。每个分区有名字 `name`、先后 `order`、检索页 `searchUrl` 和条目 `entries`；条目有三种：
+
+- **一页**：`name` 加 `url`
+- **一组**：`name` 加 `children`，做成不带 index 的文件夹，首页由功能作为第一个子项给出。带 index 时首页既是文件夹又是子项，上一页、下一页会把它算两次
+- **分隔线**：`separator` 是线上的字，按视频、知乎、书籍分段时用
+
+{/* ref file="../packages/god-docsite/src/site/site-sections.ts" lines="4-21" hash="478b66ebf193" blob="553caf0d92f4" */}
+
+布局路由的 loader 每次请求经 `siteLayoutData` 把各功能的 `sections` 调一遍，所以条目变了刷新页面就跟上；算得慢的由功能自己按文件修改时间缓存。平台把每个分区换成页面树里的一个 `root` 文件夹，接在内容目录的顶层之后，按 `order` 从小到大排，相同时按功能名、再按分区名；文件夹最上面一项由平台加成「检索」，指向 `searchUrl`，所以各功能的分区开头都一样。因为是 root 文件夹，目录切换按钮里多一项，当前页在分区里时侧栏停在这一组。分区里的页也并进站内地址到标题，正文里指向这些页的链接显示成带标题的小卡片。
+
+{/* ref file="../packages/god-docsite/src/site/layout.server.ts" lines="38-55" hash="1eef29b41ba7" blob="813a3afc2296" */}
+
+分区放在 `site.server.ts` 里，而不是 `feature.tsx` 的页面树插件里：页面树在 `loader()` 建起时只算一次、只含 `content/` 里的页，元数据变了也不更新；`feature.tsx` 又会进浏览器，不能读盘。
 
 ## 三种页面进一棵页面树
 

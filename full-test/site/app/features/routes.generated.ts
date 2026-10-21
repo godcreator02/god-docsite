@@ -1,4 +1,4 @@
-// 建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts 或 styles.css 的子目录
+// 建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts、styles.css 或 site.server.ts 的子目录
 import type { RouteConfigEntry } from '@react-router/dev/routes'
 import * as collabRoutes from './collab/routes.ts'
 import * as commentsRoutes from './comments/routes.ts'
