@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { feedUrlOf } from '@godcreator/god-docsite'
+import { feedUrlOf, hostChannel, type HostContext } from '@godcreator/god-docsite'
 import type { DevServer, LaunchDevServer } from './dev-server.js'
 import { DocsiteRejected, messageOf } from './errors.js'
 import { checkDevScript, checkPlatformInstalled, checkSiteIdentity } from './site-contract.js'
@@ -56,8 +56,8 @@ export type SitePortMemory = {
 export type SiteHostOptions = {
   log: { info: (message: string) => void; warn: (message: string) => void }
   launchDevServer: LaunchDevServer
-  /** 本 home 的身份码，启动时交给开发服务 */
-  identityCode: () => string
+  /** 这个站的托管方上下文（身份码、本机目录、阅读字体）：开发服务报出地址后推进它的频道 host，之后变了经 pushHostContext 再推 */
+  hostContextOf: (dir: string) => HostContext
   ports: SitePortMemory
   /** 不给就用 defaultCrashRestartPolicy */
   crashRestart?: CrashRestartPolicy
@@ -180,7 +180,7 @@ export class SiteHost {
     site.error = null
     let server: DevServer
     try {
-      server = await this.options.launchDevServer(site.dir, this.options.identityCode(), await this.options.ports.preferredPortOf(site.dir))
+      server = await this.options.launchDevServer(site.dir, await this.options.ports.preferredPortOf(site.dir))
     } catch (error) {
       site.error = messageOf(error)
       this.changed(site)
@@ -189,6 +189,15 @@ export class SiteHost {
     if (this.disposed || this.sites.get(siteKeyOf(site.dir)) !== site) {
       await server.stop()
       throw new DocsiteRejected('插件正在卸载，没有启动站点')
+    }
+    // 推完再算启动成功：站点收到的第一个请求就有身份码与字体
+    try {
+      await server.push(hostChannel, this.options.hostContextOf(site.dir))
+    } catch (error) {
+      await server.stop()
+      site.error = `开发服务起来了，托管方上下文没推进频道 ${hostChannel}，已停掉：${messageOf(error)}`
+      this.changed(site)
+      throw new DocsiteRejected(site.error)
     }
     site.running = server
     site.error = null
@@ -230,6 +239,24 @@ export class SiteHost {
     this.options.log.info(`${site.dir} 的开发服务已停止`)
     this.changed(site)
     return { url: server.url }
+  }
+
+  /**
+   * 身份码、阅读字体或提供的本机目录变了：把每个在运行的站的托管方上下文重推一次。
+   * 设置变了的回调里没有人等结果，推不进去的站记一条警告、照旧用上一份，下次启动时重推
+   */
+  async pushHostContext(): Promise<void> {
+    await Promise.all(
+      [...this.sites.values()].map(async (site) => {
+        const server = site.running
+        if (server === null) return
+        try {
+          await server.push(hostChannel, this.options.hostContextOf(site.dir))
+        } catch (error) {
+          this.options.log.warn(`${site.dir} 的托管方上下文没重推进去，站点照旧用上一份：${messageOf(error)}`)
+        }
+      }),
+    )
   }
 
   /** 往站点的推送通道推一份数据；站点没在运行就报错 */

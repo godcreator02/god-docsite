@@ -142,10 +142,10 @@ export const docsiteSeams = defineSeamGraph({
       name: '启动开发服务',
       a: ['host-cap'],
       b: ['dev-process'],
-      iface: 'spawn pnpm dev [--port <端口>]，环境变量 DOCSITE_IDENTITY_CODE 与 DOCSITE_FEED_TOKEN',
+      iface: 'spawn pnpm dev [--port <端口>]，环境变量 DOCSITE_FEED_TOKEN；报出地址后推频道 host',
       convention: false,
       via: 'code',
-      text: '托管就是插件替站点目录跑 pnpm dev：启动时经环境变量交给开发服务本 home 的身份码与这次现生成的推送令牌，没有身份码站点只读。端口怎么定见「一次 start 怎么走」。',
+      text: '托管就是插件替站点目录跑 pnpm dev：启动时经环境变量只交给开发服务这次现生成的推送令牌；开发服务报出地址后，插件把托管方上下文（身份码、阅读字体，个人站还有本机目录）推进频道 host，推之前站点只读。端口怎么定见「一次 start 怎么走」。',
     },
     {
       n: 7,

@@ -345,7 +345,7 @@ export async function runCollabChecks({ browser, baseUrl, mode, siteDir, feedTok
 
     if (mode === 'start') {
       // 协作服务端代码里才有的原话：写入 action 的报错、在本机打开 repo: 链接的报错
-      await check('浏览器产物里没有协作的服务端代码', async () => serverCodeInClientBuild(siteDir, ['node:fs', 'node:child_process', '认不出 intent', '运行 VS Code 的 code 命令失败', 'DOCSITE_IDENTITY_CODE']))
+      await check('浏览器产物里没有协作的服务端代码', async () => serverCodeInClientBuild(siteDir, ['node:fs', 'node:child_process', '认不出 intent', '运行 VS Code 的 code 命令失败']))
     }
   } finally {
     await context.close()

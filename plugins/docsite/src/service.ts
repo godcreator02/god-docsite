@@ -6,7 +6,7 @@ import type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
 import type { SiteStarted, SiteStatus } from './site-host.js'
 
 /**
- * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在 gwb-data 的 hosted-sites 里，别的插件的站也经 add 登记）、往站点推数据与订阅站点的频道、本 home 的身份码。
+ * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在 gwb-data 的 hosted-sites 里，别的插件的站也经 add 登记）、往站点推数据与订阅站点的频道、本 home 的身份码、给个人站提供本机目录。
  * 站点都建在平台包 @godcreator/god-docsite 上，站点根有身份文件 docsite.json（类别与布局代号，建站时写）。站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
  */
 export interface GwbDocsiteApi {
@@ -39,6 +39,11 @@ export interface GwbDocsiteApi {
   subscribe(dir: string, channel: string, listener: (data: unknown) => void): () => void
   /** 把本 home 的身份码加进站点的 people.json：已有这个 id 就加进它的 codes，没有就新加一项；changed 为 false 是本来就在 */
   join(dir: string, person: JoiningPerson): Promise<{ changed: boolean }>
+  /**
+   * 提供一个本机目录给个人站（audience 为 personal）：放进托管方上下文的 dirs（名字到绝对路径），在运行的站马上收到，站点的功能包经站点上下文的 providedDirs() 读。
+   * 名字是功能包和插件约好的小写词；同一个名字只许一个插件提供，第二个抛 Error 写明谁先提供的目录。返回撤销的函数，放进 ctx.effect 里
+   */
+  provideSiteDir(name: string, dir: string): () => void
   /** 某个站的状态变了（启动、停止、出错）时调用；返回撤掉的函数 */
   onStatus(listener: (dir: string) => void): () => void
   /**
@@ -90,6 +95,9 @@ export class DocsiteService extends Service implements GwbDocsiteApi {
   }
   join(dir: string, person: JoiningPerson) {
     return this.api.join(dir, person)
+  }
+  provideSiteDir(name: string, dir: string) {
+    return this.api.provideSiteDir(name, dir)
   }
   onStatus(listener: (dir: string) => void) {
     return this.api.onStatus(listener)

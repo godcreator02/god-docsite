@@ -7,6 +7,7 @@ import { devOutputEntryOf, feedEventsOf, localUrlOf, type DevServer } from '../s
 import { isIdentityCode, joinPeople, newIdentityCode } from '../src/people-file.js'
 import { devScriptHasFixedPort } from '../src/site-contract.js'
 import { SiteHost, type CrashRestartPolicy, type SitePortMemory } from '../src/site-host.js'
+import type { HostContext } from '@godcreator/god-docsite'
 
 let siteDir: string
 
@@ -36,7 +37,6 @@ type FakeSubscription = { channel: string; listener: (data: unknown) => void; on
 /** 假的开发服务：记下推来的数据与订阅，能让它退出 */
 function fakeServers() {
   const launched: Array<{
-    code: string
     port: number | null
     pushed: Array<[string, unknown]>
     subscriptions: FakeSubscription[]
@@ -44,8 +44,8 @@ function fakeServers() {
     stopped: boolean
     stoppedNow: boolean
   }> = []
-  const launch = async (_dir: string, code: string, port: number | null): Promise<DevServer> => {
-    const record = { code, port, pushed: [] as Array<[string, unknown]>, subscriptions: [] as FakeSubscription[], exit: (_reason: string) => {}, stopped: false, stoppedNow: false }
+  const launch = async (_dir: string, port: number | null): Promise<DevServer> => {
+    const record = { port, pushed: [] as Array<[string, unknown]>, subscriptions: [] as FakeSubscription[], exit: (_reason: string) => {}, stopped: false, stoppedNow: false }
     launched.push(record)
     return {
       url: `http://127.0.0.1:${port ?? 14000 + launched.length}`,
@@ -88,27 +88,30 @@ function fakePorts(free = true): SitePortMemory & { remembered: Map<string, numb
 /** 测试用的崩溃重启规矩：间隔短到几十毫秒，两次用完 */
 const quickRestart: CrashRestartPolicy = { delaysMs: [20, 40], stableAfterMs: 60_000 }
 
-function hostWith(launch: (dir: string, code: string, port: number | null) => Promise<DevServer>, ports: SitePortMemory = fakePorts(), crashRestart: CrashRestartPolicy = quickRestart) {
+function hostWith(launch: (dir: string, port: number | null) => Promise<DevServer>, ports: SitePortMemory = fakePorts(), crashRestart: CrashRestartPolicy = quickRestart) {
   const logs: string[] = []
   const host = new SiteHost({
     log: { info: (message) => logs.push(message), warn: (message) => logs.push(message) },
     launchDevServer: launch,
-    identityCode: () => 'mycode000001',
+    hostContextOf: () => hostContext,
     ports,
     crashRestart,
   })
   return { host, logs }
 }
 
+/** 测试里推给每个站的托管方上下文 */
+const hostContext: HostContext = { format: 1, identityCode: 'mycode000001', dirs: { papers: 'D:/library/papers' }, readerFonts: { body: null, heading: null, mono: null } }
+
 const waitMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('站点状态机', () => {
-  it('start 启动并交给开发服务身份码，状态转 running', async () => {
+  it('start 启动后把托管方上下文推进频道 host，状态转 running', async () => {
     await siteWithSupportedKit()
     const { launched, launch } = fakeServers()
     const { host } = hostWith(launch)
     expect(await host.start(siteDir)).toEqual({ url: 'http://127.0.0.1:14001', pid: 1, alreadyRunning: false })
-    expect(launched[0]!.code).toBe('mycode000001')
+    expect(launched[0]!.pushed).toEqual([['host', hostContext]])
     expect(host.statusOf(siteDir)).toEqual({ dir: path.resolve(siteDir), state: 'running', url: 'http://127.0.0.1:14001', error: null })
   })
 
@@ -125,8 +128,8 @@ describe('站点状态机', () => {
     let release: (() => void) | undefined
     const gate = new Promise<void>((resolve) => (release = resolve))
     const hanging = fakeServers()
-    const hangingLaunch = async (dir: string, code: string, port: number | null): Promise<DevServer> => {
-      const server = await hanging.launch(dir, code, port)
+    const hangingLaunch = async (dir: string, port: number | null): Promise<DevServer> => {
+      const server = await hanging.launch(dir, port)
       await gate
       return server
     }
@@ -217,10 +220,10 @@ describe('站点状态机', () => {
     await siteWithSupportedKit()
     const { launched, launch } = fakeServers()
     let launches = 0
-    const flaky = async (dir: string, code: string, port: number | null) => {
+    const flaky = async (dir: string, port: number | null) => {
       launches += 1
       if (launches === 2) throw new Error('开发服务启动后就退出了（退出码 1）')
-      return launch(dir, code, port)
+      return launch(dir, port)
     }
     const { host } = hostWith(flaky)
     await host.start(siteDir)
@@ -280,7 +283,10 @@ describe('站点状态机', () => {
     await expect(host.push(siteDir, 'collab', { n: 1 })).rejects.toThrow('的站点没在运行')
     await host.start(siteDir)
     await host.push(siteDir, 'collab', { n: 1 })
-    expect(launched[0]!.pushed).toEqual([['collab', { n: 1 }]])
+    expect(launched[0]!.pushed).toEqual([
+      ['host', hostContext],
+      ['collab', { n: 1 }],
+    ])
   })
 
   it('第一次不给端口、站点自己挑，记下来；下次先试上次的端口，被占了再让站点挑', async () => {
@@ -372,6 +378,44 @@ describe('订阅站点的频道', () => {
   it('事件流切成事件：data 行的 JSON，注释行不算，没收完的留着', () => {
     expect(feedEventsOf(': connected\n\ndata: {"n":1}\n\ndata: {"n"')).toEqual({ events: [{ n: 1 }], rest: 'data: {"n"' })
     expect(feedEventsOf('data: null\r\n\r\n')).toEqual({ events: [null], rest: '' })
+  })
+})
+
+describe('托管方上下文', () => {
+  it('推不进去：停掉开发服务，状态转 failed、写明原因', async () => {
+    await siteWithSupportedKit()
+    const { launched, launch } = fakeServers()
+    const refusing = async (dir: string, port: number | null) => ({ ...(await launch(dir, port)), push: async () => Promise.reject(new Error('站点的推送路由回 400：托管方上下文的 format 要是 1')) })
+    const { host } = hostWith(refusing)
+    await expect(host.start(siteDir)).rejects.toThrow(`托管方上下文没推进频道 host，已停掉：站点的推送路由回 400`)
+    expect(launched[0]!.stopped).toBe(true)
+    expect(host.statusOf(siteDir).state).toBe('failed')
+  })
+
+  it('pushHostContext 给每个在运行的站重推一次；推不进去的记警告，别的站照推', async () => {
+    await siteWithSupportedKit()
+    const otherDir = await mkdtemp(path.join(tmpdir(), 'gwb-docsite-'))
+    for (const [file, text] of [['package.json', '{"scripts":{"dev":"react-router dev"}}'], ['docsite.json', '{"kind":"base","audience":"shared","format":2}']]) await writeFile(path.join(otherDir, file!), text!)
+    await mkdir(path.join(otherDir, 'node_modules', '@godcreator', 'god-docsite'), { recursive: true })
+    await writeFile(path.join(otherDir, 'node_modules', '@godcreator', 'god-docsite', 'package.json'), '{"name":"@godcreator/god-docsite","version":"0.1.0"}')
+    const { launched, launch } = fakeServers()
+    let refuse = false
+    const sometimesRefusing = async (dir: string, port: number | null) => {
+      const server = await launch(dir, port)
+      return dir === otherDir ? { ...server, push: async (channel: string, data: unknown) => (refuse ? Promise.reject(new Error('连不上')) : server.push(channel, data)) } : server
+    }
+    const { host, logs } = hostWith(sometimesRefusing)
+    await host.start(siteDir)
+    await host.start(otherDir)
+    refuse = true
+    await host.pushHostContext()
+    expect(launched[0]!.pushed).toEqual([
+      ['host', hostContext],
+      ['host', hostContext],
+    ])
+    expect(logs.some((line) => line.includes('托管方上下文没重推进去，站点照旧用上一份：连不上'))).toBe(true)
+    await host.stopAll()
+    await rm(otherDir, { recursive: true })
   })
 })
 

@@ -106,10 +106,10 @@ export const repoMap = defineSeamGraph({
       name: '托管开发服务',
       a: ['gwb-docsite'],
       b: ['wiring'],
-      iface: '子进程 pnpm dev · 环境变量 DOCSITE_IDENTITY_CODE、DOCSITE_FEED_TOKEN',
+      iface: '子进程 pnpm dev · 环境变量 DOCSITE_FEED_TOKEN · 推送频道 host',
       convention: false,
       via: 'disk',
-      text: 'docsite.site.add 登记为常驻（记在 gwb-data 的 hosted-sites 里）并启动站点的开发服务，经环境变量交给它身份码与推送令牌；登记着的站在插件每次加载时都会启动，工作台的「站点」窗格列出每个站。',
+      text: 'docsite.site.add 登记为常驻（记在 gwb-data 的 hosted-sites 里）并启动站点的开发服务，经环境变量交给它推送令牌，起来后把身份码、阅读字体等托管方上下文推进频道 host；登记着的站在插件每次加载时都会启动，工作台的「站点」窗格列出每个站。',
     },
     {
       n: 3,

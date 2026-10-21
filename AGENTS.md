@@ -31,7 +31,7 @@
 * 依赖不打补丁：dev 下新增内容文件的即时出现由平台包的 vite 插件负责（不再靠 vite 补丁），功能包路由经站点 `app/features/` 的接线文件登记
   （不再靠 React Router 补丁），为什么能删见轨迹卡 `docs-site/trajectory/2026-10-15-drop-dependency-patches.mdx`
 * 站点的开发服务都交给 gwb-docsite 托管（`docsite.site.add`），不在会话里自己 `pnpm dev`。端口不写在站里：启动时先试上次用的，被占了在 10000–49151 里随机挑，地址看 `docsite.site.list` 的 `url`
-  要写评论，开发服务的环境变量 `DOCSITE_IDENTITY_CODE` 要是站里 `people.json` 某人的码（经 gwb-docsite 启动时它自己给）。
+  要写评论，gwb-docsite 推进推送频道 `host` 的托管方上下文里的身份码要是站里 `people.json` 某人的码（站点起来后它自己推）。
   只有 dev 能写：build + start 跑的是发布版，全面只读（身份包的 `siteIdentity(dir, 'start')` 不看身份码）。协作是各人在本机的 dev 里改、经 git 同步，
   不做多人共用一个网站写入，选型见轨迹卡 `docs-site/trajectory/2026-10-15-published-site-readonly.mdx`
 * **平台模板写出的站点文件只改 `packages/god-docsite/template/`**，功能包的接线文件只改各包的 `template/`；docs-site、full-test/site 的 `app/` 由建站器写出，

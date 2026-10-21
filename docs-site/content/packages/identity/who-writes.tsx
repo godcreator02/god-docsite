@@ -6,7 +6,7 @@
 import type { JSX } from 'react';
 import { CasePicker, CodeLines, Dot, Pane, Pill } from '@godcreator/explainer/site';
 import type { Tone } from '@godcreator/explainer/site';
-import { cases, envName, peopleLines, stepNames } from './who-writes.data.mjs';
+import { cases, codeField, peopleLines, stepNames } from './who-writes.data.mjs';
 import type { StepState, WhoWritesCase } from './who-writes.data.mjs';
 import './who-writes.css';
 
@@ -20,7 +20,7 @@ function CaseView({ item }: { item: WhoWritesCase }): JSX.Element {
           <div className="ww-lines">
             <div>运行方式：{item.machine.runMode}</div>
             <div className="ww-env">
-              {item.machine.code === null ? `${envName} 没有设` : `${envName}=${item.machine.code}`}
+              {item.machine.code === null ? '没有托管方上下文' : `${codeField}: ${item.machine.code}`}
               {item.machine.ignored ? <span className="ww-dim"> 不看</span> : null}
             </div>
           </div>

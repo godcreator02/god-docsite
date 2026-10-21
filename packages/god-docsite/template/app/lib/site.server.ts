@@ -1,5 +1,13 @@
 import path from 'node:path'
-import { siteAudienceOf, siteFeedValue, siteOrigin, siteReferencesForRequests, type BaseSiteContext } from '@godcreator/god-docsite/server'
+import {
+  siteAudienceOf,
+  siteFeedValue,
+  siteHostContext,
+  siteOrigin,
+  siteProvidedDirs,
+  siteReferencesForRequests,
+  type BaseSiteContext,
+} from '@godcreator/god-docsite/server'
 import { siteIdentity, sitePeople } from '@godcreator/identity/node'
 import { comments } from '../../.source/server'
 import { source } from './source'
@@ -23,10 +31,12 @@ export const site = {
   commentEntries: comments,
   /** 带身份码，只在服务端用；给浏览器的经 publicPeopleOf 或 publicPeopleWithAvatars */
   people: () => sitePeople(dir),
-  /** start（build 之后的发布版）一律只读 */
-  identity: () => siteIdentity(dir, mode),
+  /** 身份码在托管方上下文里；start（build 之后的发布版）一律只读 */
+  identity: () => siteIdentity(dir, mode, siteHostContext()?.identityCode),
   trustedOrigin: () => siteOrigin(mode),
   feedValue: (channel: string) => siteFeedValue(channel),
+  hostContext: () => siteHostContext(),
+  providedDirs: () => siteProvidedDirs(),
   mdxPlugins: () => import('./mdx-plugins').then((plugins) => plugins.sitePlugins),
-  references: siteReferencesForRequests(() => ({ siteDir: dir, audience, providedDirs: {} })),
+  references: siteReferencesForRequests(() => ({ siteDir: dir, audience, providedDirs: siteProvidedDirs() })),
 } satisfies BaseSiteContext

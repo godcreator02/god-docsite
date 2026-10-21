@@ -23,10 +23,21 @@ const checkGroups = [
 
 const serverStartTimeoutMs = 180_000
 
-async function withServer({ name, siteDir, args, env, logFile, url }, body) {
+/** 和 gwb-docsite 一样：开发服务起来以后把托管方上下文推进频道 host，站点从里面取测试员的身份码 */
+async function pushHostContext(url, feedToken) {
+  const response = await fetch(new URL('/__docsite/feed/host', url), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-docsite-token': feedToken },
+    body: JSON.stringify({ format: 1, identityCode: testerIdentityCode, readerFonts: { body: null, heading: null, mono: null } }),
+  })
+  if (!response.ok) throw new Error(`推托管方上下文，站点回 ${response.status}：${await response.text()}`)
+}
+
+async function withServer({ name, siteDir, args, env, logFile, url, afterReady }, body) {
   const server = startServer({ name, cwd: siteDir, args, env, logFile })
   try {
     await waitForHttp(url, { timeoutMs: serverStartTimeoutMs, server })
+    await afterReady?.()
     return await body()
   } finally {
     await server.stop()
@@ -54,7 +65,15 @@ async function devRound({ browser, siteDir, logDir, runTag, serverEnv, feedToken
     const port = await freePort()
     const url = `http://127.0.0.1:${port}`
     await withServer(
-      { name: 'dev', siteDir, args: [reactRouterBin(siteDir), 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'], env: serverEnv, logFile: path.join(logDir, 'dev-server.txt'), url },
+      {
+        name: 'dev',
+        siteDir,
+        args: [reactRouterBin(siteDir), 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
+        env: serverEnv,
+        logFile: path.join(logDir, 'dev-server.txt'),
+        url,
+        afterReady: () => pushHostContext(url, feedToken),
+      },
       () => runCheckGroups({ browser, baseUrl: url, mode: 'dev', siteDir, feedToken, runTag, record }),
     )
   } catch (error) {
@@ -92,7 +111,7 @@ async function startRound({ browser, siteDir, logDir, runTag, serverEnv, feedTok
 export async function runRounds({ siteDir, servers, logDir, runTag, record }) {
   record('all-features', 'static', await runRouteTableChecks({ siteDir }))
   const feedToken = randomUUID()
-  const serverEnv = { DOCSITE_IDENTITY_CODE: testerIdentityCode, DOCSITE_FEED_TOKEN: feedToken }
+  const serverEnv = { DOCSITE_FEED_TOKEN: feedToken }
   const browser = await chromium.launch({ headless: true })
   try {
     const round = { browser, siteDir, logDir, runTag, serverEnv, feedToken, record }

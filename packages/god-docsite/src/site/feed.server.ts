@@ -1,18 +1,9 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
 import { feedChannelListSeparator, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedStreamEnvelope } from '../core/feed.js'
+import { hostChannel, parseHostContext } from '../core/host-context.js'
+import { feedHub, subscribeFeedHub } from '../node/feed-hub.js'
 
 type FeedListener = (data: unknown) => void
-/** launchers 记每个频道有几个带着令牌订阅的连接（启动方），浏览器的订阅不算 */
-type FeedHub = { latest: Map<string, unknown>; listeners: Map<string, Set<FeedListener>>; launchers: Map<string, number> }
-
-// 挂在 globalThis 上：dev 下站点模块随热更新重新执行时，订阅表若跟着模块走，已连着的浏览器就收不到之后的推送
-const feedHubKey = Symbol.for('@godcreator/god-docsite/feed-hub')
-
-function feedHub(): FeedHub {
-  const holder = globalThis as { [feedHubKey]?: FeedHub }
-  holder[feedHubKey] ??= { latest: new Map(), listeners: new Map(), launchers: new Map() }
-  return holder[feedHubKey]
-}
 
 /**
  * 启动方（带着 DOCSITE_FEED_TOKEN 订阅的一方，比如 gwb-docsite）此刻有没有在听这个频道：
@@ -38,14 +29,6 @@ export function publishSiteFeed(channel: string, data: unknown): void {
   const hub = feedHub()
   hub.latest.set(channel, data)
   for (const listener of hub.listeners.get(channel) ?? []) listener(data)
-}
-
-function subscribe(channel: string, listener: FeedListener): () => void {
-  const listeners = feedHub().listeners
-  const ofChannel = listeners.get(channel) ?? new Set()
-  listeners.set(channel, ofChannel)
-  ofChannel.add(listener)
-  return () => ofChannel.delete(listener)
 }
 
 function channelOf(params: LoaderFunctionArgs['params']): string {
@@ -86,7 +69,7 @@ function eventStreamOf(channels: readonly string[], listed: boolean, signal: Abo
       const unsubscribeListeners = channels.map((channel) => {
         const send = senderOf(channel)
         if (hub.latest.has(channel)) send(hub.latest.get(channel))
-        return subscribe(channel, send)
+        return subscribeFeedHub(channel, send)
       })
       if (launcher) for (const channel of channels) countLauncher(channel, 1)
       let unsubscribed = false
@@ -133,7 +116,7 @@ export function feedLoader({ request, params }: LoaderFunctionArgs): Response {
 
 /**
  * 推送通道的入口（同一路由的 action）：POST JSON，请求头带启动方经环境变量 DOCSITE_FEED_TOKEN 给的令牌。
- * 站点进程没有令牌、令牌不对 403，正文不是 JSON 400；成功 204
+ * 站点进程没有令牌、令牌不对 403，正文不是 JSON、推给频道 host 的托管方上下文写错了 400；成功 204
  */
 export async function feedAction({ request, params }: ActionFunctionArgs): Promise<Response> {
   const channel = channelOf(params)
@@ -148,6 +131,13 @@ export async function feedAction({ request, params }: ActionFunctionArgs): Promi
   } catch (error) {
     if (error instanceof SyntaxError) return textResponse(400, `正文要是 JSON：${error.message}`)
     throw error
+  }
+  if (channel === hostChannel) {
+    try {
+      parseHostContext(data)
+    } catch (error) {
+      return textResponse(400, error instanceof Error ? error.message : String(error))
+    }
   }
   publishSiteFeed(channel, data)
   return new Response(null, { status: 204 })

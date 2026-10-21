@@ -58,7 +58,7 @@ docsite.site.remove  {"dir":…}   去掉常驻登记，在运行就停掉；没
 - 启动前核对：站点根有身份文件 `docsite.json` 且写对了，`node_modules` 里装着 `@godcreator/god-docsite`，`scripts.dev` 没写 `--port`（写了就拒绝，照报错去掉）
 - 身份文件写明站点的类别、给谁看与布局代号，平台建站时写，只有三项：`{ "kind": "base" | "docs" | "collab", "audience": "personal" | "shared", "format": 2 }`，协作站只能是 `shared`。
   没有它的站拒绝托管（旧包 `@godcreator/docsite-kit` 上的站、有身份文件之前建的站）：平台建的站照报错手动补一份，别的站先迁到平台；`format` 不是 `2`、缺 `audience` 也拒绝，照平台包的 `template/` 升级站点后再改
-- 启动时经环境变量交给站点本 home 的身份码 `DOCSITE_IDENTITY_CODE`、这次的推送令牌 `DOCSITE_FEED_TOKEN` 与阅读字体文件的路径 `DOCSITE_READER_FONTS_FILE`
+- 启动时经环境变量只交给站点这次的推送令牌 `DOCSITE_FEED_TOKEN`；站点报出地址后，插件把托管方上下文推进推送频道 `host`：本 home 的身份码、阅读字体三项，个人站（`audience` 是 `personal`）还有别的插件提供的本机目录。推不进去就停掉站点、记成 `failed`。设置里的身份码、字体改了，或本机目录有增减，正在运行的站马上重推
 - `failed` 时 `error` 写着退出码与最后几行输出。进程自己退出了会自动重启：连续崩溃时依次等 2 秒、10 秒、60 秒，`error` 末尾写着几秒后第几次；连续三次重启都没撑过 5 分钟就不再重启，`error` 写着「不再自动重启」，查明原因修好后 `docsite.site.start`。等着重启时 `docsite.site.stop` 取消这次重启
 - 常驻的站只记在 gwb-data 的文档 `hosted-sites` 里，不在设置里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
   不想要某个协作站就移出项目列表（`collab.project.remove`），单 `docsite.site.remove` 的话 gwb-collab 下次加载又登记回来
@@ -68,7 +68,7 @@ docsite.site.remove  {"dir":…}   去掉常驻登记，在运行就停掉；没
 ## 我是谁
 
 每个 home 有一串身份码（`docsite.identity` 查，设置 `identity-code`，第一次加载时生成），站点按 `people.json` 里各人的 `codes` 认人。
-只有本机由工作台托管的开发服务（`pnpm dev`）能写评论、改任务；`pnpm build` 之后用 `pnpm start` 跑的是发布版，全面只读，环境变量里有身份码也不认。
+只有本机由工作台托管的开发服务（`pnpm dev`）能写评论、改任务；`pnpm build` 之后用 `pnpm start` 跑的是发布版，没有托管方上下文，全面只读。
 协作就是各人在自己电脑上改、经 git 同步，不做多人共用一个网站写入。
 侧栏底部写「只读」、悬停提示码不在 `people.json` 里时：
 
@@ -77,7 +77,7 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 ```
 
 已有这个 `id` 就把码加进它的 `codes`，没有就新加一项；码已在别人名下、`id` 是 agent 时拒绝。只写文件，要别人也看到得提交。
-换电脑时把旧电脑的码填进新电脑的设置 `identity-code`，之后启动的开发服务才用新的码。
+换电脑时把旧电脑的码填进新电脑的设置 `identity-code`，正在运行的站马上改用新的码。
 
 ## 头像
 
@@ -176,3 +176,4 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 | `subscribe(dir, channel, listener)` | 带着推送令牌订阅站点的一个频道（站点由此知道启动方在听）：先收到现在的值，之后每变一次调 `listener(data)`；站点每次启动都重新连，返回撤掉的函数 |
 | `join(dir, { id, name, gitea? })` | 同 `docsite.people.join`，回 `{ changed }` |
 | `identityCode()` | 本 home 的身份码 |
+| `provideSiteDir(name, dir)` | 给个人站提供一个本机目录，站点的功能包经站点上下文 `providedDirs()[name]` 读：`name` 是小写字母开头的小写字母、数字与 `-`，`dir` 是绝对路径；同一个名字已有人提供就报错。返回撤销的函数，放进调用方的 `ctx.effect` |

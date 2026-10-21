@@ -4,7 +4,7 @@
  * 能力方块用 cap() 给左上角与宽度（高度固定），接缝走线与编号圆点手写，线不压字、圆点不落在方块上，
  * 线与模块框边平行时至少留 12px、编号圆点不放在别的线上。
  * 四列：左 gwb-docsite（三个能力）、中左站点目录（框外，people.json 放低）、中 identity 包（七项能力竖排）、右用它的两方。
- * 1 号（join → joinSitePeople）与 4 号（环境变量 → siteIdentity）走站点目录上方的空档直达；
+ * 1 号（join → joinSitePeople）与 4 号（托管方上下文 → siteIdentity）走站点目录上方的空档直达；
  * 2 号（写回名单）沿走廊 x=500 下去、绕到 people.json 底边进，3 号（现读名单）沿 x=482 从右边进，两条虚线各走各的；
  * 6 号（写入前核对）走右列走廊（x=862）；5 号的 site.server.ts 段走走廊 x=846，布局路由段沿右缘（x=1088）绕到下面两个能力。
  */
@@ -50,7 +50,7 @@ const layout: SeamLayout = {
     '2': { d: 'M532,174 H500 V390 H380 V352', badge: [500, 310] },
     // sitePeople ⇠ people.json（现读）：出 read 左边（比 4 号的进口低 16px），沿 x=482 从名单右边进
     '3': { d: 'M532,244 H482 V328 H453', badge: [482, 268] },
-    // 启动开发服务 →（环境变量）→ siteIdentity：从 launch 右边直达 read 左边
+    // 启动开发服务 →（托管方上下文）→ siteIdentity：从 launch 右边直达 read 左边
     '4': { d: 'M228,228 H532', badge: [380, 228] },
     // 平台模板 → siteIdentity、publicPeopleOf、界面：site.server.ts 段走走廊 x=846 进 read 右边；
     // 布局路由段从 layout 右边沿右缘 x=1088 绕下来（与两框右缘相距 13px），进 public 与 ui 的右边（ui 比 core 能力宽，右缘 x=816）

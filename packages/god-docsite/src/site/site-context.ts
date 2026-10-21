@@ -1,6 +1,7 @@
 import type * as PageTree from 'fumadocs-core/page-tree'
 import type { SerializedPageTree } from 'fumadocs-core/source/client'
 import type { HtmlHeadingAnchor } from '../core/html-text.js'
+import type { HostContext } from '../core/host-context.js'
 import type { SiteAudience } from '../core/site-audience.js'
 import type { SiteReferences } from '../core/site-references.js'
 import type { SiteMdxPluginLists } from './external-mdx.js'
@@ -62,12 +63,16 @@ export interface BaseSiteContext<Person extends SitePerson = SitePerson, Viewer 
   commentEntries: readonly CommentEntry[]
   /** people.json 的人员列表 */
   people(): readonly Person[]
-  /** 本机身份：dev 下是启动方经环境变量 DOCSITE_IDENTITY_CODE 给的码在 people.json 里认出的人；start（发布版）一律只读 */
+  /** 本机身份：dev 下是托管方上下文里的身份码在 people.json 里认出的人，没有托管方上下文只读；start（发布版）一律只读 */
   identity(): Viewer
   /** 写入请求的 Origin 头要等于它：DOCSITE_ORIGIN，否则 dev 取平台 vite 插件写的 DOCSITE_DEV_ORIGIN、start 取 HOST/PORT */
   trustedOrigin(): string
   /** 推送通道这个频道现在的值，没推过是 undefined；功能的 layoutData 只能经它读（feature.tsx 进浏览器，不能 import 平台的 ./server） */
   feedValue(channel: string): unknown
+  /** 托管方（gwb-docsite）推进频道 host 的上下文：身份码、本机目录、阅读字体；没推过是 null */
+  hostContext(): HostContext | null
+  /** 托管方提供的本机目录，名字到绝对路径：只有个人站有，功能包读不到自己要的目录就按「这台电脑上没有」显示 */
+  providedDirs(): Readonly<Record<string, string>>
   /** 全站的 remark / rehype 插件（app/lib/mdx-plugins.ts），用到时才加载：外部 mdx 页按它和内容页同样编译 */
   mdxPlugins(): Promise<SiteMdxPluginLists>
   /** 平台的引用扫描：从内容页出发，各功能包登记的组件引用了哪些条目、本站缺哪些；同时来的调用共用一次扫描 */

@@ -1,22 +1,22 @@
 'use client';
 /**
- * RecognizeCases：同一份名单，站点怎么跑、环境变量里有没有码、码在不在名单里，认出来的结果不同。
- * 从左到右三格：运行方式与环境变量 → 名单里找（命中的行高亮；发布版整格灰掉）→ 侧栏底部显示
+ * RecognizeCases：同一份名单，站点怎么跑、托管方上下文里有没有码、码在不在名单里，认出来的结果不同。
+ * 从左到右三格：运行方式与托管方上下文 → 名单里找（命中的行高亮；发布版整格灰掉）→ 侧栏底部显示
  * （仿 IdentityBadge：认出人时头像加名字，只读时「只读」加原因原文）。数据都在 recognize-cases.data.mjs。
  */
 import type { JSX } from 'react';
 import { CasePicker, CodeLines, Pane, Pill } from '@godcreator/explainer/site';
-import { cases, envName, peopleLines } from './recognize-cases.data.mjs';
+import { cases, codeField, peopleLines } from './recognize-cases.data.mjs';
 import type { RecognizeCase } from './recognize-cases.data.d.mts';
 import './recognize-cases.css';
 
 function MachinePane({ item }: { item: RecognizeCase }): JSX.Element {
   return (
-    <Pane title="运行方式与环境变量" icon="terminal" role="slate">
+    <Pane title="运行方式与托管方上下文" icon="terminal" role="slate">
       <div className="rc-machine">
         <div>运行方式: {item.machine.runMode}</div>
         <div>
-          {item.machine.code === null ? `${envName} 没有设` : `${envName}=${item.machine.code}`}
+          {item.machine.code === null ? '没有托管方上下文' : `${codeField}: ${item.machine.code}`}
           {item.machine.ignored ? <span className="rc-dim"> 不看</span> : null}
         </div>
       </div>

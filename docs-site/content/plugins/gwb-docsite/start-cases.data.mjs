@@ -6,15 +6,15 @@
  */
 
 /** 共用数据：站点目录、本 home 的身份码、假开发服务报出的地址与 pid */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="34-101" hash="db0e440ccc29" blob="87082ac909c0" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="35-104" hash="ae508326e342" blob="1bb45486b784" */
 export const siteDir = '/projects/demo/site'
 export const identityCode = 'mycode000001'
 
 /** start 的五步，前一步能下结论就不往下走 */
-export const stepNames = ['已在运行或正在启动', '启动前核对', '定端口', '启动开发服务', '记端口、转 running']
+export const stepNames = ['已在运行或正在启动', '启动前核对', '定端口', '启动开发服务', '推上下文、记端口、转 running']
 
-/** 启动时经环境变量交给开发服务的两样：本 home 的身份码、这次启动现生成的推送令牌 */
-export const envLine = 'DOCSITE_IDENTITY_CODE=mycode000001 DOCSITE_FEED_TOKEN=<这次生成的随机串>'
+/** 启动时经环境变量交给开发服务的只有这次启动现生成的推送令牌；身份码等在开发服务报出地址后推进频道 host */
+export const envLine = 'DOCSITE_FEED_TOKEN=<这次生成的随机串>'
 
 /** 启动前核对不过的五条原话（站点目录换成例子里同一个可读的路径；Windows 上路径分隔符统一写 /） */
 export const refusalMessages = [
@@ -30,12 +30,12 @@ export const refusalMessages = [
  * 五步各走成什么样（state：pass 过了往下走，stop 在这一步结束，skip 没走到；stopTone 区分回现状与拒绝或失败）、
  * 第 ④ 步走到时启动的命令（command）、交回（result 的 error 为 true 是抛错）、之后 docsite.site.list 里这个站的样子（after）。
  */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="286-300" hash="ea0825f3caab" blob="45b933989632" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="292-306" hash="ea0825f3caab" blob="1bb45486b784" */
 export const cases = [
   {
     id: 'first',
     label: '第一次启动',
-    text: 'gwb-data 里没记过这个站的端口，不带 --port，由平台的 vite 插件自己挑一个空闲端口。开发服务在输出里报出地址，插件记下这次的端口，状态转成 running。身份码与推送令牌经环境变量交给开发服务。',
+    text: 'gwb-data 里没记过这个站的端口，不带 --port，由平台的 vite 插件自己挑一个空闲端口。推送令牌经环境变量交给开发服务。开发服务在输出里报出地址后，插件先把托管方上下文（身份码 mycode000001、阅读字体）推进频道 host，再记下这次的端口，状态转成 running。',
     portsBefore: { port: null, occupancy: 'none' },
     portsAfter: { port: 14001, note: '记下 14001' },
     steps: [
@@ -101,7 +101,7 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: false }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="115-139" hash="221b354e4e54" blob="87082ac909c0" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="118-142" hash="5db9fff64079" blob="1bb45486b784" */
   {
     id: 'already',
     label: '已在运行',
@@ -119,8 +119,8 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: true }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null, note: '只启动过一次' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="245-262" hash="644eac09b731" blob="45b933989632" */
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="302-311" hash="0bed967545fc" blob="45b933989632" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="248-265" hash="644eac09b731" blob="1bb45486b784" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="308-317" hash="0bed967545fc" blob="1bb45486b784" */
   /* ref file="../plugins/docsite/src/site-contract.ts" hash="286215824311" blob="5f97243f4688" */
   {
     id: 'refused',
@@ -140,7 +140,7 @@ export const cases = [
     result: { error: true, value: '五种拒绝各抛一条原话' },
     after: [{ state: 'failed', url: null, error: '拒绝的那条原话' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="236-243" hash="2ffe71740b6f" blob="87082ac909c0" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="239-246" hash="2ffe71740b6f" blob="1bb45486b784" */
   {
     id: 'launch-fails',
     label: '开发服务没起来',

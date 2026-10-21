@@ -13,6 +13,7 @@ export {
   type FeedStreamEnvelope,
 } from './feed.js'
 export { browserHostOf, devOriginEnvName } from './site-origin.js'
-export { isReaderFontName, readerFontsCssOf, readerFontsFileEnvName, readerFontsFormat, type ReaderFontsFile } from './reader-fonts.js'
+export { isReaderFontName, readerFontsCssOf, type ReaderFonts } from './reader-fonts.js'
+export { hostChannel, hostContextFormat, parseHostContext, type HostContext } from './host-context.js'
 export { isSiteAudience, siteAudiences, type SiteAudience } from './site-audience.js'
 export type { ReferencePlace, ReferenceResolverModule, SiteReference, SiteReferenceProblem, SiteReferences } from './site-references.js'

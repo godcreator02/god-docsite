@@ -20,11 +20,11 @@ export const identitySeams = defineSeamGraph({
       pkg: 'plugins/docsite',
       role: 'cyan',
       outside: false,
-      blurb: '身份码在本 home 第一次加载时生成、存在设置 identity-code 里；把自己加进名单走它的命令 docsite.people.join，启动开发服务时把码经环境变量交给站点进程。它自己怎么用归插件的页。',
+      blurb: '身份码在本 home 第一次加载时生成、存在设置 identity-code 里；把自己加进名单走它的命令 docsite.people.join，站点起来后把码放进托管方上下文推给站点。它自己怎么用归插件的页。',
       caps: [
         { id: 'code', name: '保管本 home 的身份码', ident: '设置 identity-code' },
         { id: 'join', name: '加进名单的命令', ident: 'docsite.people.join' },
-        { id: 'launch', name: '启动开发服务', ident: 'DOCSITE_IDENTITY_CODE' },
+        { id: 'launch', name: '推托管方上下文', ident: 'host.identityCode' },
       ],
     },
     {
@@ -42,7 +42,7 @@ export const identitySeams = defineSeamGraph({
       pkg: '@godcreator/identity',
       role: 'emerald',
       outside: false,
-      blurb: 'core 层定名单的校验与加入、按码认人、公开投影与写入前核对，被包内 node 层调用；node 层读写 people.json、按运行方式与环境变量认本机身份；site 层是交给页面的界面。',
+      blurb: 'core 层定名单的校验与加入、按码认人、公开投影与写入前核对，被包内 node 层调用；node 层读写 people.json、按运行方式与交来的身份码认本机身份；site 层是交给页面的界面。',
       caps: [
         { id: 'parse', name: 'core 名单校验与加入', ident: 'parsePeople · peopleWithJoined' },
         { id: 'join-node', name: 'node 加入名单', ident: 'joinSitePeople' },
@@ -112,10 +112,10 @@ export const identitySeams = defineSeamGraph({
       name: '身份码交给站点进程',
       a: ['launch'],
       b: ['read'],
-      iface: '环境变量 DOCSITE_IDENTITY_CODE → siteIdentity(siteDir, mode)',
+      iface: '频道 host 的 identityCode → siteIdentity(siteDir, mode, identityCode)',
       convention: false,
       via: 'code',
-      text: 'gwb-docsite 启动开发服务时把本 home 的码经环境变量交给站点进程，siteIdentity 拿它在名单里找人；发布版（start）不看这个变量，一律只读。',
+      text: 'gwb-docsite 把本 home 的码放进托管方上下文推进频道 host，站点模板取出来交给 siteIdentity 在名单里找人；发布版（start）不看码，一律只读。',
     },
     {
       n: 5,

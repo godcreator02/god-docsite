@@ -1,4 +1,4 @@
-import path from 'node:path'
+import { hostContextFormat, type HostContext } from '@godcreator/god-docsite'
 import { siteIdentityOf } from '@godcreator/god-docsite/identity'
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 空的类型 import 只为让这几个包的 `declare module 'cordis'` 生效，ctx 上才有各服务的类型
@@ -14,7 +14,8 @@ import { devServerLauncher } from './dev-server.js'
 import { addedByCommand, HostedSites } from './hosted-sites.js'
 import { isIdentityCode, joinPeople, newIdentityCode } from './people-file.js'
 import { runPnpm } from './pnpm.js'
-import { listInstalledFontFamilies, readerFontsFileName, readerFontsFrom, readerFontSettings, writeReaderFontsFile } from './reader-fonts.js'
+import { ProvidedSiteDirs } from './provided-dirs.js'
+import { listInstalledFontFamilies, readerFontsFrom, readerFontSettings } from './reader-fonts.js'
 import { addSiteFeature } from './scaffold/add-feature.js'
 import { createDocsite } from './scaffold/create.js'
 import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
@@ -55,7 +56,7 @@ const settingDefinitions = [
     type: 'string',
     title: '身份码',
     description:
-      '本 home 的身份码：站点的 people.json 里按它认出「我是谁」。插件第一次加载时生成 12 个小写字母与数字；换电脑时把旧电脑的码填到这里（8 到 64 个小写字母或数字），改了以后新启动的开发服务才用新的码',
+      '本 home 的身份码：站点的 people.json 里按它认出「我是谁」。插件第一次加载时生成 12 个小写字母与数字；换电脑时把旧电脑的码填到这里（8 到 64 个小写字母或数字），改了马上推给在运行的站',
     default: '',
   },
 ] as const
@@ -79,23 +80,28 @@ export function apply(ctx: GwbContext): void {
     return code
   }
 
-  // 阅读字体：三项设置的清单是本机字体；值变了就重写给站点读的文件，一次写完再写下一次
+  // 阅读字体：三项设置的清单是本机字体
   for (const { key, title, description } of readerFontSettings) {
     ctx.effect(() => settings.define({ key, type: 'string', title, description, options: listInstalledFontFamilies }))
   }
-  const readerFontsFile = path.join(ctx.gwbData.dir, readerFontsFileName)
-  let readerFontsWriting = Promise.resolve()
-  const writeReaderFonts = (): void => {
-    readerFontsWriting = readerFontsWriting
-      .then(() => writeReaderFontsFile(readerFontsFile, readerFontsFrom((key) => settings.get(key))))
-      .catch((error: unknown) => log.warn(`阅读字体文件 ${readerFontsFile} 没写成，托管的站点照旧用上一次的字体：${error instanceof Error ? error.message : String(error)}`))
-  }
-  writeReaderFonts()
-  for (const { key } of readerFontSettings) ctx.effect(() => settings.watch(key, writeReaderFonts))
 
   const dataStore = { readDoc: (doc: string) => ctx.gwbData.readDoc(doc), writeDoc: (doc: string, value: unknown) => ctx.gwbData.writeDoc(doc, value) }
   const ports = new SitePorts(dataStore, async (port) => (await loadPlatformScaffold()).isPortFree(port))
-  const host = new SiteHost({ log, launchDevServer: devServerLauncher(ctx.logger('gwb-docsite-dev'), readerFontsFile), identityCode, ports })
+  const providedDirs = new ProvidedSiteDirs(() => void host.pushHostContext())
+  // 托管方上下文：身份码、阅读字体与插件提供的本机目录，本机目录只给个人站
+  const hostContextOf = (dir: string): HostContext => {
+    const identity = siteIdentityOf(dir)
+    if (identity === null) throw new Error(`${dir} 下没有身份文件 docsite.json，算不出要不要给它本机目录`)
+    return {
+      format: hostContextFormat,
+      identityCode: identityCode(),
+      ...(identity.audience === 'personal' ? { dirs: providedDirs.all() } : {}),
+      readerFonts: readerFontsFrom((key) => settings.get(key)),
+    }
+  }
+  const host = new SiteHost({ log, launchDevServer: devServerLauncher(ctx.logger('gwb-docsite-dev')), hostContextOf, ports })
+  for (const key of ['identity-code', ...readerFontSettings.map((setting) => setting.key)]) ctx.effect(() => settings.watch(key, () => void host.pushHostContext()))
+
   // 内核不等卸载回调里的异步操作，工作台退出时异步的停止来不及跑完：卸载时同步停；没经卸载就退出的，在退出事件里同步停
   const stopSitesNow = () => host.stopAllNow()
   ctx.effect(() => {
@@ -127,6 +133,7 @@ export function apply(ctx: GwbContext): void {
     push: (dir, channel, data) => host.push(dir, channel, data),
     subscribe: (dir, channel, listener) => host.subscribe(dir, channel, listener),
     join: (dir, person) => joinPeople(dir, identityCode(), person),
+    provideSiteDir: (name, dir) => providedDirs.provide(name, dir),
     onStatus: (listener) => host.onStatus(listener),
     init: (dir, options) => createDocsite(dir, options, { ...homePageCheck, scaffold, pnpm: runPnpm, packageSource: { kind: 'registry', resolveFrom: pluginDir } }),
     addFeature: (dir, options) =>

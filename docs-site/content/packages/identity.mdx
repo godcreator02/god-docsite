@@ -1,6 +1,6 @@
 ---
 title: identity：身份
-description: 站点的人员名单 people.json 与身份码：身份码由 gwb-docsite 生成、经环境变量交给站点，dev 按它在名单里认人，发布版一律只读；加进名单六种情况怎么改文件，写入前核对请求来源与身份，交给浏览器的人员只有公开字段；头像按文件名约定放在 public/avatars/，在侧栏底部上传
+description: 站点的人员名单 people.json 与身份码：身份码由 gwb-docsite 生成、放进托管方上下文推给站点，dev 按它在名单里认人，发布版一律只读；加进名单六种情况怎么改文件，写入前核对请求来源与身份，交给浏览器的人员只有公开字段；头像按文件名约定放在 public/avatars/，在侧栏底部上传
 icon: IdCard
 ---
 
@@ -46,15 +46,15 @@ import { PublicShape } from './identity/public-shape'
 
 ## 认人：dev 看身份码，发布版一律只读
 
-图上第 3、4 号。认人的结果 `SiteIdentity` 只有两种：有人（公开形状的那个人），或没人加一句只读原因；原因里不写码本身。同一份名单，站点怎么跑、环境变量里有没有码、码在不在名单里，认出来的结果不同：
+图上第 3、4 号。认人的结果 `SiteIdentity` 只有两种：有人（公开形状的那个人），或没人加一句只读原因；原因里不写码本身。同一份名单，站点怎么跑、托管方上下文里有没有码、码在不在名单里，认出来的结果不同：
 
 {/* ref file="../packages/identity/src/core/identity.ts" hash="ee7573cfb482" blob="7b82e260a0c2" */}
 
 <RecognizeCases />
 
-`dev`（本机由 gwb-docsite 启动的开发服务）按环境变量 `DOCSITE_IDENTITY_CODE` 找人；`start`（build 之后的发布版）一律只读，环境变量里有码也不看。所以写评论、改任务只在各人本机的 dev 里做，改完经 git 同步；为什么这样定，见轨迹卡 [只有本机 dev 能写，build + start 的发布版全面只读](/trajectory/2026-10-15-published-site-readonly)。
+`dev`（本机由 gwb-docsite 启动的开发服务）按托管方上下文里的身份码找人：gwb-docsite 把它推进频道 `host`，站点模板取出来作为 `siteIdentity(dir, mode, identityCode)` 的第三个参数，身份包自己不读推送通道；`start`（build 之后的发布版）一律只读，给了码也不看。所以写评论、改任务只在各人本机的 dev 里做，改完经 git 同步；为什么这样定，见轨迹卡 [只有本机 dev 能写，build + start 的发布版全面只读](/trajectory/2026-10-15-published-site-readonly)。
 
-{/* ref file="../packages/identity/src/node/identity.ts" hash="299e3558d9da" blob="a212be6dd6f7" */}
+{/* ref file="../packages/identity/src/node/identity.ts" hash="b1c46c50120c" blob="2efe309e3dd1" */}
 
 ## 一次写入以谁的身份
 
@@ -117,10 +117,10 @@ import { PublicShape } from './identity/public-shape'
 | 层 | 导出 | 做什么 |
 | --- | --- | --- |
 | `core/` | `@godcreator/identity` | 名单的校验与加入规则、按码认人、公开投影、写入前核对、@ 的认法、头像的存放约定与核对；不碰磁盘、不 import React |
-| `node/` | `@godcreator/identity/node` | 读写站点的 `people.json`、按运行方式与环境变量认本机身份、带头像的公开名单、头像写入路由的处理 |
+| `node/` | `@godcreator/identity/node` | 读写站点的 `people.json`、按运行方式与交来的身份码认本机身份、带头像的公开名单、头像写入路由的处理 |
 | `site/` | `@godcreator/identity/site` | `IdentityProvider` 与两个 hook、`Avatar`、`IdentityBadge` 与它点开的头像面板、浏览器里的头像处理；样式在包的 `styles.css` |
 | `template/` | （建站器复制进站点） | 头像写入路由 `/identity/avatar`，建站时由 `addBaseFeatures` 补进站点 `app/features/identity/` |
 
 层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；identity 不依赖任何别的功能包。
 
-用它的三方就是图上的 gwb-docsite 与右列两方，图上画过的调用不再逐条列，另列几个图上没画的：gwb-docsite 另用 `identityCodeEnvName`、`identityCodePattern`、`mentionsOf`（评论命令里认 @）；comments 另用 `personOf` 与类型 `SiteIdentity`；collab 另用 `publicPeopleWithAvatars`、`mentionsOf`、`IdentityProvider`、`Avatar` 与头像文件夹的位置 `avatarsDirInSite`（合并检查用），平台模板的正文页也用 `Avatar`。
+用它的三方就是图上的 gwb-docsite 与右列两方，图上画过的调用不再逐条列，另列几个图上没画的：gwb-docsite 另用 `identityCodePattern`、`mentionsOf`（评论命令里认 @）；comments 另用 `personOf` 与类型 `SiteIdentity`；collab 另用 `publicPeopleWithAvatars`、`mentionsOf`、`IdentityProvider`、`Avatar` 与头像文件夹的位置 `avatarsDirInSite`（合并检查用），平台模板的正文页也用 `Avatar`。

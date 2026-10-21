@@ -1,6 +1,7 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
+import type { HostContext } from '@godcreator/god-docsite'
 import { listComments, writeComment } from '../src/comments.js'
 import { devServerLauncher } from '../src/dev-server.js'
 import { joinPeople } from '../src/people-file.js'
@@ -21,12 +22,10 @@ const portDocs = new Map<string, unknown>()
 const ports = new SitePorts({ readDoc: async (doc) => portDocs.get(doc), writeDoc: async (doc, value) => void portDocs.set(doc, value) }, async (port) => (await loadPlatformScaffold()).isPortFree(port))
 /** 开发服务的输出：stdout 与 stderr 各记在哪一边 */
 const devOutput = { debug: [] as string[], warn: [] as string[] }
-/** 阅读字体文件：和 gwb-docsite 写的一样，正文设成更纱等宽，页面的 <head> 里要有对应的变量 */
-const readerFontsFile = path.join(root, 'gwb-data', 'reader-fonts.json')
-mkdirSync(path.dirname(readerFontsFile), { recursive: true })
-writeFileSync(readerFontsFile, JSON.stringify({ format: 1, body: 'Sarasa Mono SC', heading: null, mono: null }))
-const launchDevServer = devServerLauncher({ debug: (message) => devOutput.debug.push(message), warn: (message) => devOutput.warn.push(message) }, readerFontsFile)
-const host = new SiteHost({ log: { info: () => {}, warn: () => {} }, launchDevServer, identityCode: () => identityCode, ports })
+/** 托管方上下文：和 gwb-docsite 推的一样，正文设成更纱等宽，页面的 <head> 里要有对应的变量 */
+const hostContext: HostContext = { format: 1, identityCode, dirs: {}, readerFonts: { body: 'Sarasa Mono SC', heading: null, mono: null } }
+const launchDevServer = devServerLauncher({ debug: (message) => devOutput.debug.push(message), warn: (message) => devOutput.warn.push(message) })
+const host = new SiteHost({ log: { info: () => {}, warn: () => {} }, launchDevServer, hostContextOf: () => hostContext, ports })
 const scaffold = () => loadPlatformScaffold()
 const pageStatus = async (url: string) => (await fetch(new URL('/', url))).status
 

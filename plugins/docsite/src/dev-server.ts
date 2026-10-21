@@ -1,7 +1,6 @@
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { feedTokenEnvName, feedTokenHeader, feedUrlOf, readerFontsFileEnvName } from '@godcreator/god-docsite'
-import { identityCodeEnvName } from '@godcreator/identity/node'
+import { feedTokenEnvName, feedTokenHeader, feedUrlOf } from '@godcreator/god-docsite'
 import { DocsiteRejected } from './errors.js'
 
 const ansiEscapePattern = /\x1b\[[0-9;]*[A-Za-z]/g
@@ -47,8 +46,8 @@ export type DevServer = {
   subscribe(channel: string, listener: (data: unknown) => void, onEnd: (reason: string) => void): () => void
 }
 
-/** 启动开发服务、交给它身份码，等它报出地址；port 是想用的端口，null 是让站点自己随机挑。先退出或超时就抛 DocsiteRejected，写明开发服务的输出。测试里换成假的 */
-export type LaunchDevServer = (siteDir: string, identityCode: string, port: number | null) => Promise<DevServer>
+/** 启动开发服务、等它报出地址；port 是想用的端口，null 是让站点自己随机挑。先退出或超时就抛 DocsiteRejected，写明开发服务的输出。测试里换成假的 */
+export type LaunchDevServer = (siteDir: string, port: number | null) => Promise<DevServer>
 
 /** 等开发服务报出地址的时间：pnpm 启动加上 Vite 第一次预构建依赖 */
 const startTimeoutMilliseconds = 60_000
@@ -153,18 +152,18 @@ export function subscribeFeed(siteUrl: string, token: string, channel: string, l
 }
 
 /**
- * 在站点目录里运行 pnpm dev，环境变量交给它身份码、这次启动生成的推送令牌与阅读字体文件的路径（站点每次请求读它），等它在输出里报出地址。
+ * 在站点目录里运行 pnpm dev，环境变量只交给它这次启动生成的推送令牌，等它在输出里报出地址；身份码、阅读字体等由 SiteHost 随后推进频道 host。
  * 给了 port 就带上 --port（平台的 vite 插件加 strictPort，被占就起不来），没给由平台的 vite 插件随机挑；报出的地址端口和给的不同就拒绝。
  * 先退出或超时都抛 DocsiteRejected，写明开发服务的输出。
  * 输出一块一条写进 outputLog：stderr 记 warn（Vite 与服务端渲染的报错从这里出来），stdout 记 debug
  */
-export const devServerLauncher = (outputLog: DevOutputLog, readerFontsFile: string): LaunchDevServer => (siteDir, identityCode, port) => {
+export const devServerLauncher = (outputLog: DevOutputLog): LaunchDevServer => (siteDir, port) => {
   const token = randomUUID()
   const child = spawn('pnpm', port === null ? ['dev'] : ['dev', '--port', String(port)], {
     cwd: siteDir,
     shell: true,
     windowsHide: true,
-    env: { ...process.env, [identityCodeEnvName]: identityCode, [feedTokenEnvName]: token, [readerFontsFileEnvName]: readerFontsFile },
+    env: { ...process.env, [feedTokenEnvName]: token },
   })
   let output = ''
   let reportedUrl = false

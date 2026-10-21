@@ -754,7 +754,7 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
       })
     } else {
       await check('浏览器产物里没有服务端代码', async () =>
-        serverCodeInClientBuild(siteDir, ['node:fs', 'node:path', 'node:crypto', 'DOCSITE_FEED_TOKEN', 'DOCSITE_IDENTITY_CODE', '算不出可信 origin']),
+        serverCodeInClientBuild(siteDir, ['node:fs', 'node:path', 'node:crypto', 'DOCSITE_FEED_TOKEN', '算不出可信 origin']),
       )
     }
   } finally {

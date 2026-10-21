@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { identityOf, type StoredPerson } from '../src/core/index.js'
-import { identityCodeEnvName, siteIdentity, sitePeople } from '../src/node/index.js'
+import { siteIdentity, sitePeople } from '../src/node/index.js'
 
 const people: StoredPerson[] = [
   { id: 'zhou', name: '小周', codes: ['zhoucode0001'], gitea: 'zhou' },
@@ -31,7 +31,6 @@ describe('站点目录里的人员列表', () => {
     siteDir = await mkdtemp(path.join(tmpdir(), 'docsite-identity-'))
   })
   afterEach(async () => {
-    delete process.env[identityCodeEnvName]
     await rm(siteDir, { recursive: true })
   })
 
@@ -41,19 +40,16 @@ describe('站点目录里的人员列表', () => {
     expect(sitePeople(siteDir)).toEqual(people)
   })
 
-  it('dev 下本机身份按环境变量里的身份码找：没有码只读，有码是那个人（不带 codes）', async () => {
+  it('dev 下本机身份按托管方交来的身份码找：没有码只读，有码是那个人（不带 codes）', async () => {
     await writeFile(path.join(siteDir, 'people.json'), JSON.stringify(people))
-    expect(siteIdentity(siteDir, 'dev').reason).toContain('没有本机的身份码')
-    process.env[identityCodeEnvName] = 'zhoucode0001'
-    expect(siteIdentity(siteDir, 'dev')).toEqual({ person: { id: 'zhou', name: '小周', gitea: 'zhou' } })
-    process.env[identityCodeEnvName] = 'othercode001'
-    expect(siteIdentity(siteDir, 'dev').reason).not.toContain('othercode001')
+    expect(siteIdentity(siteDir, 'dev', undefined).reason).toContain('没有本机的身份码')
+    expect(siteIdentity(siteDir, 'dev', 'zhoucode0001')).toEqual({ person: { id: 'zhou', name: '小周', gitea: 'zhou' } })
+    expect(siteIdentity(siteDir, 'dev', 'othercode001').reason).not.toContain('othercode001')
   })
 
-  it('start（发布版）一律只读：环境变量里的身份码在人员列表里也不认', async () => {
+  it('start（发布版）一律只读：给了在人员列表里的身份码也不认', async () => {
     await writeFile(path.join(siteDir, 'people.json'), JSON.stringify(people))
-    process.env[identityCodeEnvName] = 'zhoucode0001'
-    const identity = siteIdentity(siteDir, 'start')
+    const identity = siteIdentity(siteDir, 'start', 'zhoucode0001')
     expect(identity.person).toBeNull()
     expect(identity.reason).toContain('发布版')
   })

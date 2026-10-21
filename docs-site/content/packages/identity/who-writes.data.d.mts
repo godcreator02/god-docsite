@@ -24,5 +24,5 @@ export interface WhoWritesCase {
 export declare const stepNames: string[];
 export declare const peopleLines: string[];
 export declare const trustedOrigin: string;
-export declare const envName: string;
+export declare const codeField: string;
 export declare const cases: WhoWritesCase[];

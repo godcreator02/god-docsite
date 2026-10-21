@@ -8,7 +8,7 @@
 /* ref file="../plugins/docsite/src/site-host.ts" lines="8-14" hash="df7ebb7f1f35" blob="7e3fcf6a0b05" */
 
 /** stop 对没在运行、也没有等着重启的站报错，原话逐字照抄（模板里的 dir 换成例子的站点目录） */
-/* ref file="../plugins/docsite/src/site-host.ts" lines="213-233" hash="1f716b537790" blob="7e3fcf6a0b05" */
+/* ref file="../plugins/docsite/src/site-host.ts" lines="222-242" hash="1f716b537790" blob="f2ed7eee0b36" */
 export const stopNotRunningMessage = '/projects/demo/site 的站点没在运行'
 
 /** 启动前核对不过的报错原话（五条里的第一条，模板里的 dir 换成例子的站点目录） */

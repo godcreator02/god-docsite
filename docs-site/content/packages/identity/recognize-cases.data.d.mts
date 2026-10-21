@@ -2,9 +2,9 @@
 
 export interface RecognizeMachine {
   runMode: 'dev' | 'start';
-  /** 环境变量里的码，没有设是 null */
+  /** 托管方上下文里的码，没有上下文是 null */
   code: string | null;
-  /** 发布版（start）不看环境变量里的码 */
+  /** 发布版（start）不看码 */
   ignored: boolean;
 }
 
@@ -29,5 +29,5 @@ export interface RecognizeCase {
 }
 
 export declare const peopleLines: string[];
-export declare const envName: string;
+export declare const codeField: string;
 export declare const cases: RecognizeCase[];
