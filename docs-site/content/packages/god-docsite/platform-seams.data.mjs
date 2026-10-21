@@ -111,7 +111,7 @@ export const platformSeams = defineSeamGraph({
   ],
   seams: [
     // 接缝 1 的 iface 照抄 gwb-docsite 源码里用到的那几个导出名（plugins/docsite/src/scaffold/platform.ts 的 PlatformScaffold）
-    /* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="8-8" hash="3daa88a23d12" blob="3fd3d79ed663" */
+    /* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="9-9" hash="3daa88a23d12" blob="27bafe4c2054" */
     {
       n: 1,
       name: '建站与加功能',

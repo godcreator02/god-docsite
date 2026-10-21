@@ -16,10 +16,10 @@ export const actors = [
 
 /* ref file="../packages/god-docsite/src/core/feed.ts" lines="1-12" hash="d7c6b77ce97f" blob="8ecbf76d0f5b" */
 
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="117-144" hash="9f730f433d5f" blob="d65574c716da" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="121-149" hash="df075581ea14" blob="6ee5e9b4a9e0" */
 
 /** 第 3 步的频道表：站点进程里每个频道只留最新一份 */
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="21-32" hash="abd786ebeea0" blob="4e60d11bac58" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="22-33" hash="abd786ebeea0" blob="6ee5e9b4a9e0" */
 
 /** 第 4、5 步：loader 读初始值、浏览器订阅事件流 */
 /* ref file="../packages/god-docsite/src/site/use-site-feed.ts" lines="1-12" hash="26a8047943b2" blob="6261f759a484" */
@@ -28,7 +28,7 @@ export const actors = [
 /* ref file="../packages/god-docsite/src/site/feed-client.ts" lines="75-87" hash="2e257a626f3a" blob="27c69dfbc069" */
 
 /** 第 5 步的事件流：连上先发现在的值，之后每推一次发一次 */
-/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="54-115" hash="633ce253e3f0" blob="d65574c716da" */
+/* ref file="../packages/god-docsite/src/site/feed.server.ts" lines="58-119" hash="633ce253e3f0" blob="6ee5e9b4a9e0" */
 
 export const steps = [
   {

@@ -15,5 +15,6 @@ export {
 export { browserHostOf, devOriginEnvName } from './site-origin.js'
 export { isReaderFontName, readerFontsCssOf, type ReaderFonts } from './reader-fonts.js'
 export { hostChannel, hostContextFormat, parseHostContext, type HostContext } from './host-context.js'
+export { appWindowParam, isSitePath, openPageChannel, parseOpenPageRequest, type OpenPageRequest } from './open-page.js'
 export { isSiteAudience, siteAudiences, type SiteAudience } from './site-audience.js'
 export type { ReferencePlace, ReferenceResolverModule, SiteReference, SiteReferenceProblem, SiteReferences } from './site-references.js'

@@ -3,6 +3,7 @@ import { BookOpen } from 'lucide-react'
 import { HomeLayout } from '@fumadocs/base-ui/layouts/home'
 import type { LinkItemType } from '@fumadocs/base-ui/layouts/shared'
 import { DevIssuesButton, DevSiteUpdates } from './dev-updates.js'
+import { OpenPageFollower } from './open-page.js'
 import type { SiteHomeData } from './home.server.js'
 import type { SidebarLink } from './sidebar-links.js'
 import { TopNotices } from './top-notices.js'
@@ -31,6 +32,7 @@ export function SiteHomeLayout({ data, sidebarLinks, children }: SiteHomeLayoutP
   return (
     <HomeLayout nav={nav} links={links}>
       <DevSiteUpdates />
+      <OpenPageFollower />
       <TopNotices>
         <DevIssuesButton />
       </TopNotices>

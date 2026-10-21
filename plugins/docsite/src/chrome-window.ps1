@@ -1,9 +1,9 @@
-# 找这个站点开着的 Chrome 应用窗口：应用身份对上（同一个主机），窗口标题是站名或「页面名 · 站名」（网站自己这样设标题）。
+# 找这个站点开着的 Chrome 应用窗口：应用身份以 AppIdPrefix 开头（同一个主机，开在哪一页都算），窗口标题是站名或「页面名 · 站名」（网站自己这样设标题）。
 # 标题在窗口外框上，窗口被别的窗口完全盖住、最小化时都读得到；网页里的内容这时 Chrome 不一定建出来，所以不读网页
 param(
   [Parameter(Mandatory)][string]$ChromePath,
   [Parameter(Mandatory)][string]$SiteTitle,
-  [Parameter(Mandatory)][string]$AppId
+  [Parameter(Mandatory)][string]$AppIdPrefix
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -TypeDefinition @"
@@ -49,7 +49,7 @@ public static class DocsiteChromeWindow {
       finally { PropVariantClear(ref value); }
     } finally { Marshal.ReleaseComObject(store); }
   }
-  public static List<IntPtr> Candidates(string chrome, string appId, string siteTitle) {
+  public static List<IntPtr> Candidates(string chrome, string appIdPrefix, string siteTitle) {
     var found = new List<IntPtr>();
     EnumWindows((handle, state) => {
       if (!IsWindowVisible(handle)) return true;
@@ -66,7 +66,7 @@ public static class DocsiteChromeWindow {
         }
       } catch (ArgumentException) { return true; }
       var actual = AppIdOf(handle);
-      if (actual != appId && !(actual != null && actual.StartsWith(appId + ".", StringComparison.Ordinal))) return true;
+      if (actual == null || !actual.StartsWith(appIdPrefix, StringComparison.Ordinal)) return true;
       found.Add(handle);
       return true;
     }, IntPtr.Zero);
@@ -90,6 +90,6 @@ public static class DocsiteChromeWindow {
   }
 }
 "@
-$windows = [DocsiteChromeWindow]::Candidates($ChromePath, $AppId, $SiteTitle)
+$windows = [DocsiteChromeWindow]::Candidates($ChromePath, $AppIdPrefix, $SiteTitle)
 if ($windows.Count -eq 0) { @{ found = $false; focused = $false } | ConvertTo-Json -Compress; exit 0 }
 @{ found = $true; focused = [DocsiteChromeWindow]::Focus($windows[0]) } | ConvertTo-Json -Compress

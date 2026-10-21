@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import type * as PlatformNodeExports from '@godcreator/god-docsite/node'
 import type * as Scaffold from '@godcreator/god-docsite/scaffold'
 import { DocsiteRejected } from '../errors.js'
 
@@ -20,18 +21,30 @@ function pluginRootOf(startDir: string): string {
   }
 }
 
+/** 平台 ./node 出口里插件用到的：查一页外部 mdx 编译过不过 */
+export type PlatformNode = Pick<typeof PlatformNodeExports, 'checkMdx'>
+export type { MdxCheck } from '@godcreator/god-docsite/node'
+
 /**
- * 加载装在插件旁边的平台建站器。必须从平台包自己的目录加载、不能打包进插件：建站器按自己模块的位置找平台包的 template/。
- * 地址是算出来的、经 import(变量) 加载，发版检查才不把它当成产物里的包名 import（插件产物只许 import peer 里的包）
+ * 加载装在插件旁边的平台包的一个出口。必须从平台包自己的目录加载、不能打包进插件：建站器按自己模块的位置找平台包的 template/，
+ * ./node 带着 mdx 编译器，打包进来插件会大一圈。地址是算出来的、经 import(变量) 加载，发版检查才不把它当成产物里的包名 import（插件产物只许 import peer 里的包）
  */
-export async function loadPlatformScaffold(fromDir = pluginDir): Promise<PlatformScaffold> {
+async function loadPlatformExport<Exports>(subpath: 'scaffold' | 'node', fromDir: string): Promise<Exports> {
   let entry: string
   try {
-    entry = createRequire(path.join(fromDir, 'package.json')).resolve(`${platformPackageName}/scaffold`)
+    entry = createRequire(path.join(fromDir, 'package.json')).resolve(`${platformPackageName}/${subpath}`)
   } catch (error) {
-    throw new DocsiteRejected(`从 ${fromDir} 找不到 ${platformPackageName}/scaffold：插件的 dependencies 里有它，重装插件（${error instanceof Error ? error.message : String(error)}）`)
+    throw new DocsiteRejected(`从 ${fromDir} 找不到 ${platformPackageName}/${subpath}：插件的 dependencies 里有它，重装插件（${error instanceof Error ? error.message : String(error)}）`)
   }
-  return (await import(pathToFileURL(entry).href)) as PlatformScaffold
+  return (await import(pathToFileURL(entry).href)) as Exports
+}
+
+export function loadPlatformScaffold(fromDir = pluginDir): Promise<PlatformScaffold> {
+  return loadPlatformExport<PlatformScaffold>('scaffold', fromDir)
+}
+
+export function loadPlatformNode(fromDir = pluginDir): Promise<PlatformNode> {
+  return loadPlatformExport<PlatformNode>('node', fromDir)
 }
 
 export type VisiblePackage = { dir: string; version: string }

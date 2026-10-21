@@ -19,11 +19,11 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 插件自己的状态：设置里有本 home 的身份码 `identity-code` 与阅读字体三项 `font-body`、`font-heading`、`font-mono`；gwb-data 里有常驻站点的登记表 `hosted-sites`、每个站上次用的端口 `site-ports`；内存里还有别的插件提供的本机目录表。人会去看、会去改的放设置；插件运行时自己维护的放 gwb-data：
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="53-62" hash="7695cd218dc9" blob="5b4b1b158057" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="55-64" hash="7695cd218dc9" blob="77e3694f1f79" */}
 
 图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、提供目录表 `ProvidedSiteDirs`、拼托管方上下文的函数、进程表 `SiteHost`、常驻表 `HostedSites`，监听身份码与三项字体设置（变了就把托管方上下文重推给在运行的站），组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令（`docsite.site.open` 打开窗口用的函数在这里接上本机 Chrome）、说明书与站点窗格。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="64-167" hash="e0fe68510e5c" blob="5b4b1b158057" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="66-172" hash="6a04db65f785" blob="77e3694f1f79" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。它经托管方上下文交给站点（见「托管方上下文」），改了设置马上重推给在运行的站，不用重启。
 
@@ -37,15 +37,15 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 三项的值拼成托管方上下文的 `readerFonts`（平台包的 `ReaderFonts`：`body`、`heading`、`mono`，没设是 `null`），设置里不是字体名就报错。三项各 `watch` 一次，变了就把每个在运行的站的托管方上下文重推一次：
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="103-103" hash="dbb5a7eb5c5f" blob="5b4b1b158057" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="105-105" hash="dbb5a7eb5c5f" blob="77e3694f1f79" */}
 
 站点收到新的上下文后让浏览器重新取数据，开着的页面不用刷新就换上新字体。站点那边怎么读、写成哪几个 CSS 变量，见[平台包](/packages/god-docsite)页的「阅读字体」。
 
 ## 建站与加功能
 
-图上第 4 号。建站器不打包进插件：它按自己模块的位置找平台包的 `template/`，打包进来就找不到。插件从自己的包根用 Node 的解析规则找 `@godcreator/god-docsite/scaffold`，经 `import(变量)` 加载；地址是算出来的，发版检查才不会把它当成产物里 import 的包名（插件产物只许 import peer 里的包）。
+图上第 4 号。建站器不打包进插件：它按自己模块的位置找平台包的 `template/`，打包进来就找不到。插件从自己的包根用 Node 的解析规则找 `@godcreator/god-docsite/scaffold`，经 `import(变量)` 加载；服务 `checkMdx` 要的 `./node` 出口带着 mdx 编译器，同样不打包、用到时这样加载。地址是算出来的，发版检查才不会把它当成产物里 import 的包名（插件产物只许 import peer 里的包）。
 
-{/* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="23-35" hash="242c7fc83e9c" blob="3fd3d79ed663" */}
+{/* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="28-40" hash="f916e15b89cd" blob="27bafe4c2054" */}
 
 建站器复制完模板，插件接着写站点的身份文件 `docsite.json`（格式见 [god-docsite](/packages/god-docsite) 页的「站点身份文件」）：`docsite.site.init` 写 `base`，`docfirst.create` 写 `docs`，两条命令都要调用的人给 `audience`（`personal` 或 `shared`，不按类别推默认值）；gwb-collab 经服务 `init` 传 `collab` 与 `shared`。身份文件的读写来自平台包的 `./identity` 出口，它不按自己模块的位置找文件，按值 import、打包进插件。
 
@@ -85,9 +85,9 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 ### 打开站点：Chrome 应用窗口
 
-`docsite.site.open` 是站点窗格与 gwb-collab 协作窗格的「打开」共用的一条命令：先照 `start` 确保站点在运行，再用本机 Chrome 运行 `chrome.exe --app=<地址>`，开出一个没有标签栏和地址栏、在任务栏上单独一个图标的窗口，登录状态与 Cookie 和平时的 Chrome 共用。Chrome 只在 Program Files、Program Files (x86)、当前用户的 LocalAppData 下找，找不到就拒绝，不改用默认浏览器。
+`docsite.site.open` 是站点窗格与 gwb-collab 协作窗格的「打开」共用的一条命令，可选参数 `path` 是要打开的站内地址（不给是首页）：先照 `start` 确保站点在运行，再用本机 Chrome 运行 `chrome.exe --app=<地址>`，开出一个没有标签栏和地址栏、在任务栏上单独一个图标的窗口，登录状态与 Cookie 和平时的 Chrome 共用。Chrome 只在 Program Files、Program Files (x86)、当前用户的 LocalAppData 下找，找不到就拒绝，不改用默认浏览器。
 
-一个站只开一个窗口：打开前先运行随包的 `chrome-window.ps1` 找这个站已经开着的窗口，找到就恢复、切到前台，回 `window: "focused"`；没找到才新开，回 `launched`。窗口按两样认：应用身份 `Chrome.<主机>_<路径>`（Chrome 给应用窗口的身份不带端口），与窗口标题（站名，或「页面名 · 站名」，站点自己这样设标题；站名取 `content/meta.json` 的 `title`）。标题在窗口外框上，窗口被盖住、最小化时都读得到。站点没写站名时认不出窗口，每次都新开。刚启动的窗口页面还没加载出来、标题还不是站名，所以只用标题找开着的窗口，启动后不等窗口出现。同一个站同时点几次只打开一次。两个 home 开着同名的站时分不出是谁的窗口，切到的是先找到的那个。
+一个站只开一个窗口：打开前先运行随包的 `chrome-window.ps1` 找这个站已经开着的窗口，找到就恢复、切到前台，回 `window: "focused"`，给了 `path` 再往站点的频道 `open-page` 推一次换页请求，窗口跟着换到那一页（机制归[平台包](/packages/god-docsite)页的「应用窗口换页」）；没找到才新开，回 `launched`，地址带上应用窗口的记号 `docsite-app-window=1`，之后这个窗口才跟着换页。窗口按两样认：应用身份以 `Chrome.<主机>_/` 开头（Chrome 给应用窗口的身份是主机加打开时的路径，不带端口；窗口开在哪一页都算这个站），与窗口标题（站名，或「页面名 · 站名」，站点自己这样设标题；站名取 `content/meta.json` 的 `title`）。标题在窗口外框上，窗口被盖住、最小化时都读得到。站点没写站名时认不出窗口，每次都新开。刚启动的窗口页面还没加载出来、标题还不是站名，所以只用标题找开着的窗口，启动后不等窗口出现。同一个站同时点几次只打开一次。两个 home 开着同名的站时分不出是谁的窗口，切到的是先找到的那个。
 
 `chrome-app.ts` 在打包时进 `dist/index.js`，它按自己旁边的路径运行 `chrome-window.ps1`，所以 `build.ts` 把脚本复制进 `dist/`。
 
@@ -125,7 +125,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 插件自己知道、站点要用的事合成一份，推进站点推送通道的频道 `host`（格式归[平台包](/packages/god-docsite)页的「托管方上下文」）：本 home 的身份码、三项阅读字体；站点的身份文件写着 `audience: "personal"` 时，再加上别的插件提供的本机目录 `dirs`，`shared` 的站收不到它。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="90-101" hash="9c0cbe2ecef9" blob="5b4b1b158057" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="92-103" hash="9c0cbe2ecef9" blob="77e3694f1f79" */}
 
 什么时候推：每次启动时开发服务报出地址之后推第一次，推完 `start` 才回执；身份码、三项字体设置变了，或别的插件登记、撤销了目录，把每个在运行的站重推一次。重推时某个站推不进去，记一条警告，那个站照旧用上一份，下次启动时推新的；设置变了的回调里没有人等结果。
 
@@ -157,9 +157,9 @@ ctx.inject(['gwbDocsite'], (scoped) => {
 
 ## 服务 gwbDocsite
 
-图上第 2、3 号。别的插件 `inject: ['gwbDocsite']` 后调用。接口分五组：建站（`init`、`addFeature`）、托管（`add`、`remove`、`start`、`stop`、`status`、`onStatus`）、推送与订阅（`push`、`subscribe`）、身份（`join`、`identityCode`，以及读站点身份文件的 `siteIdentity`：别的插件要判断一个站给不给别人看就调它）、给个人站提供本机目录（`provideSiteDir`）。命令 `docsite.*` 是同一份实现外面包一层参数校验，所以命令与服务的行为不会分叉；每个方法的参数与回执表在说明书 `docsite` 的「服务 gwbDocsite」一节。
+图上第 2、3 号。别的插件 `inject: ['gwbDocsite']` 后调用。接口分六组：建站（`init`、`addFeature`）、托管（`add`、`remove`、`start`、`stop`、`status`、`onStatus`）、推送与订阅（`push`、`subscribe`）、身份（`join`、`identityCode`，以及读站点身份文件的 `siteIdentity`：别的插件要判断一个站给不给别人看就调它）、给个人站提供本机目录（`provideSiteDir`）、不要站点在运行的检查与读取（`checkMdx` 编译一页外部 mdx，`checkSite` 在站点目录里运行站点自己那一版的 `docsite-check`，`readComments` 读一个评论目录，给论文、资料这类材料旁边的批注用）。命令 `docsite.*` 是同一份实现外面包一层参数校验，所以命令与服务的行为不会分叉；每个方法的参数与回执表在说明书 `docsite` 的「服务 gwbDocsite」一节。
 
-{/* ref file="../plugins/docsite/src/service.ts" lines="8-59" hash="b883f0dd07ee" blob="0c2029b066ee" */}
+{/* ref file="../plugins/docsite/src/service.ts" lines="11-71" hash="73b20f9a905e" blob="70a8a72a1d12" */}
 
 服务对象只存闭包：cordis 读服务属性时会把属性里存的服务重新绑到调用方的上下文。`declare module 'cordis'` 写在包入口 `index.ts`：发版工具只读类型入口 `dist/index.d.ts` 认这个服务由谁提供。改方法签名就是改给别的插件 inject 的服务，要先问人、照 gwb-release 定版本号。
 

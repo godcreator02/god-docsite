@@ -714,6 +714,34 @@ export async function runBaseChecks({ browser, baseUrl, mode, siteDir, feedToken
         }
       })
 
+      await check('dev 频道 open-page：带应用窗口标记打开的标签页去掉标记、跟着换页，没带标记的不动', async () => {
+        const appWindow = await context.newPage()
+        watchPage(appWindow, 'base', problems)
+        try {
+          await appWindow.goto(`${baseUrl}/glossary-demo?docsite-app-window=1`, { waitUntil: 'load' })
+          await waitForHydrated(appWindow, '#nd-sidebar a[href="/glossary-demo"]')
+          await appWindow.waitForURL(`${baseUrl}/glossary-demo`, { timeout: stepTimeoutMs })
+          await page.goto(`${baseUrl}/glossary-demo`, { waitUntil: 'load' })
+          await waitForHydrated(page, '#nd-sidebar a[href="/glossary-demo"]')
+          // 两个标签页的推送连接都连上以后再推：连上时先收到的旧请求不算
+          await new Promise((resolve) => setTimeout(resolve, 1_000))
+          const response = await fetch(`${baseUrl}/__docsite/feed/open-page`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'x-docsite-token': feedToken },
+            body: JSON.stringify({ path: '/writing/collapse-test', at: Date.now() }),
+          })
+          await appWindow.locator('h1', { hasText: '收起内容试验' }).waitFor({ timeout: stepTimeoutMs })
+          const otherStayed = new URL(page.url()).pathname === '/glossary-demo'
+          const badShape = await fetch(`${baseUrl}/__docsite/feed/open-page`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-docsite-token': feedToken }, body: '{"path":"nowhere"}' })
+          return {
+            pass: response.status === 204 && otherStayed && badShape.status === 400,
+            detail: `推 ${response.status}；应用窗口换到了 ${new URL(appWindow.url()).pathname}，没带标记的标签页还在 ${new URL(page.url()).pathname}；形状不对 ${badShape.status}`,
+          }
+        } finally {
+          await appWindow.close()
+        }
+      })
+
       await check('dev 改 TSX 页标题：侧栏与正文标题跟着变（不挂标题刷新插件）', async () => {
         const titlePage = titlePageOf(siteDir, runTag)
         await page.goto(`${baseUrl}/${titlePage.slug}`, { waitUntil: 'load' })

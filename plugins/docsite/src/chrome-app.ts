@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
+import { appWindowParam } from '@godcreator/god-docsite'
 import { DocsiteRejected } from './errors.js'
 
 /** Chrome 在 Windows 上的安装位置：给所有用户装的 64 位、32 位，只给当前用户装的 */
@@ -32,10 +33,19 @@ function launchChromeApp(chrome: string, url: string): Promise<void> {
 
 const runFile = promisify(execFile)
 
-/** Chrome 的应用窗口身份只带主机与路径、不带端口；同一主机上几个站点靠窗口标题里的站名分开 */
-export function chromeAppIdOf(url: string): string {
-  const parsed = new URL(url)
-  return `Chrome.${parsed.hostname}_${parsed.pathname}`
+/**
+ * Chrome 的应用窗口身份是「Chrome.主机_打开时的路径」，不带端口与查询参数。窗口开在哪一页都算这个站，所以只比到主机；
+ * 同一主机上几个站点靠窗口标题里的站名分开
+ */
+export function chromeAppIdPrefixOf(url: string): string {
+  return `Chrome.${new URL(url).hostname}_/`
+}
+
+/** 新开应用窗口用的地址：带上 appWindowParam，站点的那个标签页由此知道自己是应用窗口，之后跟着频道 open-page 换页 */
+export function appWindowUrlOf(pageUrl: string): string {
+  const url = new URL(pageUrl)
+  url.searchParams.set(appWindowParam, '1')
+  return url.href
 }
 
 /**
@@ -45,7 +55,7 @@ export function chromeAppIdOf(url: string): string {
 async function focusChromeApp(chrome: string, url: string, siteTitle: string): Promise<boolean> {
   const { stdout } = await runFile(
     'pwsh',
-    ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', fileURLToPath(new URL('./chrome-window.ps1', import.meta.url)), '-ChromePath', path.resolve(chrome), '-SiteTitle', siteTitle, '-AppId', chromeAppIdOf(url)],
+    ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', fileURLToPath(new URL('./chrome-window.ps1', import.meta.url)), '-ChromePath', path.resolve(chrome), '-SiteTitle', siteTitle, '-AppIdPrefix', chromeAppIdPrefixOf(url)],
     { windowsHide: true, timeout: 20_000 },
   )
   const reply = JSON.parse(stdout) as { found: boolean; focused: boolean }

@@ -1,16 +1,18 @@
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import type { CommentFileOnDisk, Reactions } from '@godcreator/comments'
-import { readCommentThreads } from '@godcreator/comments/node'
+import { readCommentThreads, type CommentThreadOnDisk } from '@godcreator/comments/node'
 import { mentionsOf, type Person } from '@godcreator/identity'
 import { sitePeople } from '@godcreator/identity/node'
-import { DocsiteRejected } from './errors.js'
+import { DocsiteRejected, messageOf } from './errors.js'
 
 export type CommentFilter = { page?: string; about?: string }
 
 /** reactions 只在有人点过表情时有：表情 → 点了的人员 id */
-type ListedComment = { author: string; createdAt: string; body: string; mentions: string[]; reactions?: Reactions }
+export type StoredComment = { author: string; createdAt: string; body: string; reactions?: Reactions }
 
-export type ListedThread = {
+/** 评论目录里的一串，照文件原样：作者是人员 id，不认人、不算 @ */
+export type StoredThread = {
   id: string
   page: string
   anchor?: string
@@ -20,49 +22,67 @@ export type ListedThread = {
   resolvedBy?: string
   resolvedAt?: string
   body: string
-  mentions: string[]
   reactions?: Reactions
-  replies: ListedComment[]
+  replies: StoredComment[]
 }
 
-function listedOf(entry: CommentFileOnDisk, people: readonly Person[]): ListedComment {
-  return { author: entry.authorId, createdAt: entry.createdAt, body: entry.body, mentions: mentionsOf(entry.body, people), ...(entry.reactions !== undefined ? { reactions: entry.reactions } : {}) }
+/** mentions：正文与回复里 @ 了的人员 id，按站点的 people.json 认 */
+export type ListedThread = Omit<StoredThread, 'replies'> & { mentions: string[]; replies: Array<StoredComment & { mentions: string[] }> }
+
+function storedCommentOf(entry: CommentFileOnDisk): StoredComment {
+  return { author: entry.authorId, createdAt: entry.createdAt, body: entry.body, ...(entry.reactions !== undefined ? { reactions: entry.reactions } : {}) }
+}
+
+function storedThreadOf({ head, replies }: CommentThreadOnDisk): StoredThread {
+  return {
+    id: head.path.split('/')[0]!,
+    page: head.page ?? '',
+    ...(head.anchor !== undefined ? { anchor: head.anchor } : {}),
+    author: head.authorId,
+    createdAt: head.createdAt,
+    ...(head.resolved !== undefined ? { status: 'resolved' as const, resolvedBy: head.resolved.by, resolvedAt: head.resolved.at } : { status: 'open' as const }),
+    body: head.body,
+    ...(head.reactions !== undefined ? { reactions: head.reactions } : {}),
+    replies: replies.map(storedCommentOf),
+  }
+}
+
+/**
+ * 读一个评论目录里的全部评论串（不要站点在运行）：论文、资料这类材料旁边的 comments/ 也是这个形状。
+ * 目录不存在就是还没人写过，回空
+ */
+export async function readComments(commentsDir: string): Promise<StoredThread[]> {
+  if (!existsSync(commentsDir)) return []
+  let threads: CommentThreadOnDisk[]
+  try {
+    threads = await readCommentThreads(commentsDir)
+  } catch (error) {
+    throw new DocsiteRejected(`读评论目录 ${commentsDir} 失败：${messageOf(error)}`)
+  }
+  return threads.map(storedThreadOf)
 }
 
 /** 读站点目录里的评论（不要站点在运行）：按挂的页面、和谁有关筛。page 是页面在内容目录里的路径（如 "writing/collapse-test.mdx"） */
 export async function listComments(siteDir: string, filter: CommentFilter): Promise<ListedThread[]> {
   let people: Person[]
-  let threads: Awaited<ReturnType<typeof readCommentThreads>>
+  let threads: CommentThreadOnDisk[]
   try {
     people = sitePeople(siteDir)
     threads = await readCommentThreads(path.join(siteDir, 'comments'))
   } catch (error) {
-    throw new DocsiteRejected(error instanceof Error ? error.message : String(error))
+    throw new DocsiteRejected(messageOf(error))
   }
   return threads
     .filter((thread) => filter.page === undefined || thread.head.page === filter.page)
     .map((thread) => {
-      const mentions = [...mentionsOf(thread.head.body, people), ...thread.replies.flatMap((reply) => mentionsOf(reply.body, people))]
-      const author = people.find((person) => person.id === thread.head.authorId)
-      if (author === undefined) throw new DocsiteRejected(`评论作者不在 people.json 里：${thread.head.path}（${thread.head.authorId}）`)
-      return {
-        id: thread.head.path.split('/')[0]!,
-        page: thread.head.page ?? '',
-        ...(thread.head.anchor !== undefined ? { anchor: thread.head.anchor } : {}),
-        author: thread.head.authorId,
-        createdAt: thread.head.createdAt,
-        ...(thread.head.resolved !== undefined
-          ? { status: 'resolved' as const, resolvedBy: thread.head.resolved.by, resolvedAt: thread.head.resolved.at }
-          : { status: 'open' as const }),
-        body: thread.head.body,
-        mentions: [...new Set(mentions)],
-        ...(thread.head.reactions !== undefined ? { reactions: thread.head.reactions } : {}),
-        replies: thread.replies.map((reply) => listedOf(reply, people)),
-      }
+      if (!people.some((person) => person.id === thread.head.authorId)) throw new DocsiteRejected(`评论作者不在 people.json 里：${thread.head.path}（${thread.head.authorId}）`)
+      const stored = storedThreadOf(thread)
+      const replies = stored.replies.map((reply) => ({ ...reply, mentions: mentionsOf(reply.body, people) }))
+      const mentions = [...new Set([...mentionsOf(stored.body, people), ...replies.flatMap((reply) => reply.mentions)])]
+      return { ...stored, mentions, replies }
     })
     .filter((thread) => filter.about === undefined || thread.mentions.includes(filter.about) || thread.author === filter.about)
 }
-
 export type CommentWrite =
   | { op: 'create'; page: string; body: string; as?: string; anchor?: string }
   | { op: 'reply'; thread: string; body: string; as?: string }

@@ -47,7 +47,7 @@ docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0
 ```text
 docsite.site.add     {"dir":…}   登记为常驻并启动；插件每次加载时（工作台启动、插件升级）也启动登记着的站
 docsite.site.start   {"dir":…}   启动；已在运行或正在启动就回现状
-docsite.site.open    {"dir":…}   没在运行先启动，再用 Chrome 应用窗口打开；这个站的窗口已经开着就切到前台，回 { url, window: focused | launched }
+docsite.site.open    {"dir":…,"path":…}   path 可省；没在运行先启动，再用 Chrome 应用窗口打开那一页；这个站的窗口已经开着就切到前台、换到那一页，回 { url, window: focused | launched }
 docsite.site.stop    {"dir":…}   停掉；没在运行就拒绝
 docsite.site.list    {}          每个站 { dir, state, url, error, title, kind, audience, hosted, by }：state 是 running / stopped / failed，url 只在运行时有，
                                  title 是站名，kind 是类别（base / docs / collab）、audience 是给谁看（personal / shared），没有身份文件都为 null，
@@ -63,7 +63,7 @@ docsite.site.remove  {"dir":…}   去掉常驻登记，在运行就停掉；没
 - 常驻的站只记在 gwb-data 的文档 `hosted-sites` 里，不在设置里。协作站也在里面：gwb-collab 在项目加进列表时登记、移出列表时去掉，启停照样用 `docsite.site.start` / `docsite.site.stop`；
   不想要某个协作站就移出项目列表（`collab.project.remove`），单 `docsite.site.remove` 的话 gwb-collab 下次加载又登记回来
 - 人在工作台的「站点」窗格里看每个站：站名、类别与给谁看（如「文档站 · 共享」「基础站 · 个人」）、来源（手动、gwb-collab、临时）、状态与端口，能打开（`docsite.site.open`，协作窗格的打开也是它）、启停，手动登记的还能不再托管
-- `docsite.site.open` 只用 Chrome：在 Program Files、Program Files (x86)、当前用户的 LocalAppData 下找 `Google\Chrome\Application\chrome.exe`，找不到就拒绝。窗口按标题里的站名（`content/meta.json` 的 `title`）认，没写站名的站每次都新开
+- `docsite.site.open` 只用 Chrome：在 Program Files、Program Files (x86)、当前用户的 LocalAppData 下找 `Google\Chrome\Application\chrome.exe`，找不到就拒绝。窗口按标题里的站名（`content/meta.json` 的 `title`）认，没写站名的站每次都新开。`path` 是以 `/` 开头的站内地址；已经开着的窗口经站点的推送频道 `open-page` 换页，只有这条命令开出来的窗口会跟着换，VS Code 里开的同一个站不动
 
 ## 我是谁
 
@@ -177,3 +177,6 @@ docsite.people.join {"dir":…,"id":"<字母数字_->","name":"<显示名>","git
 | `join(dir, { id, name, gitea? })` | 同 `docsite.people.join`，回 `{ changed }` |
 | `identityCode()` | 本 home 的身份码 |
 | `provideSiteDir(name, dir)` | 给个人站提供一个本机目录，站点的功能包经站点上下文 `providedDirs()[name]` 读：`name` 是小写字母开头的小写字母、数字与 `-`，`dir` 是绝对路径；同一个名字已有人提供就报错。返回撤销的函数，放进调用方的 `ctx.effect` |
+| `checkMdx(file, { rootDir })` | 一页外部 mdx（功能包的路由请求时编译的那种，不在站点 `content/` 里）编译过不过：回 `{ ok: true }` 或 `{ ok: false, message }`，`message` 是编译器原话。查 frontmatter、MDX 语法、`import`、越出 `rootDir` 的图片地址；不加载站点的组件表，查不出组件名写错。站点不用在运行 |
+| `checkSite(dir)` | 在站点目录里运行站点自己那一版的 `docsite-check`（内容放法，`shared` 站引用的条目本站都有），回 `{ passed, report }`：`report` 是检查列出的问题原话，通过时是那一行结论。站点装的平台包没有这条检查、检查本身没跑起来时报错 |
+| `readComments(commentsDir)` | 读一个评论目录（论文、资料旁边的 `comments/`）里的全部评论串，照文件原样回，形状同 `docsite.comments` 的 `threads` 但没有 `mentions`，作者是人员 id；目录不存在回空。站点不用在运行 |

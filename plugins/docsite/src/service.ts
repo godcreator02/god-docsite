@@ -1,12 +1,15 @@
 import { Service, type Context } from 'cordis'
 import type { SiteIdentity } from '@godcreator/god-docsite/identity'
 import type { JoiningPerson } from '@godcreator/identity'
+import type { StoredThread } from './comments.js'
 import type { SiteFeatureAdded, SiteFeatureOptions } from './scaffold/add-feature.js'
 import type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
+import type { MdxCheck } from './scaffold/platform.js'
+import type { SiteCheck } from './site-check.js'
 import type { SiteStarted, SiteStatus } from './site-host.js'
 
 /**
- * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在 gwb-data 的 hosted-sites 里，别的插件的站也经 add 登记）、往站点推数据与订阅站点的频道、本 home 的身份码、给个人站提供本机目录。
+ * 别的插件注入的服务 gwbDocsite：建站与加功能、托管站点的开发服务（常驻的站只记在 gwb-data 的 hosted-sites 里，别的插件的站也经 add 登记）、往站点推数据与订阅站点的频道、本 home 的身份码、给个人站提供本机目录，以及不要站点在运行的几样检查与读取（一页外部 mdx、整个站点、一个评论目录）。
  * 站点都建在平台包 @godcreator/god-docsite 上，站点根有身份文件 docsite.json（类别与布局代号，建站时写）。站点目录都写绝对路径；同一个站点目录大小写、斜杠不同的写法算同一个
  */
 export interface GwbDocsiteApi {
@@ -44,6 +47,15 @@ export interface GwbDocsiteApi {
    * 名字是功能包和插件约好的小写词；同一个名字只许一个插件提供，第二个抛 Error 写明谁先提供的目录。返回撤销的函数，放进 ctx.effect 里
    */
   provideSiteDir(name: string, dir: string): () => void
+  /**
+   * 一页外部 mdx（不在站点 content/ 里，功能包的路由请求时编译的那种）编译过不过，不过时带编译器原话：frontmatter、MDX 语法、import、越出 rootDir 的图片地址。
+   * 用插件旁边装的平台包编译，站点不用在运行；不加载站点的组件表，查不出组件名写错
+   */
+  checkMdx(file: string, options: { rootDir: string }): Promise<MdxCheck>
+  /** 在站点目录里运行站点自己那一版的 docsite-check（内容放法、shared 站引用的条目本站都有）；没跑起来抛 Error，查出问题照常回 passed: false */
+  checkSite(dir: string): Promise<SiteCheck>
+  /** 读一个评论目录里的全部评论串（论文、资料旁边的 comments/），照文件原样回，作者是人员 id；目录不存在回空 */
+  readComments(commentsDir: string): Promise<StoredThread[]>
   /** 某个站的状态变了（启动、停止、出错）时调用；返回撤掉的函数 */
   onStatus(listener: (dir: string) => void): () => void
   /**
@@ -98,6 +110,15 @@ export class DocsiteService extends Service implements GwbDocsiteApi {
   }
   provideSiteDir(name: string, dir: string) {
     return this.api.provideSiteDir(name, dir)
+  }
+  checkMdx(file: string, options: { rootDir: string }) {
+    return this.api.checkMdx(file, options)
+  }
+  checkSite(dir: string) {
+    return this.api.checkSite(dir)
+  }
+  readComments(commentsDir: string) {
+    return this.api.readComments(commentsDir)
   }
   onStatus(listener: (dir: string) => void) {
     return this.api.onStatus(listener)

@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
 import { feedChannelListSeparator, feedTokenEnvName, feedTokenHeader, isFeedChannel, type FeedStreamEnvelope } from '../core/feed.js'
 import { hostChannel, parseHostContext } from '../core/host-context.js'
+import { openPageChannel, parseOpenPageRequest } from '../core/open-page.js'
 import { feedHub, subscribeFeedHub } from '../node/feed-hub.js'
 
 type FeedListener = (data: unknown) => void
@@ -30,6 +31,9 @@ export function publishSiteFeed(channel: string, data: unknown): void {
   hub.latest.set(channel, data)
   for (const listener of hub.listeners.get(channel) ?? []) listener(data)
 }
+
+/** 平台自己定了数据形状的频道：推送时就核对，写错了回 400、不存 */
+const shapedChannels: Record<string, (data: unknown) => unknown> = { [hostChannel]: parseHostContext, [openPageChannel]: parseOpenPageRequest }
 
 function channelOf(params: LoaderFunctionArgs['params']): string {
   const channel = params['channel']
@@ -116,7 +120,7 @@ export function feedLoader({ request, params }: LoaderFunctionArgs): Response {
 
 /**
  * 推送通道的入口（同一路由的 action）：POST JSON，请求头带启动方经环境变量 DOCSITE_FEED_TOKEN 给的令牌。
- * 站点进程没有令牌、令牌不对 403，正文不是 JSON、推给频道 host 的托管方上下文写错了 400；成功 204
+ * 站点进程没有令牌、令牌不对 403，正文不是 JSON、推给频道 host 的托管方上下文或 open-page 的换页请求写错了 400；成功 204
  */
 export async function feedAction({ request, params }: ActionFunctionArgs): Promise<Response> {
   const channel = channelOf(params)
@@ -132,9 +136,10 @@ export async function feedAction({ request, params }: ActionFunctionArgs): Promi
     if (error instanceof SyntaxError) return textResponse(400, `正文要是 JSON：${error.message}`)
     throw error
   }
-  if (channel === hostChannel) {
+  const parse = shapedChannels[channel]
+  if (parse !== undefined) {
     try {
-      parseHostContext(data)
+      parse(data)
     } catch (error) {
       return textResponse(400, error instanceof Error ? error.message : String(error))
     }

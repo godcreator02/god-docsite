@@ -4,6 +4,7 @@ import { DocsLayout } from '@fumadocs/base-ui/layouts/docs'
 import { getLayoutTabs } from '@fumadocs/base-ui/layouts/shared'
 import { ThemeSwitch, type ThemeSwitchProps } from '@fumadocs/base-ui/layouts/shared/slots/theme-switch'
 import { DevIssuesButton, DevSiteUpdates } from './dev-updates.js'
+import { OpenPageFollower } from './open-page.js'
 import type { SiteLayoutData } from './site-context.js'
 import type { SidebarLink } from './sidebar-links.js'
 import { groupKeepingSidebar, rowSearchTrigger, SidebarLinksRow } from './sidebar.js'
@@ -55,6 +56,7 @@ export function SiteLayout({ data, sidebarLinks, sidebarFooterStart, top, childr
   return (
     <SiteLinksProvider pageTitles={data.pageTitles}>
       <DevSiteUpdates />
+      <OpenPageFollower />
       <TopNotices>
         <DevIssuesButton />
         {top}

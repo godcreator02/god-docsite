@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
-import { chromeAppIdOf, chromeAppOpener, chromeCandidatesOf, findChrome } from '../src/chrome-app.js'
+import { appWindowUrlOf, chromeAppIdPrefixOf, chromeAppOpener, chromeCandidatesOf, findChrome } from '../src/chrome-app.js'
 
 describe('找 Chrome', () => {
   const env = { ProgramFiles: 'C:\\Program Files', 'ProgramFiles(x86)': 'C:\\Program Files (x86)', LOCALAPPDATA: 'C:\\Users\\bob\\AppData\\Local' }
@@ -25,9 +25,13 @@ describe('每个站点只用一个 Chrome 应用窗口', () => {
   const url = 'http://127.0.0.1:4330/'
   const title = '混合型 MMC 样机'
 
-  it('应用窗口的身份不带端口', () => {
-    expect(chromeAppIdOf(url)).toBe('Chrome.127.0.0.1_/')
-    expect(chromeAppIdOf('http://127.0.0.1:4331/tasks')).toBe('Chrome.127.0.0.1_/tasks')
+  it('应用窗口的身份只比到主机：不带端口，开在哪一页都算', () => {
+    expect(chromeAppIdPrefixOf(url)).toBe('Chrome.127.0.0.1_/')
+    expect(chromeAppIdPrefixOf('http://127.0.0.1:4331/tasks?x=1')).toBe('Chrome.127.0.0.1_/')
+  })
+
+  it('新开的窗口地址带上应用窗口的标记，原有的查询参数与锚点留着', () => {
+    expect(appWindowUrlOf('http://127.0.0.1:4330/papers/abc?view=pdf#s2')).toBe('http://127.0.0.1:4330/papers/abc?view=pdf&docsite-app-window=1#s2')
   })
 
   it('按站名找已有窗口，找到只切到前台、不启动；关掉以后下一次重新启动', async () => {

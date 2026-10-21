@@ -9,6 +9,7 @@ import type { GwbShellApi } from '@godcreator/gwb-shell'
 import type {} from '@godcreator/gwb-skills'
 import { chromeCandidatesOf, findChrome, openInChromeApp } from './chrome-app.js'
 import { registerCommands } from './commands.js'
+import { readComments } from './comments.js'
 import { registerDocfirstCommands } from './docfirst/commands.js'
 import { devServerLauncher } from './dev-server.js'
 import { addedByCommand, HostedSites } from './hosted-sites.js'
@@ -19,8 +20,9 @@ import { listInstalledFontFamilies, readerFontsFrom, readerFontSettings } from '
 import { addSiteFeature } from './scaffold/add-feature.js'
 import { createDocsite } from './scaffold/create.js'
 import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
-import { loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
+import { loadPlatformNode, loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
+import { checkSite } from './site-check.js'
 import { SiteHost } from './site-host.js'
 import { siteDescriptionOf, siteListingsOf } from './site-list.js'
 import { SitePorts } from './site-ports.js'
@@ -134,6 +136,9 @@ export function apply(ctx: GwbContext): void {
     subscribe: (dir, channel, listener) => host.subscribe(dir, channel, listener),
     join: (dir, person) => joinPeople(dir, identityCode(), person),
     provideSiteDir: (name, dir) => providedDirs.provide(name, dir),
+    checkMdx: async (file, options) => (await loadPlatformNode()).checkMdx(file, options),
+    checkSite,
+    readComments,
     onStatus: (listener) => host.onStatus(listener),
     init: (dir, options) => createDocsite(dir, options, { ...homePageCheck, scaffold, pnpm: runPnpm, packageSource: { kind: 'registry', resolveFrom: pluginDir } }),
     addFeature: (dir, options) =>
