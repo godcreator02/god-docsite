@@ -4,6 +4,7 @@
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import type { SiteAudience } from "@godcreator/god-docsite";
 import type { GwbDocsiteApi } from "../service.js";
 import { isRecord } from "./vocab.js";
 
@@ -94,8 +95,8 @@ export interface DocfirstSiteDeps {
  * 建一个 docfirst 站：gwbDocsite.init 建基础站 → 叠 docfirst 起始物、写脚本与命令行依赖 → 逐个 gwbDocsite.addFeature。
  * 脚本与依赖写在加功能之前：addFeature 的 pnpm add 顺带把 docfirst 命令行装上，不用再装一次。版本都是插件旁边装着的那一版写 ^<版本>
  */
-export async function createDocfirstSite(siteDir: string, { title }: { title: string }, deps: DocfirstSiteDeps): Promise<{ features: string[] }> {
-  await deps.docsite.init(siteDir, { title, kind: 'docs' });
+export async function createDocfirstSite(siteDir: string, { title, audience }: { title: string; audience: SiteAudience }, deps: DocfirstSiteDeps): Promise<{ features: string[] }> {
+  await deps.docsite.init(siteDir, { title, kind: 'docs', audience });
   const docfirst = packageNearby(deps.packagesFrom, DOCFIRST_PACKAGE);
   overlayDocfirstTemplate(siteDir, docfirst.dir);
   addDocfirstScripts(siteDir, `^${docfirst.version}`);

@@ -23,7 +23,7 @@
 ## 怎么用
 
 建站与托管在 gwb 工作台里做：`docsite.site.init` 建基础站、`docsite.feature.add` 加功能包、`docsite.site.add` 托管开发服务；
-要钉码与轨迹卡的站用 `docfirst.create {"dir":"<仓>/docs-site"}` 一步建好。
+要钉码与轨迹卡的站用 `docfirst.create {"dir":"<仓>/docs-site","audience":"shared"}` 一步建好。
 
 docfirst 站的项目根放一份 `docfirst.config.mjs`（内容根、组件名册、生成物写到哪、轨迹卡目录）。内容根下 `future/` 是未来区，其余目录都是现状区；
 文档里单独写一行不带记录的记号，路径相对项目根：

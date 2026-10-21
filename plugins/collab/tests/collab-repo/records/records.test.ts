@@ -63,7 +63,7 @@ beforeEach(() => {
   mkdirSync(path.join(repo, 'collab'), { recursive: true })
   mkdirSync(path.join(repo, 'site'), { recursive: true })
   writeFileSync(path.join(repo, 'site', 'people.json'), people)
-  writeFileSync(path.join(repo, 'site', 'docsite.json'), '{"kind":"collab","format":1}')
+  writeFileSync(path.join(repo, 'site', 'docsite.json'), '{"kind":"collab","audience":"shared","format":2}')
   bob = { repo, collabDir: path.join(repo, 'collab'), siteDir: path.join(repo, 'site'), person: 'bob' }
 })
 

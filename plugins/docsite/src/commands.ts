@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { isSiteAudience } from '@godcreator/god-docsite'
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 import { listComments, writeComment, type CommentFilter, type CommentWrite } from './comments.js'
 import { DocsiteRejected, messageOf } from './errors.js'
@@ -65,7 +66,7 @@ const siteShape =
   '每个站是 { dir, state, url, error }：state 是 running（进程在，url 是实际地址）、stopped（没有进程）、failed（进程退出了或没能启动，error 记退出码与最后几行输出）；url 只在 running 时有。端口不写在站点里：启动时先试这个站上次用的端口，被占了就随机挑一个五位数的空闲端口'
 
 const listingShape =
-  `${siteShape}。列表的每一行另有 title、kind、hosted、by：title 是站点 content/meta.json 的 title（没有为 null）；kind 是站点根 docsite.json 写的类别 base（基础站）、docs（文档站）或 collab（协作站），没有这个文件为 null；hosted 是登记为常驻（工作台每次启动都启动它），` +
+  `${siteShape}。列表的每一行另有 title、kind、audience、hosted、by：title 是站点 content/meta.json 的 title（没有为 null）；kind 是站点根 docsite.json 写的类别 base（基础站）、docs（文档站）或 collab（协作站），audience 是它写的给谁看 personal（只有自己在本机看）或 shared（别人也会 clone 下来看），没有这个文件两项都为 null；hosted 是登记为常驻（工作台每次启动都启动它），` +
   'by 是谁登记的（docsite.site.add，或登记它的插件名，如 gwb-collab）；没登记、只是这次被启动过的站 hosted 为 false、by 为 null。常驻的站按登记先后排在前面'
 
 const commentWriteUsage =
@@ -180,16 +181,18 @@ export function registerCommands({ commands, docsite, isRegistered, list, openSi
       name: 'docsite.site.init',
       description: '一条命令从空目录建站：平台包 god-docsite 的建站器复制站点模板、装依赖、起服务检查，骨架写完归站点',
       usage:
-        '{ dir, title }：dir 是站点目录的绝对路径，要不存在或是空目录；title（站名，写进 content/meta.json）必给。端口不写进站点，启动时挑（见 docsite.site.start）。' +
-        '站点模板是平台包 @godcreator/god-docsite 的 template/，平台包（god-docsite、identity、comments）的依赖写成插件旁边装着的那一版的 ^<版本>；站点根写身份文件 docsite.json，类别是 base（基础站；文档站用 docfirst.create，协作站用 collab.site.init）；写完 pnpm install，起服务检查首页，通过后登记为常驻的站保持运行、没登记的停掉。' +
+        '{ dir, title, audience }：dir 是站点目录的绝对路径，要不存在或是空目录；title（站名，写进 content/meta.json）必给；audience 必给，写这个站给谁看：只有自己在本机看写 personal（能读工作台插件提供的本机目录），别人也会 clone 下来看写 shared（只读站点目录里的文件）。端口不写进站点，启动时挑（见 docsite.site.start）。' +
+        '站点模板是平台包 @godcreator/god-docsite 的 template/，平台包（god-docsite、identity、comments）的依赖写成插件旁边装着的那一版的 ^<版本>；站点根写身份文件 docsite.json：类别 base（基础站；文档站用 docfirst.create，协作站用 collab.site.init）、给的 audience、这一版的布局代号；写完 pnpm install，起服务检查首页，通过后登记为常驻的站保持运行、没登记的停掉。' +
         'people.json 里只有 agent claude，人用 docsite.people.join 把自己加进来。要功能（轨迹卡、钉码、协作等）建完再 docsite.feature.add。回 { dir, platformDependencies }',
       effect: 'write',
     },
     async (args) => {
-      const parsed = argsOf(args, ['dir', 'title'])
+      const parsed = argsOf(args, ['dir', 'title', 'audience'])
       const title = optionalString(parsed, 'title')
       if (title === undefined) throw new DocsiteRejected('缺少 title（站名），要是非空字符串')
-      return docsite.init(dirOf(parsed), { title, kind: 'base' })
+      const audience = parsed['audience']
+      if (!isSiteAudience(audience)) throw new DocsiteRejected(`audience 要是 personal 或 shared，收到 ${JSON.stringify(audience)}：只有自己在本机看写 personal，别人也会 clone 下来看写 shared`)
+      return docsite.init(dirOf(parsed), { title, kind: 'base', audience })
     },
   )
 

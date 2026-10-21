@@ -6,16 +6,21 @@ export type SiteRow = {
   error: string | null
   title: string | null
   kind: 'base' | 'docs' | 'collab' | null
+  audience: 'personal' | 'shared' | null
   hosted: boolean
   by: string | null
 }
 
 const kindLabels = { base: '基础站', docs: '文档站', collab: '协作站' } as const
+const audienceLabels = { personal: '个人', shared: '共享' } as const
 
-/** 站点类别：站点根 docsite.json 写的 kind；没有这个文件的站托管不了，原因写在这一行下面 */
+/** 站点类别与给谁看：站点根 docsite.json 写的 kind 与 audience；没有这个文件的站托管不了，原因写在这一行下面 */
 export function kindOf(site: SiteRow): { label: string; title: string } {
-  if (site.kind === null) return { label: '未标注', title: '站点根没有身份文件 docsite.json：不是平台建的站，或是有身份文件之前建的站' }
-  return { label: kindLabels[site.kind], title: `站点根 docsite.json 写的类别：${site.kind}` }
+  if (site.kind === null || site.audience === null) return { label: '未标注', title: '站点根没有身份文件 docsite.json：不是平台建的站，或是有身份文件之前建的站' }
+  return {
+    label: `${kindLabels[site.kind]} · ${audienceLabels[site.audience]}`,
+    title: `站点根 docsite.json 写的类别 ${site.kind}、给谁看 ${site.audience}（personal 只有自己在本机看，shared 别人也会 clone 下来看）`,
+  }
 }
 
 /** docsite.site.add 登记的站记的 by；窗格里只有这种站能「不再托管」，别的插件登记的由那个插件管 */

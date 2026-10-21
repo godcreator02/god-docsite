@@ -42,7 +42,7 @@ afterAll(async () => {
 describe('真的在临时目录建站', () => {
   it('建站（端口随机挑）→ 加入身份 → 写评论与回复 → 推送 → 重启沿用上次的端口 → 加轨迹卡功能 → pnpm build', { timeout: 900_000 }, async () => {
     const keepRunning: HomePageCheckDeps = { isRegistered: async () => true, start: (dir) => host.start(dir), stop: (dir) => host.stop(dir), pageStatus }
-    await createDocsite(siteDir, { title: '真站', kind: 'base' }, { ...keepRunning, scaffold, packageSource: { kind: 'link', repoDir }, pnpm: runPnpm })
+    await createDocsite(siteDir, { title: '真站', kind: 'base', audience: 'personal' }, { ...keepRunning, scaffold, packageSource: { kind: 'link', repoDir }, pnpm: runPnpm })
     const status = host.statusOf(siteDir)
     expect(status.state).toBe('running')
     const url = status.url!

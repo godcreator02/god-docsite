@@ -13,7 +13,7 @@ describe('合并检查：只有负责人能改的内容', () => {
     write('site/people.json', people.replace('乙', '乙改名'))
     write('site/.npmrc', 'registry=https://example.org/\n')
     write('site/pnpm-workspace.yaml', 'onlyBuiltDependencies: [evil]\n')
-    write('site/docsite.json', '{"kind":"base","format":1}\n')
+    write('site/docsite.json', '{"kind":"base","audience":"shared","format":2}\n')
     write('site/vite.config.ts', 'export default {}\n')
     write('site/postcss.config.mjs', 'export default {}\n')
     commit('乙改了一堆只有负责人能改的东西')

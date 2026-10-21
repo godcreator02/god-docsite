@@ -14,3 +14,4 @@ export {
 } from './feed.js'
 export { browserHostOf, devOriginEnvName } from './site-origin.js'
 export { isReaderFontName, readerFontsCssOf, readerFontsFileEnvName, readerFontsFormat, type ReaderFontsFile } from './reader-fonts.js'
+export { isSiteAudience, siteAudiences, type SiteAudience } from './site-audience.js'

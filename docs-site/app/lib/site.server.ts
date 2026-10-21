@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { siteFeedValue, siteOrigin, type BaseSiteContext } from '@godcreator/god-docsite/server'
+import { siteAudienceOf, siteFeedValue, siteOrigin, type BaseSiteContext } from '@godcreator/god-docsite/server'
 import { siteIdentity, sitePeople } from '@godcreator/identity/node'
 import { comments } from '../../.source/server'
 import { source } from './source'
@@ -15,6 +15,7 @@ const mode: 'dev' | 'start' = import.meta.env.DEV ? 'dev' : 'start'
 export const site = {
   dir,
   mode,
+  audience: siteAudienceOf(dir),
   source,
   contentDir: path.join(dir, 'content'),
   commentsDir: path.join(dir, 'comments'),

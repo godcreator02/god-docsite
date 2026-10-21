@@ -21,8 +21,9 @@ export function registerDocfirstCommands({ commands, docsite, packagesFrom, log 
       name: CREATE_COMMAND,
       description: '建一个接好 docfirst 的文档站（现状、轨迹、未来三个区）：建基础站、加功能包，再叠 docfirst 的起始物与脚本',
       usage:
-        '{ dir: string, title?: string }。' +
+        '{ dir: string, audience: "personal" | "shared", title?: string }。' +
         'dir 是站目录的绝对路径，约定是 <仓>/docs-site：它必须还不存在（或是空目录），上一级（仓目录）必须已经存在。' +
+        'audience 必给，写进站点身份文件 docsite.json：别人也会 clone 下来看的写 shared（代码仓的文档站多是这种），只有自己在本机看的写 personal。' +
         'title 是显示名，不给就依次用仓根 package.json 的 title、包名去掉 scope、仓目录名。' +
         '端口不写进站点，启动时由 gwb-docsite 挑（见 docsite.site.start）。' +
         `先同 docsite.site.init 建基础站（装依赖、起服务检查）；再把 ${DOCFIRST_PACKAGE} 的 template/（docfirst.config.mjs、outputs 正本、未来区起始页、第一张轨迹卡）叠到站点根（已有的文件不覆盖），` +
@@ -41,7 +42,7 @@ export function registerDocfirstCommands({ commands, docsite, packagesFrom, log 
       const overwritten = filesFirstRenderOverwrites(args.repoDir)
       let features: string[]
       try {
-        ;({ features } = await createDocfirstSite(args.siteDir, { title }, { docsite, packagesFrom }))
+        ;({ features } = await createDocfirstSite(args.siteDir, { title, audience: args.audience }, { docsite, packagesFrom }))
       } catch (error) {
         return { ok: false, error: `${CREATE_COMMAND} 没建成：${messageOf(error)}` }
       }

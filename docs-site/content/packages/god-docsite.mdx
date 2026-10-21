@@ -15,7 +15,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 - **模板与建站器**：`template/` 是唯一的站点模板，`./scaffold` 是建站器（`createSite` 建站、`addFeature` 加功能、`regenerateFeatureIndex` 重写汇总文件），负责把站点写出来
 - **运行时出口**：`./server`、`./react`、`./vite`、`./mdx` 等，由模板写出的站点文件调用，管页面树、布局与侧栏、搜索、推送与术语标注
 
-另有 `./identity`：站点根的身份文件 `docsite.json`（站点类别与布局代号）的读写，插件靠它认出平台建的站、分出类别，见下面「站点身份文件」一节。
+另有 `./identity`：站点根的身份文件 `docsite.json`（站点类别、给谁看与布局代号）的读写，插件靠它认出平台建的站、分出类别，见下面「站点身份文件」一节。
 
 本站的 `app/features/` 就是建站器建出来的样子：`code-pin`、`comments`、`explainer`、`identity`、`trajectory` 五个功能目录，和「`createSite` → `addBaseFeatures` → 依次 `addFeature` code-pin、trajectory、explainer」得到的一字不差——`pnpm test:scaffold` 就是这么比对的。这一页的例子从头到尾都是本站自己。
 
@@ -90,19 +90,20 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 ## 站点身份文件
 
-站点根的 `docsite.json` 写明这个站拿来干什么、按哪一代布局建的，只有两项：
+站点根的 `docsite.json` 写明这个站拿来干什么、给谁看、按哪一代布局建的，只有三项：
 
 ```json
-{ "kind": "collab", "format": 1 }
+{ "kind": "collab", "audience": "shared", "format": 2 }
 ```
 
 - `kind` 是 `base`（基础站）、`docs`（文档站）、`collab`（协作站）之一，说的是用途，不是装了哪些功能：测试站装了全部功能，`kind` 仍是 `collab`。装了哪些功能看 `package.json` 的依赖
-- `format` 是布局代号，现在是 `1`。布局再变时加一，读到不认识的号直接报错、写明照模板手动升级，不自动搬
-- 写坏了就报错，写明哪一项不对：不是 JSON、`kind` 不在三个值里、`format` 不对、多了认不出的键
+- `audience` 是 `personal`（只有自己在本机看）或 `shared`（别人也会 clone 下来看）。一个站会给谁看，它就只能依赖那些人都拿得到的东西：`personal` 的站可以读工作台插件提供的本机目录，`shared` 的站只读自己目录里的文件。协作站只能是 `shared`。站点运行时经站点上下文的 `audience` 读到它，功能包按它决定读哪里的数据
+- `format` 是布局代号，现在是 `2`。布局再变时加一，读到不认识的号直接报错、写明用 gwb-docsite 的 `docsite.site.upgrade` 列出要照模板改的文件，不自动搬
+- 写坏了就报错，写明哪一项不对：不是 JSON、`kind` 不在三个值里、`audience` 缺了或不在两个值里、协作站写了 `personal`、`format` 不对、多了认不出的键
 
-`createSite` 不写它：建站的一方建完站接着调 `writeSiteIdentity` 写一次，之后归站点。gwb-docsite 的 `docsite.site.init`、`docfirst.create`、gwb-collab 的 `collab.site.init` 分别写 `base`、`docs`、`collab`。gwb-docsite 托管前、gwb-collab 认协作仓都只看它，没有这个文件的站（旧平台 docsite-kit 建的站、有身份文件之前建的站）不认。
+`createSite` 不写它：建站的一方建完站接着调 `writeSiteIdentity(siteDir, kind, audience)` 写一次，之后归站点。gwb-docsite 的 `docsite.site.init`、`docfirst.create` 分别写 `base`、`docs`，`audience` 由调用的人给；gwb-collab 的 `collab.site.init` 写 `collab` 与 `shared`。gwb-docsite 托管前、gwb-collab 认协作仓都只看它，没有这个文件的站（旧平台 docsite-kit 建的站、有身份文件之前建的站）不认。模板的 `app/lib/site.server.ts` 在站点加载时经 `./server` 的 `siteAudienceOf` 读它，写错了站点起不来。
 
-{/* ref file="../packages/god-docsite/src/node/site-identity.ts" lines="4-13" hash="8b4d76c28339" blob="a260faf0383b" */}
+{/* ref file="../packages/god-docsite/src/node/site-identity.ts" lines="5-16" hash="496fbe6153e7" blob="19583e4461db" */}
 
 ## 功能目录里的四种文件
 
@@ -137,9 +138,9 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 ## 站点上下文
 
-站点的 `app/lib/site.server.ts` 造一个 `site`，平台与功能包的 loader、action 都经参数拿到它，自己不 import 站点代码。字段：站点目录、`mode`（`dev` / `start`）、loader 结果 `source`（平台只用到它的四个方法：`getPage`、`getPages`、`getPageTree`、`serializePageTree`，页面是三种来源之一）、内容目录、评论目录与评论条目，以及每次调用都重新读取的四个函数——人员列表、本机身份（start 一律只读）、可信来源、推送通道某频道现在的值。功能包模板里的 `site.server.ts` 从它组装本功能要的上下文。
+站点的 `app/lib/site.server.ts` 造一个 `site`，平台与功能包的 loader、action 都经参数拿到它，自己不 import 站点代码。字段：站点目录、`mode`（`dev` / `start`）、`audience`（身份文件写的给谁看，站点加载时读一次）、loader 结果 `source`（平台只用到它的四个方法：`getPage`、`getPages`、`getPageTree`、`serializePageTree`，页面是三种来源之一）、内容目录、评论目录与评论条目，以及每次调用都重新读取的四个函数——人员列表、本机身份（start 一律只读）、可信来源、推送通道某频道现在的值。功能包模板里的 `site.server.ts` 从它组装本功能要的上下文。
 
-{/* ref file="../packages/god-docsite/src/site/site-context.ts" lines="6-66" hash="7172c6ce4439" blob="d46a41fec05d" */}
+{/* ref file="../packages/god-docsite/src/site/site-context.ts" lines="7-69" hash="d860795e0bc1" blob="8aa457c11df5" */}
 
 ## 推送通道
 

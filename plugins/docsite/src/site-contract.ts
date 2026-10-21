@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { siteIdentityFileName, siteIdentityOf, siteKinds, type SiteIdentity } from '@godcreator/god-docsite/identity'
+import { currentSiteFormat, siteAudiences, siteIdentityFileName, siteIdentityOf, siteKinds, type SiteIdentity } from '@godcreator/god-docsite/identity'
 import { DocsiteRejected, messageOf } from './errors.js'
 import { platformPackageName } from './scaffold/platform.js'
 
@@ -17,7 +17,7 @@ export function checkSiteIdentity(siteDir: string): SiteIdentity {
   }
   if (identity === null) {
     throw new DocsiteRejected(
-      `${siteDir} 下没有身份文件 ${siteIdentityFileName}：不是 ${platformPackageName} 建的站，或是有身份文件之前建的站。平台建的站补一份 { "kind": "<${siteKinds.join(' | ')}>", "format": 1 }；别的站先迁到 ${platformPackageName}`,
+      `${siteDir} 下没有身份文件 ${siteIdentityFileName}：不是 ${platformPackageName} 建的站，或是有身份文件之前建的站。平台建的站补一份 { "kind": "<${siteKinds.join(' | ')}>", "audience": "<${siteAudiences.join(' | ')}>", "format": ${currentSiteFormat} }；别的站先迁到 ${platformPackageName}`,
     )
   }
   return identity

@@ -165,7 +165,7 @@ QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-com
 
 `collab.site.init {repo, title}` 只对新站点（`site/` 不存在或是空目录），按顺序：
 
-1. 交给 gwb-docsite 的 `init` 建站（平台模板、身份文件 `site/docsite.json` 写 `"kind": "collab"`、装依赖、启动一次检查首页）
+1. 交给 gwb-docsite 的 `init` 建站（平台模板、身份文件 `site/docsite.json` 写 `"kind": "collab"` 与 `"audience": "shared"`、装依赖、启动一次检查首页）
 2. 建好仓根的 `collab/` 与站点的 `journal/`：站点运行时会写入它们，协作功能的样式表在 Tailwind 扫描里排除这两个目录，目录要在开发服务启动前就存在才生效，否则一写入就整页刷新、推送连接断掉
 3. 仓里还没有 `.gitea/workflows/collab-auto-merge.yaml` 就照打包进来的模板写出，`MERGE_CHECK_RANGE` 写成 `^<打包时的 collab 版本>`；已有的是负责人管的，不覆盖
 4. 站点此刻在运行（站点目录早已登记在 gwb-docsite、`init` 检查完首页后它保持运行）就先停掉：加功能要站点停着
@@ -173,7 +173,7 @@ QQ 任务组是另一件事：给项目起了 QQ 命令（`collab.project.qq-com
 6. 把平台模板的首页 `site/app/routes/home.tsx` 换成打包进来的项目首页（它 import 协作功能的接线文件，所以要等加完功能再写）
 7. 项目在列表里就交给 gwb-docsite 常驻（这时才再启动）；不在就等 `collab.project.add` 时登记
 
-{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="120-138" hash="caa907e3c89e" blob="ad1249f005d0" */}
+{/* ref file="../plugins/collab/src/site-process/collab-sites.ts" lines="120-138" hash="e328f83e3435" blob="75dddb1952f4" */}
 
 它只写文件、不提交：新站点里 `.gitea/`、`site/package.json`、`site/docsite.json`、站点根的配置文件都是只有负责人能改的内容，由负责人提交。用到的 gwb-docsite 服务方法就是 `add`、`remove`、`start`、`stop`、`status`、`onStatus`、`push`、`init`、`addFeature`，另有身份码 `identityCode` 与加入项目时的 `join`。
 

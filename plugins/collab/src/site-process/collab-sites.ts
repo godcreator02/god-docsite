@@ -125,7 +125,7 @@ export class CollabSites {
   async init(repo: string, options: { featureRange: string; mergeWorkflow: string; homePage: string; title: string; listed: boolean }): Promise<CollabSiteInitResult> {
     const { featureRange, mergeWorkflow, homePage, listed, ...newSite } = options
     const siteDir = siteDirOf(repo)
-    const created = await this.options.docsite.init(siteDir, { ...newSite, kind: 'collab' })
+    const created = await this.options.docsite.init(siteDir, { ...newSite, kind: 'collab', audience: 'shared' })
     createDirsWrittenWhileRunning(repo)
     const mergeWorkflowWritten = writeMergeWorkflowIfMissing(repo, mergeWorkflow)
     // 站点目录已登记为 gwb-docsite 的常驻站时（项目在列表里、重建站点），建站检查完首页它保持运行；加功能要站点停着

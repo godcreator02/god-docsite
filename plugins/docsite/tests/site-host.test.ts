@@ -21,7 +21,7 @@ afterEach(async () => {
 /** 站点目录里放上 package.json、身份文件与平台包：start 前的核对能过 */
 async function siteWithSupportedKit(): Promise<void> {
   await writeFile(path.join(siteDir, 'package.json'), '{"scripts":{"dev":"react-router dev --host 127.0.0.1 --strictPort"}}')
-  await writeFile(path.join(siteDir, 'docsite.json'), '{"kind":"base","format":1}')
+  await writeFile(path.join(siteDir, 'docsite.json'), '{"kind":"base","audience":"personal","format":2}')
   await installPackage('@godcreator/god-docsite', '0.1.0')
 }
 
@@ -252,9 +252,11 @@ describe('站点状态机', () => {
     await expect(host.start(siteDir)).rejects.toThrow('下没有身份文件 docsite.json')
     expect(host.statusOf(siteDir)).toMatchObject({ state: 'failed', url: null })
     expect(host.statusOf(siteDir).error).toContain('下没有身份文件 docsite.json')
-    await writeFile(path.join(siteDir, 'docsite.json'), '{"kind":"wiki","format":1}')
+    await writeFile(path.join(siteDir, 'docsite.json'), '{"kind":"wiki","audience":"personal","format":2}')
     await expect(host.start(siteDir)).rejects.toThrow('kind 要是 base / docs / collab 之一')
     await writeFile(path.join(siteDir, 'docsite.json'), '{"kind":"base","format":1}')
+    await expect(host.start(siteDir)).rejects.toThrow('只认第 2 代布局')
+    await writeFile(path.join(siteDir, 'docsite.json'), '{"kind":"base","audience":"personal","format":2}')
     await expect(host.start(siteDir)).rejects.toThrow('node_modules 里没有 @godcreator/god-docsite')
     expect(launched).toEqual([])
   })

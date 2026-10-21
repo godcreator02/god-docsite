@@ -50,7 +50,7 @@
   - 升协作功能包用 `docsite.feature.add {"dir":"<协作仓>/site","package":"@godcreator/collab","version":"^<版本>"}`，它升版本、补上站点还没有的接线文件，不覆盖已有的；它最后启动服务检查首页、常驻的站就此保持运行，接着还要 `pnpm add` 的话先再 `docsite.site.stop` 一次
   - 平台包与别的功能包在 `site/` 里 `pnpm add <包>@^<版本>`
   - 平台模板写出的文件与接线文件由你对照平台包与功能包的 `template/` 逐个判断要改哪些文件（见说明书 `docsite` 的「升级已有站点」），站点自己改过的地方保留
-  - 站点还没有身份文件 `site/docsite.json` 时补一份 `{ "kind": "collab", "format": 1 }`：没有它插件认不出协作仓、gwb-docsite 也不托管这个站。它只有负责人能改，和别的升级改动一起提交审核
+  - 站点还没有身份文件 `site/docsite.json` 时补一份 `{ "kind": "collab", "audience": "shared", "format": 2 }`：没有它插件认不出协作仓、gwb-docsite 也不托管这个站。它只有负责人能改，和别的升级改动一起提交审核
   - 升了协作功能包，新版本不在 `.gitea/workflows/collab-auto-merge.yaml` 里 `MERGE_CHECK_RANGE` 的范围内（比如范围是 `^0.1.1`、升到了 `0.2.1`）时，把这一行改成 `^<新版本>`：执行器按它装合并检查，`collab.submit` 把 `.gitea/` 和别的升级改动一起提交审核。别的行不动，这份是负责人管的
 
   再 `docsite.site.start {"dir":"<协作仓>/site"}`，改动给人过目后提交审核

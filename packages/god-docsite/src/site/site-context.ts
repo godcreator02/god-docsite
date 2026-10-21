@@ -1,6 +1,7 @@
 import type * as PageTree from 'fumadocs-core/page-tree'
 import type { SerializedPageTree } from 'fumadocs-core/source/client'
 import type { HtmlHeadingAnchor } from '../core/html-text.js'
+import type { SiteAudience } from '../core/site-audience.js'
 import type { FilePageData } from './page-sources.js'
 
 /** MDX 页面在 page.data 里用到的部分：集合要开 postprocess.includeProcessedMarkdown，才有 getText('processed') */
@@ -30,6 +31,8 @@ export interface SiteSource {
 export interface DocsiteContext {
   dir: string
   mode: 'dev' | 'start'
+  /** 身份文件 docsite.json 的 audience：功能包按它决定读本机提供的目录（personal）还是只读站点目录里的文件（shared） */
+  audience: SiteAudience
   source: SiteSource
   /** 内容目录的绝对路径：TSX、HTML 页面与它们引用的文件都在里面 */
   contentDir: string

@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { siteIdentityOf } from '@godcreator/god-docsite/identity'
 import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 空的类型 import 只为让这几个包的 `declare module 'cordis'` 生效，ctx 上才有各服务的类型
 import type {} from '@godcreator/gwb-commands'
@@ -31,6 +32,7 @@ declare module 'cordis' {
 }
 
 export type { GwbDocsiteApi } from './service.js'
+export type { SiteAudience, SiteIdentity, SiteKind } from '@godcreator/god-docsite/identity'
 export type { SiteStarted, SiteState, SiteStatus } from './site-host.js'
 export type { JoiningPerson } from '@godcreator/identity'
 export type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
@@ -116,6 +118,7 @@ export function apply(ctx: GwbContext): void {
 
   const api: GwbDocsiteApi = {
     identityCode,
+    siteIdentity: (dir) => siteIdentityOf(dir),
     add: (dir, options) => hosted.add(dir, options?.by ?? addedByCommand),
     remove: (dir) => hosted.remove(dir),
     start: (dir) => host.start(dir),

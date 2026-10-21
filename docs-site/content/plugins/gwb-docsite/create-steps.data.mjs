@@ -8,17 +8,17 @@
  */
 
 /** init 写进站点的 people.json 第一项（也是唯一一项），逐字照抄 create.ts 的 initialPeople */
-/* ref file="../plugins/docsite/src/scaffold/create.ts" lines="27-28" hash="431330bcc18b" blob="4b12283124e4" */
+/* ref file="../plugins/docsite/src/scaffold/create.ts" lines="29-30" hash="431330bcc18b" blob="7f248418d65f" */
 export const initialPeopleEntry = { id: 'claude', name: 'Claude', agent: true }
 
-/** init 的四步：复制模板、pnpm install、补基础功能、起服务检查首页 */
-/* ref file="../plugins/docsite/src/scaffold/create.ts" lines="30-51" hash="b8c4b29e4251" blob="4b12283124e4" */
+/** init 的四步：复制模板、pnpm install、补基础功能、启动开发服务检查首页 */
+/* ref file="../plugins/docsite/src/scaffold/create.ts" lines="32-53" hash="58eecf49354a" blob="7f248418d65f" */
 
 /** docfirst.create 的全部步骤：init → 叠起始物 → 写脚本 → 逐个加功能包 */
-/* ref file="../plugins/docsite/src/docfirst/docfirst-site.ts" lines="93-108" hash="20149c93d1a3" blob="13d704e93d26" */
+/* ref file="../plugins/docsite/src/docfirst/docfirst-site.ts" lines="94-109" hash="b31e92e24fd8" blob="a1db0a31dbec" */
 
 /** 写进站点 package.json 的 doc 系列脚本，逐字照抄 DOCFIRST_SCRIPTS */
-/* ref file="../plugins/docsite/src/docfirst/docfirst-site.ts" lines="17-21" hash="33b3d832abaf" blob="e8cc22e938c5" */
+/* ref file="../plugins/docsite/src/docfirst/docfirst-site.ts" lines="18-22" hash="33b3d832abaf" blob="a1db0a31dbec" */
 export const docfirstScripts = {
   doc: 'docfirst check',
   'doc:confirm': 'docfirst confirm',
@@ -58,7 +58,7 @@ export const treeNodes = [
   { id: 'content-future-meta', name: 'meta.json', depth: 2, step: 5 },
   { id: 'content-future-overview', name: 'overview.mdx', depth: 2, step: 5 },
   { id: 'docfirst-config', name: 'docfirst.config.mjs', depth: 0, step: 5 },
-  { id: 'docsite-json', name: 'docsite.json', depth: 0, step: 1, note: 'kind：docs' },
+  { id: 'docsite-json', name: 'docsite.json', depth: 0, step: 1, note: 'kind：docs，audience：shared' },
   { id: 'node-modules', name: 'node_modules/', depth: 0, dir: true, step: 2, note: '三个平台包装好了' },
   { id: 'package-json', name: 'package.json', depth: 0, step: 1, note: '平台依赖 ^0.1.0', modifiedSteps: [6, 7] },
   { id: 'people-json', name: 'people.json', depth: 0, step: 1, note: '只有 agent claude' },
@@ -88,11 +88,11 @@ export const steps = [
         { tone: 'code', text: '    "agent": true' },
         { tone: 'code', text: '  }' },
         { tone: 'code', text: ']' },
-        { tone: 'none', text: '插件接着写身份文件 docsite.json，docfirst.create 建的是文档站：' },
-        { tone: 'code', text: '{ "kind": "docs", "format": 1 }' },
+        { tone: 'none', text: '插件接着写身份文件 docsite.json，docfirst.create 建的是文档站，audience 是调用时给的：' },
+        { tone: 'code', text: '{ "kind": "docs", "audience": "shared", "format": 2 }' },
       ],
     },
-    text: '建站器 createSite 复制平台包 template/ 的全部文件（gitignore 写回成 .gitignore），写站名、people.json、pnpm-workspace.yaml 与空的功能汇总文件；插件接着写身份文件 docsite.json（docsite.site.init 写 base）。模板文件写完就归站点，不装依赖、不起服务。',
+    text: '建站器 createSite 复制平台包 template/ 的全部文件（gitignore 写回成 .gitignore），写站名、people.json、pnpm-workspace.yaml 与空的功能汇总文件；插件接着写身份文件 docsite.json（docsite.site.init 写 base），audience 照调用时给的写。模板文件写完就归站点，不装依赖、不启动开发服务。',
   },
   {
     title: 'pnpm install',

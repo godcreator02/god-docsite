@@ -19,7 +19,7 @@ export const envLine = 'DOCSITE_IDENTITY_CODE=mycode000001 DOCSITE_FEED_TOKEN=<�
 /** 启动前核对不过的五条原话（站点目录换成例子里同一个可读的路径；Windows 上路径分隔符统一写 /） */
 export const refusalMessages = [
   '/projects/demo/site 下没有 package.json，不是站点目录',
-  '/projects/demo/site 下没有身份文件 docsite.json：不是 @godcreator/god-docsite 建的站，或是有身份文件之前建的站。平台建的站补一份 { "kind": "<base | docs | collab>", "format": 1 }；别的站先迁到 @godcreator/god-docsite',
+  '/projects/demo/site 下没有身份文件 docsite.json：不是 @godcreator/god-docsite 建的站，或是有身份文件之前建的站。平台建的站补一份 { "kind": "<base | docs | collab>", "audience": "<personal | shared>", "format": 2 }；别的站先迁到 @godcreator/god-docsite',
   '/projects/demo/site/docsite.json 的 kind 要是 base / docs / collab 之一，收到 "wiki"',
   '/projects/demo/site 的 node_modules 里没有 @godcreator/god-docsite：还没在站点目录里运行 pnpm install',
   '/projects/demo/site/package.json 的 scripts.dev 写死了 --port：端口由 gwb-docsite 启动时挑，把 --port 和端口号从 scripts.dev 里去掉',
@@ -30,7 +30,7 @@ export const refusalMessages = [
  * 五步各走成什么样（state：pass 过了往下走，stop 在这一步结束，skip 没走到；stopTone 区分回现状与拒绝或失败）、
  * 第 ④ 步走到时启动的命令（command）、交回（result 的 error 为 true 是抛错）、之后 docsite.site.list 里这个站的样子（after）。
  */
-/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="284-298" hash="ea0825f3caab" blob="87082ac909c0" */
+/* ref file="../plugins/docsite/tests/site-host.test.ts" lines="286-300" hash="ea0825f3caab" blob="45b933989632" */
 export const cases = [
   {
     id: 'first',
@@ -119,9 +119,9 @@ export const cases = [
     result: { error: false, value: '{ url: "http://127.0.0.1:14001", pid: 1, alreadyRunning: true }' },
     after: [{ state: 'running', url: 'http://127.0.0.1:14001', error: null, note: '只启动过一次' }],
   },
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="245-260" hash="c28cb65304a1" blob="87082ac909c0" */
-  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="300-309" hash="0bed967545fc" blob="87082ac909c0" */
-  /* ref file="../plugins/docsite/src/site-contract.ts" hash="7d5fc52852d0" blob="5ea4e0f2625d" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="245-262" hash="644eac09b731" blob="45b933989632" */
+  /* ref file="../plugins/docsite/tests/site-host.test.ts" lines="302-311" hash="0bed967545fc" blob="45b933989632" */
+  /* ref file="../plugins/docsite/src/site-contract.ts" hash="286215824311" blob="5f97243f4688" */
   {
     id: 'refused',
     label: '启动前核对不过',

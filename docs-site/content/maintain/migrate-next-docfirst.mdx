@@ -26,7 +26,7 @@ plecs-studio（291 个 mdx、带 `.ledger.json`）与 anpc-lcl（用 `explainer-
 ## 1. 生成骨架
 
 ```text
-docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"<站名>"}
+docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","audience":"shared","title":"<站名>"}
 ```
 
 - 上一级目录要先建好；站名用旧站 `src/lib/shared.ts` 里的 `appName`，没有这个文件的（gwb-unit-folder）在 `src/lib/tree.ts` 的 `zoneTree()` 里
@@ -42,7 +42,7 @@ docfirst.create {"dir":"D:\\gwb-docfirst-migrate\\<仓名>\\docs-site","title":"
 | `app/` 整个目录 | 路由、布局、首页、各功能的接线文件 |
 | `vite.config.ts`、`react-router.config.ts`、`source.config.ts`、`tsconfig.json` | 构建与类型检查 |
 | `.gitignore`、`pnpm-workspace.yaml`、`pnpm-lock.yaml` | 安装设置与锁文件 |
-| `docsite.json`、`people.json`、`glossary.json`、`comments/.gitkeep` | 身份文件是 `{ "kind": "docs", "format": 1 }`，没有它 `docsite.site.*` 拒绝托管 |
+| `docsite.json`、`people.json`、`glossary.json`、`comments/.gitkeep` | 身份文件是 `{ "kind": "docs", "audience": "shared", "format": 2 }`，没有它 `docsite.site.*` 拒绝托管 |
 | `package.json` 的 `type`、`scripts`、`dependencies`、`devDependencies` | `name`、`version`、`description` 留旧站的；旧站的 `"docfirst": "docfirst"` 脚本骨架没有，不用留，`pnpm exec docfirst …` 照样能用 |
 
 骨架的 `content/start.mdx`、`content/future/overview.mdx`、`content/docs/outputs/` 下的正本与 `trajectory/2026-01-01-site-born.md` 不复制：旧站有自己的生成正本、未来区与根卡。

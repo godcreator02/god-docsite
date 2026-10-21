@@ -75,9 +75,9 @@ describe('createDocfirstSite', () => {
         return { feature: added.at(-1)!, specifier: options.specifier!, addedFiles: [], keptFiles: [], features: added.sort() }
       },
     }
-    const result = await createDocfirstSite(siteDir, { title: '文档站' }, { docsite, packagesFrom: pluginDir })
+    const result = await createDocfirstSite(siteDir, { title: '文档站', audience: 'shared' }, { docsite, packagesFrom: pluginDir })
     expect(calls).toEqual([
-      'init {"title":"文档站","kind":"docs"}',
+      'init {"title":"文档站","kind":"docs","audience":"shared"}',
       `addFeature @godcreator/code-pin@^${versionOf('code-pin')}`,
       `addFeature @godcreator/trajectory@^${versionOf('trajectory')}`,
       `addFeature @godcreator/explainer@^${versionOf('explainer')}`,
@@ -98,7 +98,7 @@ describe('createDocfirstSite', () => {
         throw new Error('不该走到这里')
       },
     }
-    await expect(createDocfirstSite(siteDir, { title: '文档站' }, { docsite, packagesFrom: pluginDir })).rejects.toThrow('首页返回 500')
+    await expect(createDocfirstSite(siteDir, { title: '文档站', audience: 'shared' }, { docsite, packagesFrom: pluginDir })).rejects.toThrow('首页返回 500')
     expect(calls).toEqual([])
     expect(existsSync(siteDir)).toBe(false)
   })

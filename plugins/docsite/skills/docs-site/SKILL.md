@@ -14,12 +14,13 @@ docfirst 站另装功能包 `@godcreator/code-pin`、`@godcreator/trajectory`、
 ## 建站
 
 ```
-docfirst.create  {"dir":"<仓>/docs-site"}    接好 docfirst 的站：现状、轨迹、未来三个区，钉码与生成物
+docfirst.create  {"dir":"<仓>/docs-site","audience":"shared"}    接好 docfirst 的站：现状、轨迹、未来三个区，钉码与生成物
 ```
 
 - `dir`：站目录的绝对路径，**要不存在或是空目录**，上一级（仓目录）必须已经存在
+- `audience`：必给，写这个站给谁看。别人也会 clone 下来看写 `shared`（代码仓的文档站多是这种），只有自己在本机看写 `personal`；拿不准就问人
 - `title`：站名，不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓的目录名
-- 只认这两个参数，多给一个就拒绝
+- 只认这三个参数，多给一个就拒绝
 
 它先建基础站（同 `docsite.site.init`：复制平台模板、装依赖、启动服务检查），再把 `@godcreator/docfirst` 的起始物（`docfirst.config.mjs`、`content/docs/outputs/` 下
 README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）复制到站点根（已有的文件不覆盖），往 `package.json` 写脚本 `doc`、`doc:confirm`、`doc:render`，
@@ -30,7 +31,7 @@ README / AGENTS / CLAUDE 的正本、未来区起始页、第一张轨迹卡）�
 不要 docfirst 的站直接用这两条命令：
 
 ```
-docsite.site.init    {"dir":…,"title":"站名"}                                 dir 要不存在或是空目录；title 必给
+docsite.site.init    {"dir":…,"title":"站名","audience":"personal"}           dir 要不存在或是空目录；title、audience 必给
 docsite.feature.add  {"dir":…,"package":"@godcreator/trajectory","version":"^0.1.0"}   加一个功能包
 ```
 

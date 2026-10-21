@@ -1,4 +1,5 @@
 import { Service, type Context } from 'cordis'
+import type { SiteIdentity } from '@godcreator/god-docsite/identity'
 import type { JoiningPerson } from '@godcreator/identity'
 import type { SiteFeatureAdded, SiteFeatureOptions } from './scaffold/add-feature.js'
 import type { SiteInitOptions, SiteInitResult } from './scaffold/create.js'
@@ -11,6 +12,11 @@ import type { SiteStarted, SiteStatus } from './site-host.js'
 export interface GwbDocsiteApi {
   /** 本 home 的身份码（设置 identity-code），开发服务按它在站点的 people.json 里认人 */
   identityCode(): string
+  /**
+   * 站点根身份文件 docsite.json 写的类别（kind）、给谁看（audience）与布局代号；没有这个文件为 null，写错了、布局代号不是这一版认的抛 Error。
+   * 别的插件要判断一个站给不给别人看（比如只往 audience 为 shared 的站里发布）就调它
+   */
+  siteIdentity(dir: string): SiteIdentity | null
   /**
    * 托管一个站点：登记为常驻（已登记的不重复写）再启动，之后工作台每次启动都启动它。启动不了抛 Error，登记照留。
    * by 是谁登记的，显示在站点窗格里：别的插件写自己的名字（gwb-collab 写 gwb-collab），不给记成 docsite.site.add
@@ -57,6 +63,9 @@ export class DocsiteService extends Service implements GwbDocsiteApi {
   }
   identityCode() {
     return this.api.identityCode()
+  }
+  siteIdentity(dir: string) {
+    return this.api.siteIdentity(dir)
   }
   add(dir: string, options?: { by?: string }) {
     return this.api.add(dir, options)

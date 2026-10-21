@@ -32,7 +32,7 @@ function bareRepoWith(name: string, files: Record<string, string>): void {
 }
 
 const seedModule = `${JSON.stringify({ id: '20260901090000-seedmod', type: 'module', author: 'admin', title: '起点模块', due: '2026-12-31' }, null, 2)}\n`
-const collabRepoFiles = { 'collab/records/20260901090000-seedmod.json': seedModule, 'site/people.json': people, 'site/docsite.json': '{"kind":"collab","format":1}\n', 'site/package.json': '{"name":"site","private":true}\n' }
+const collabRepoFiles = { 'collab/records/20260901090000-seedmod.json': seedModule, 'site/people.json': people, 'site/docsite.json': '{"kind":"collab","audience":"shared","format":2}\n', 'site/package.json': '{"name":"site","private":true}\n' }
 
 function sourceOf(names: string[], organization = 'hybrid-mmc'): OrganizationSource {
   return { organization, repoNames: async () => [...names], cloneUrlOf: (name) => path.join(organizationDir, `${name}.git`) }
