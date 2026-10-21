@@ -8,6 +8,16 @@ export { linkChipClassName, linkChipIconClassName, routeLinkKind, siteLinkCompon
 export { SiteErrorBoundary } from './error-boundary.js'
 export { Term, type TermProps } from './term.js'
 export { ImageZoom, type ImageZoomProps } from './image-zoom.js'
+export { Figure, FigureRow, FigureRowCaption, type FigureProps, type FigureRowProps } from './figure.js'
+export {
+  ExternalMdxBroken,
+  ExternalMdxContent,
+  ExternalMdxPage,
+  type ExternalMdx,
+  type ExternalMdxComponents,
+  type ExternalMdxPageProps,
+  type SiteMdxPluginLists,
+} from './external-mdx.js'
 export { HtmlPageBody, TsxPageBody, type OnBodyToc, type TsxPageModule } from './page-bodies.js'
 export { WidePageToggle, widePageScript } from './wide-page.js'
 export { zhTranslations } from './translations.js'

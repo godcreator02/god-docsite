@@ -42,11 +42,11 @@ import { OriginCases } from './god-docsite/origin-cases'
 | `./scaffold` | `src/node/scaffold/` 建站器，纯 Node | gwb-docsite |
 | `./identity` | `src/node/site-identity.ts` 站点身份文件的读写，纯 Node、不按自己模块的位置找文件，插件可以打包进去 | gwb-docsite、gwb-collab |
 | `./content-layout` | `src/node/content-layout.ts` 内容目录放法的规则，纯 Node，插件可以打包进去 | gwb-collab（提交审核前的站点检查）、本包的 vite 插件 |
-| `./node` | `src/node/index.ts` 引用扫描 `siteReferences` 与自包含检查，要 mdx 解析器和站点装的功能包，不打包进插件 | 本包的 vite 插件与 `docsite-check` |
+| `./node` | `src/node/index.ts` 引用扫描 `siteReferences`、自包含检查与外部 mdx 的 `checkMdx`，要 mdx 编译器和站点装的功能包，不打包进插件 | 本包的 vite 插件与 `docsite-check` |
 | `./vite` | `src/vite/` vite 插件 | 站点 `vite.config.ts` |
 | `./mdx` | `src/mdx/` 术语标注的 remark 插件 | 站点 `app/lib/mdx-plugins.ts` |
 | `./server` | `src/site/*.server.ts` 等服务端部分 | 站点路由文件、功能包模板 |
-| `./react` | `src/site/` 浏览器端组件 | 站点路由文件、功能包模板；TSX 页面取点了能放大的 `ImageZoom` |
+| `./react` | `src/site/` 浏览器端组件 | 站点路由文件、功能包模板；TSX 页面取点了能放大的 `ImageZoom` 与带图注的 `Figure` |
 | `./tex` | TSX 页面里写公式的 `Tex` | 站点的 TSX 页面 |
 | `./styles.css` | 平台样式，含阅读字体的 CSS 约定 | 站点 `app/app.css` |
 | `docsite-serve`（bin） | `src/cli/serve.ts` 发布版启动命令 | 站点 `package.json` 的 `scripts.start` |
@@ -183,11 +183,33 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 <PageTypes />
 
+## 外部 mdx 页
+
+论文的排版稿、资料的笔记这类 mdx 不在 `content/` 里，进不了页面树，功能包用自己的路由显示它们。平台给四样，功能包的路由文件只写几行：
+
+| 工具 | 出口 | 做什么 |
+| --- | --- | --- |
+| `compileExternalMdx(file, { plugins, rootDir, assetsHrefOf })` | `./server` | 请求时编译一个文件，按「路径 + 修改时间 + 大小」缓存在开发服务进程里；`plugins` 传站点上下文 `mdxPlugins()` 的结果，和内容页用同一套 remark、rehype 插件。回 `ready`（代码串、frontmatter、标题目录）或 `broken`（编译器原话，行列号对得上原文件） |
+| `externalFileResponse(dir, relativePath, request)` | `./server` | 文件夹里一个文件的响应，按扩展名给类型、带 ETag，没变回 304；不存在、越出文件夹、认不出扩展名都抛 404 |
+| `ExternalMdxPage` | `./react` | 页框：标题、右侧标题目录、正文容器（`bodyProps` 放评论包的 `commentScopeProps`）；题目下面的按钮与元数据块由功能包作为子元素放进去，编译不过时正文换成编译器原话 |
+| `ExternalMdxContent` | `./react` | 只渲染正文：在浏览器里运行编译好的代码串；外部页的评论正文也用它 |
+
+{/* ref file="../packages/god-docsite/src/site/external-mdx.server.ts" lines="41-53" hash="ae4b56763ea3" blob="276ca647ab7f" */}
+
+写法和内容页一样：同一套插件，组件表是站点的 `mdxComponents` 再加上这类页才有的组件，`{…}` 表达式、`$…$` 公式照常。不一样的有两处：
+
+- **图只能放在 `rootDir` 里**：Markdown 图片与 JSX 元素上写成字符串的 `src`，相对地址按 mdx 文件所在目录解析，再经 `assetsHrefOf` 换成功能包文件路由的地址；越出 `rootDir` 就编译不过，因为没有路由能把文件夹外的文件送出去。
+- **不能写 `import`**：这些文件不在 Vite 的构建里，没有东西替它打包被引用的文件。编译时就拦下，报错写明要共用的组件放进功能包或平台的组件表。
+
+{/* ref file="../packages/god-docsite/src/node/external-mdx-source.ts" lines="24-51" hash="361b59340884" blob="ed2c4f19840f" */}
+
+同一套检查另有 `./node` 出口的 `checkMdx(file, { rootDir })`：只编译（mdx 编译器加 remark-math，不加载站点的插件与组件表），回编译过不过与原话，站点不用在运行；所以它查不出组件名写错。外部页的评论由评论包的 `externalPageThreads` 读，见 [comments 包](/packages/comments)。
+
 ## 站点上下文
 
-站点的 `app/lib/site.server.ts` 造一个 `site`，平台与功能包的 loader、action 都经参数拿到它，自己不 import 站点代码。字段：站点目录、`mode`（`dev` / `start`）、`audience`（身份文件写的给谁看，站点加载时读一次）、loader 结果 `source`（平台只用到它的四个方法：`getPage`、`getPages`、`getPageTree`、`serializePageTree`，页面是三种来源之一）、内容目录、评论目录与评论条目，以及每次调用都重新读取的五个函数——人员列表、本机身份（start 一律只读）、可信来源、推送通道某频道现在的值、引用扫描的结果（同时来的调用共用一次扫描）。功能包模板里的 `site.server.ts` 从它组装本功能要的上下文。
+站点的 `app/lib/site.server.ts` 造一个 `site`，平台与功能包的 loader、action 都经参数拿到它，自己不 import 站点代码。字段：站点目录、`mode`（`dev` / `start`）、`audience`（身份文件写的给谁看，站点加载时读一次）、loader 结果 `source`（平台只用到它的四个方法：`getPage`、`getPages`、`getPageTree`、`serializePageTree`，页面是三种来源之一）、内容目录、评论目录与评论条目，以及每次调用都重新读取的六个函数——人员列表、本机身份（start 一律只读）、可信来源、推送通道某频道现在的值、全站的 remark 与 rehype 插件（用到时才加载，外部 mdx 页按它编译）、引用扫描的结果（同时来的调用共用一次扫描）。功能包模板里的 `site.server.ts` 从它组装本功能要的上下文。
 
-{/* ref file="../packages/god-docsite/src/site/site-context.ts" lines="9-75" hash="cbf3b5a5677d" blob="e2c2c83131fc" */}
+{/* ref file="../packages/god-docsite/src/site/site-context.ts" lines="10-78" hash="99a00a28340e" blob="f795bc5c31eb" */}
 
 ## 推送通道
 
@@ -282,6 +304,7 @@ import { OriginCases } from './god-docsite/origin-cases'
 
 - **布局与侧栏**：整站布局是 fumadocs 的 `DocsLayout`；目录切换按钮按 `meta.json` 写了 `"root": true` 的文件夹生成，不在任何一组里的页面归进以站名命名的一组；在任务、全站评论这类不在页面树里的功能页面上，侧栏显示最近看过的那一组。站名下一横排是搜索按钮与各功能的侧栏入口。
 - **首页**：`app/routes/home.tsx` 在整站布局之外、地址是 `/`，内容目录根上不能再写 index 页；「文档」链接指向第一组的第一页。
+- **MDX 组件**：站点的 `mdxComponents` 合并 fumadocs 的默认组件、平台的 `siteMdxComponents` 与各功能导出的组件。平台的有 fumadocs 的排版组件（`Accordions`、`Tabs`、`Steps` 等）、术语标注的 `Term`、点了能放大的 `ImageZoom`（Markdown 图片也换成它），以及排图用的 `Figure`（一张图加图注，`width` 是占正文宽度的百分比）、`FigureRow`（几张图等宽并排，容器窄了改成上下排）与 `FigureRowCaption`（含公式的总图注，只能是 `FigureRow` 的最后一个子元素）；写错了直接报错并说明该怎么写。
 - **TSX 与 HTML 页面**：TSX 页的标题、描述、搜索文字来自它导出的 `meta`；HTML 页的标题取 `<title>`，只有写了 `id` 的标题才进目录与搜索锚点。
 - **内容目录的放法**：组文件夹只放页面、`meta.json`、页面的同名文件夹、下划线开头的文件夹与子组，同名文件夹里不放页面。build 放错了就报错停下；dev 只报不拦（别人提交了一个放错的文件，不能让每个人的站都起不来）：启动时查一次，运行中增删文件或文件夹后攒 0.3 秒再查，结果变了才在终端打印、列进问题按钮，刚打开的页面向开发服务要一次当前结果。重查途中子文件夹被删掉（git 改名、挪目录时一次删几百个文件）按已经不存在算；读目录出了别的错（文件被占用、权限）报成「这次没查成」并写明原因，下次增删文件再查，开发服务不退出。gwb-collab 的提交审核用 `./content-layout` 出口的同一份规则，在进 main 之前拦下放错的文件。
 - **搜索**：中文站点把 fumadocs 搜索的容错与命中阈值都设成 0，每个词都要原样出现。

@@ -1,0 +1,21 @@
+---
+born-at: 2026-10-21T17:51
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 外部 mdx 页的工具进平台
+domain: 骨架
+---
+
+## 背景
+
+论文库的阅读功能包已经有一套请求时编译排版稿、送文件夹里的图与 PDF、排图组件的代码。资料库的笔记要同样的东西，所以搬进平台做成通用的。原先的方案把读外部页评论的 `externalPageThreads` 也放进平台的 `./server`，评论包不改。
+
+## 选择
+
+- `externalPageThreads` 放进评论包的 `./site/server`，正文怎么编译由调用方传 `compileBody`。放进平台就要 import 评论包的 `readCommentThreads`，平台包不依赖任何功能包这条就破了；代价是评论包多了一个函数。
+- 平台给 `compileExternalMdx`、`externalFileResponse`（`./server`），`ExternalMdxPage`、`ExternalMdxContent`（`./react`），`checkMdx`（`./node`）。页框不带评论停靠栏：停靠栏在评论包里，由功能包的路由和内容页一样自己放。
+- 全站插件经站点上下文新加的 `mdxPlugins()` 交给编译，用到时才动态加载 `app/lib/mdx-plugins.ts`：外部页和内容页用同一套插件，又不让每个请求都加载构建期的插件模块。
+- `import` 在编译时就拦下。function-body 格式下 `import` 能编译过，要到浏览器里运行时才因为缺 `baseUrl` 报错，那时报错已经离开了写错的那一行。
+- `checkMdx` 只收 `rootDir`，不收组件表：它跑在站点之外，拿不到站点和各功能包的组件表，查组件名只会把站点的组件都报成写错。
+- `Figure`、`FigureRow`、`FigureRowCaption` 进平台的组件表，图直接用平台的 `ImageZoom`，不再经上下文从页面取站点的图片组件，所以普通页面也能用。
+- node 层拆 frontmatter 用 `yaml` 包，不用 fumadocs 的：依赖规则不许 node 层引 fumadocs。

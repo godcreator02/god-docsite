@@ -94,7 +94,9 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 图上第 3 号。平台模板在 `source.config.ts` 里把站点的 `comments/` 定义成集合 `comments`（怎么定义归 god-docsite 页）。页面 loader 用 `pageThreadsOf` 取本页的串，全站评论页用 `threadsByPageOf` 按页分组，再用 `commentsTableRowsOf` 排成表格的行：内容页的串写那一页的标题，功能包页面（报告页、协作页）的串标题写地址，归属的内容页已经不在站里的串不列。
 
-{/* ref file="../packages/comments/src/site/threads.server.ts" lines="98-104" hash="9f4b7ea77281" blob="010d1168f315" */}
+{/* ref file="../packages/comments/src/site/threads.server.ts" lines="132-138" hash="9f4b7ea77281" blob="0bcbb0808645" */}
+
+功能包显示的外部 mdx 页（论文的排版稿、资料的笔记）的评论不进站点的集合，跟着材料存在材料旁边的评论目录里。功能包的 loader 用 `externalPageThreads({ commentsDir, people, page, compileBody })`：它直接读这个目录（同 `readCommentThreads`），挑出这一页的串、作者换成名字，每条评论的正文交给 `compileBody` 编译——功能包传平台的 `compileExternalMdx`，评论包不依赖平台包。回 `{ threads, bodies }`，`bodies` 的键是评论相对评论目录的路径，页面上的 `CommentsDock` 用一个按路径取 `bodies` 的 `BodyComponent` 显示正文。评论目录还没建就是没有评论；写入照旧走 `handleCommentWrite({ commentsDir })`，传同一个目录。
 
 按文件夹分串：串按创建时间排，回复按文件名排（文件名就是带时刻的 id）。数据不完整就直接报错并点名文件：回复没有串头、串头缺 `page`、一个文件夹两个串头、回复带了已解决状态。
 
@@ -164,7 +166,7 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 | `core/` | `@godcreator/comments` | 评论文件的格式（读、写、状态、表情回应）、锚点的三种写法、按文件夹分串、`page` 换成站内地址（`pageAddressOf`）；不碰磁盘 |
 | `node/` | `@godcreator/comments/node` | 评论目录的读写：建串、回复、删除、改状态、加撤表情，直接读整个目录（`readCommentThreads`，站点不在运行也能读） |
 | `site/` | `@godcreator/comments/site` | `CommentsDock`、`CommentThread`、`CommentsTable`、`commentsAccessOf`、`commentScopeProps`、`CopyForAiButton`；浏览器里的页面文字、稳定 id、落点推算在 `site/browser/`，不单独导出 |
-| `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`threadsByPageOf`、`commentsTableRowsOf`、`commentIntents` |
+| `site/` 服务端 | `@godcreator/comments/site/server` | `handleCommentWrite`、`pageThreadsOf`、`externalPageThreads`、`threadsByPageOf`、`commentsTableRowsOf`、`commentIntents` |
 
 层之间的方向与不许有环由 `tests/dependency-rules.cjs` 检查；comments 只依赖 identity。
 

@@ -27,5 +27,6 @@ export const site = {
   identity: () => siteIdentity(dir, mode),
   trustedOrigin: () => siteOrigin(mode),
   feedValue: (channel: string) => siteFeedValue(channel),
+  mdxPlugins: () => import('./mdx-plugins').then((plugins) => plugins.sitePlugins),
   references: siteReferencesForRequests(() => ({ siteDir: dir, audience, providedDirs: {} })),
 } satisfies BaseSiteContext

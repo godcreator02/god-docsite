@@ -79,7 +79,8 @@
   "dependencies": {
     "@mdx-js/mdx": "catalog:",
     "remark-math": "catalog:",
-    "vitefu": "catalog:"
+    "vitefu": "catalog:",
+    "yaml": "catalog:"
   },
   "peerDependencies": {
     "@fumadocs/base-ui": "16.17.1",

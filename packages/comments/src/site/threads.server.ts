@@ -1,4 +1,6 @@
+import path from 'node:path'
 import { personOf, type Person } from '@godcreator/identity'
+import { readCommentThreads, type CommentThreadOnDisk } from '../node/store.js'
 import { threadResolutionOf } from '../core/comment-file.js'
 import { reactionEmojis, reactionsField, reactionsOf, type Reactions } from '../core/reactions.js'
 import { threadsByPage, threadsForPage, type CommentEntryLike, type ThreadSummary } from '../core/threads.js'
@@ -79,6 +81,38 @@ export type PageThreadsOptions = {
 /** 页面 loader 用：某一页的评论串；page 是页面在 docs 集合里的路径（如 "index.mdx"）或功能包页面的地址 */
 export function pageThreadsOf({ entries, people, page }: PageThreadsOptions & { page: string }): PageThreadSummary[] {
   return threadsForPage(entries.map(commentEntryOf), page).map((thread) => pageThreadOf(thread, people))
+}
+
+export type ExternalPageThreadsOptions<Body> = {
+  /** 评论目录：外部页的评论跟着材料走，存在材料旁边，不在站点的评论集合里 */
+  commentsDir: string
+  /** 站点的人员列表：评论作者都要在里面 */
+  people: readonly Person[]
+  /** 评论归属键，功能页写页面地址（如 /papers/<UUID>/paper） */
+  page: string
+  /** 把一条评论的 mdx 文件编译成正文：功能包传平台的 compileExternalMdx */
+  compileBody(file: string): Promise<Body>
+}
+
+/**
+ * 外部页的评论：直接读评论目录（不经集合），挑出这一页的串，每条评论的正文用 compileBody 编译，键是评论相对评论目录的路径。
+ * 评论目录还没建（这份材料还没人评论过）就是没有评论
+ */
+export async function externalPageThreads<Body>({ commentsDir, people, page, compileBody }: ExternalPageThreadsOptions<Body>): Promise<{ threads: PageThreadSummary[]; bodies: Record<string, Body> }> {
+  let onDisk: CommentThreadOnDisk[]
+  try {
+    onDisk = await readCommentThreads(commentsDir)
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    onDisk = []
+  }
+  const threads = threadsForPage(
+    onDisk.flatMap(({ head, replies }) => [head, ...replies]),
+    page,
+  ).map((thread) => pageThreadOf(thread, people))
+  const paths = threads.flatMap((thread) => [thread.headPath, ...thread.replies.map((reply) => reply.path)])
+  const bodies = Object.fromEntries(await Promise.all(paths.map(async (relative) => [relative, await compileBody(path.join(commentsDir, relative))] as const)))
+  return { threads, bodies }
 }
 
 /** 全站评论按页分组（含回复）：全站评论页、站内评论链接用 */
