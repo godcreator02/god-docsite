@@ -30,10 +30,11 @@ export const platformSeams = defineSeamGraph({
       pkg: '@godcreator/<功能>',
       role: null,
       outside: true,
-      blurb: '按功能划分的包：template/ 里是要补进站点功能目录的文件，package.json 的 godDocsite.collections 列出它的 mdx.ts 造哪些集合。',
+      blurb: '按功能划分的包：template/ 里是要补进站点功能目录的文件，package.json 的 godDocsite.collections 列出它的 mdx.ts 造哪些集合，godDocsite.references 列出引用条目的组件（条目在本站的文件由它的 ./node 出口给）。',
       caps: [
         { id: 'pkg-template', name: '要补进站点的文件', ident: 'template/' },
         { id: 'pkg-collections', name: '集合名单', ident: 'godDocsite.collections' },
+        { id: 'pkg-references', name: '引用组件', ident: 'godDocsite.references' },
       ],
     },
     {
@@ -66,13 +67,14 @@ export const platformSeams = defineSeamGraph({
     {
       id: 'build',
       name: '构建期',
-      pkg: './vite · ./mdx',
+      pkg: './vite · ./mdx · ./node',
       role: 'emerald',
       outside: false,
-      blurb: '站点构建与开发服务里运行：认出平台与功能包、定端口、检查内容目录；编译 MDX 时标注术语。',
+      blurb: '站点构建与开发服务里运行：认出平台与功能包、定端口、检查内容目录与 shared 站的自包含；编译 MDX 时标注术语。',
       caps: [
         { id: 'vite', name: 'vite 插件', ident: 'godDocsite()' },
         { id: 'glossary', name: '术语标注', ident: 'remarkGlossary' },
+        { id: 'references', name: '引用扫描', ident: 'siteReferences' },
       ],
     },
     {
@@ -93,11 +95,14 @@ export const platformSeams = defineSeamGraph({
     {
       id: 'cli',
       name: '命令行',
-      pkg: 'docsite-serve',
+      pkg: 'docsite-serve · docsite-check',
       role: 'cyan',
       outside: false,
-      blurb: '站点 scripts.start 调它：没设 PORT 就挑一个空闲端口，再启动站点装的 react-router-serve。',
-      caps: [{ id: 'serve', name: '发布版启动', ident: 'docsite-serve' }],
+      blurb: '站点 scripts.start 调 docsite-serve：没设 PORT 就挑一个空闲端口，再启动站点装的 react-router-serve。docsite-check 在站点目录里跑提交前的检查：内容放法与自包含。',
+      caps: [
+        { id: 'serve', name: '发布版启动', ident: 'docsite-serve' },
+        { id: 'check', name: '提交前检查', ident: 'docsite-check' },
+      ],
     },
   ],
   entries: [

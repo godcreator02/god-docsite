@@ -2,7 +2,15 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useRevalidator } from 'react-router'
 import type { ErrorPayload } from 'vite/types/hmrPayload.js'
 import type { ViteHotContext } from 'vite/types/hot.js'
-import { contentLayoutReportEvent, contentLayoutReportRequestEvent, dataDirsChangedEvent, type ContentLayoutReport } from '../core/dev-events.js'
+import {
+  contentLayoutReportEvent,
+  contentLayoutReportRequestEvent,
+  dataDirsChangedEvent,
+  selfContainedReportEvent,
+  selfContainedReportRequestEvent,
+  type ContentLayoutReport,
+  type SelfContainedReport,
+} from '../core/dev-events.js'
 
 /** 浏览器里 Vite 开发服务的热更新连接；发布版与服务端渲染时没有 */
 function viteHot(): ViteHotContext | undefined {
@@ -30,11 +38,12 @@ export interface DevIssue {
   detail: string
 }
 
-/** 三类问题，按这个顺序分组显示 */
-export type DevIssueSource = 'content-layout' | 'hot-update' | 'runtime'
+/** 四类问题，按这个顺序分组显示 */
+export type DevIssueSource = 'content-layout' | 'self-contained' | 'hot-update' | 'runtime'
 
 export const devIssueSourceNames: Record<DevIssueSource, string> = {
   'content-layout': '内容放法（放好后自动消失）',
+  'self-contained': '引用了本站没有的条目（补上后自动消失）',
   'hot-update': '改代码后编译失败（改好后自动消失）',
   runtime: '浏览器里的报错',
 }
@@ -46,6 +55,12 @@ export function contentLayoutIssuesOf(report: ContentLayoutReport): DevIssue[] {
     const separator = problem.indexOf('：')
     return separator === -1 ? { title: problem, detail: problem } : { title: `${report.contentDir}/${problem.slice(0, separator)}`, detail: problem.slice(separator + 1) }
   })
+}
+
+/** 自包含检查的结果换成问题：没查成是一条，每处一条（title 是写这处引用的文件，detail 是缺哪一条与补法） */
+export function selfContainedIssuesOf(report: SelfContainedReport): DevIssue[] {
+  if (report.checkError !== null) return [{ title: '自包含检查这次没查成，改文件后会再查', detail: report.checkError }]
+  return report.problems.map(({ file, message }) => ({ title: file, detail: message }))
 }
 
 /** Vite 热更新失败推来的错误：title 是报错第一行，detail 依次是出错的文件与位置、代码片段、调用栈 */
@@ -72,14 +87,15 @@ function withRuntimeIssue(issues: DevIssue[], issue: DevIssue): DevIssue[] {
   return [...issues, issue].slice(-keptRuntimeIssueCount)
 }
 
-/** 此刻的三类问题。存在模块里、不放组件状态：页面渲染不出来时布局卸载、换成错误页，问题不能跟着丢 */
+/** 此刻的四类问题。存在模块里、不放组件状态：页面渲染不出来时布局卸载、换成错误页，问题不能跟着丢 */
 export interface DevIssues {
   layout: DevIssue[]
+  selfContained: DevIssue[]
   hotUpdate: DevIssue[]
   runtime: DevIssue[]
 }
 
-const noDevIssues: DevIssues = { layout: [], hotUpdate: [], runtime: [] }
+const noDevIssues: DevIssues = { layout: [], selfContained: [], hotUpdate: [], runtime: [] }
 let currentDevIssues = noDevIssues
 const devIssueListeners = new Set<() => void>()
 let devIssueSourcesWatched = false
@@ -89,18 +105,20 @@ function updateDevIssues(update: (issues: DevIssues) => DevIssues) {
   for (const listener of devIssueListeners) listener()
 }
 
-/** 浏览器里第一次用到问题清单时接上三个来源，之后整个页面生命周期都留着 */
+/** 浏览器里第一次用到问题清单时接上四个来源，之后整个页面生命周期都留着 */
 function watchDevIssueSources() {
   if (devIssueSourcesWatched) return
   const hot = viteHot()
   if (hot === undefined) return
   devIssueSourcesWatched = true
   hot.on(contentLayoutReportEvent, (report: ContentLayoutReport) => updateDevIssues((issues) => ({ ...issues, layout: contentLayoutIssuesOf(report) })))
+  hot.on(selfContainedReportEvent, (report: SelfContainedReport) => updateDevIssues((issues) => ({ ...issues, selfContained: selfContainedIssuesOf(report) })))
   hot.on('vite:error', (payload: ErrorPayload) => updateDevIssues((issues) => ({ ...issues, hotUpdate: [hotUpdateIssueOf(payload.err)] })))
   hot.on('vite:afterUpdate', () => updateDevIssues((issues) => ({ ...issues, hotUpdate: [] })))
   window.addEventListener('error', (event) => updateDevIssues((issues) => ({ ...issues, runtime: withRuntimeIssue(issues.runtime, runtimeIssueOf(event.error ?? event.message)) })))
   window.addEventListener('unhandledrejection', (event) => updateDevIssues((issues) => ({ ...issues, runtime: withRuntimeIssue(issues.runtime, runtimeIssueOf(event.reason)) })))
   hot.send(contentLayoutReportRequestEvent)
+  hot.send(selfContainedReportRequestEvent)
 }
 
 function subscribeDevIssues(listener: () => void) {
@@ -119,19 +137,20 @@ export function useDevIssues(): DevIssues {
 }
 
 /**
- * dev 下的问题按钮：放在顶上正中那一行（TopNotices）的最前面，带数字，点开列出三类问题，每条再点开看完整原话。
- * 放法问题随检查结果变；热更新失败在下一次热更新成功时清掉；浏览器报错由人点「清空」。Vite 自带的报错层由平台的 vite 插件关掉，改由这里显示
+ * dev 下的问题按钮：放在顶上正中那一行（TopNotices）的最前面，带数字，点开列出四类问题，每条再点开看完整原话。
+ * 放法与自包含的问题随检查结果变；热更新失败在下一次热更新成功时清掉；浏览器报错由人点「清空」。Vite 自带的报错层由平台的 vite 插件关掉，改由这里显示
  */
 export function DevIssuesButton() {
-  const { layout: layoutIssues, hotUpdate: hotUpdateIssues, runtime: runtimeIssues } = useDevIssues()
+  const { layout: layoutIssues, selfContained: selfContainedIssues, hotUpdate: hotUpdateIssues, runtime: runtimeIssues } = useDevIssues()
   const [open, setOpen] = useState(false)
   const clearRuntimeIssues = () => updateDevIssues((issues) => ({ ...issues, runtime: [] }))
   const groups: Array<[DevIssueSource, DevIssue[]]> = [
     ['content-layout', layoutIssues],
+    ['self-contained', selfContainedIssues],
     ['hot-update', hotUpdateIssues],
     ['runtime', runtimeIssues],
   ]
-  const count = layoutIssues.length + hotUpdateIssues.length + runtimeIssues.length
+  const count = layoutIssues.length + selfContainedIssues.length + hotUpdateIssues.length + runtimeIssues.length
   if (count === 0) return null
   const hasErrors = hotUpdateIssues.length + runtimeIssues.length > 0
   return (
@@ -166,7 +185,7 @@ export function DevIssuesButton() {
               .filter(([, issues]) => issues.length > 0)
               .map(([source, issues]) => (
                 <div key={source} data-dev-issue-group={source} className="py-1">
-                  <h3 className={`mb-1 font-medium ${source === 'content-layout' ? 'text-amber-700 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>{devIssueSourceNames[source]}</h3>
+                  <h3 className={`mb-1 font-medium ${source === 'content-layout' || source === 'self-contained' ? 'text-amber-700 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>{devIssueSourceNames[source]}</h3>
                   <ul className="list-none space-y-1">
                     {issues.map((issue) => (
                       <li key={`${issue.title}\n${issue.detail}`}>

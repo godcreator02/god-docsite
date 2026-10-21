@@ -15,3 +15,21 @@ export interface ContentLayoutReport {
   problems: string[]
   checkError: string | null
 }
+
+/** shared 站自包含检查的结果变了，载荷是 SelfContainedReport */
+export const selfContainedReportEvent = 'god-docsite:self-contained-report'
+
+/** 浏览器连上以后要一次当前的自包含检查结果 */
+export const selfContainedReportRequestEvent = 'god-docsite:self-contained-report-request'
+
+/** 自包含检查的一条：哪个文件（相对站点根）、引用了本站没有的哪一条与怎么补，或引用为什么扫不出来 */
+export interface SelfContainedProblem {
+  file: string
+  message: string
+}
+
+/** dev 运行中自包含检查的结果：checkError 是这次没查成的原因，查成了是 null */
+export interface SelfContainedReport {
+  problems: SelfContainedProblem[]
+  checkError: string | null
+}

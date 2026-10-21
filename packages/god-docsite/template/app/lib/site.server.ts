@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { siteAudienceOf, siteFeedValue, siteOrigin, type BaseSiteContext } from '@godcreator/god-docsite/server'
+import { siteAudienceOf, siteFeedValue, siteOrigin, siteReferencesForRequests, type BaseSiteContext } from '@godcreator/god-docsite/server'
 import { siteIdentity, sitePeople } from '@godcreator/identity/node'
 import { comments } from '../../.source/server'
 import { source } from './source'
@@ -7,6 +7,7 @@ import { source } from './source'
 // react-router dev 与 react-router-serve 都在站点目录里启动
 const dir = process.cwd()
 const mode: 'dev' | 'start' = import.meta.env.DEV ? 'dev' : 'start'
+const audience = siteAudienceOf(dir)
 
 /**
  * 基础站点上下文：平台与功能的 loader、action 经参数拿到它，它们自己不 import 站点代码。
@@ -15,7 +16,7 @@ const mode: 'dev' | 'start' = import.meta.env.DEV ? 'dev' : 'start'
 export const site = {
   dir,
   mode,
-  audience: siteAudienceOf(dir),
+  audience,
   source,
   contentDir: path.join(dir, 'content'),
   commentsDir: path.join(dir, 'comments'),
@@ -26,4 +27,5 @@ export const site = {
   identity: () => siteIdentity(dir, mode),
   trustedOrigin: () => siteOrigin(mode),
   feedValue: (channel: string) => siteFeedValue(channel),
+  references: siteReferencesForRequests(() => ({ siteDir: dir, audience, providedDirs: {} })),
 } satisfies BaseSiteContext

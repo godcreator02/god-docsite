@@ -2,6 +2,7 @@ import type * as PageTree from 'fumadocs-core/page-tree'
 import type { SerializedPageTree } from 'fumadocs-core/source/client'
 import type { HtmlHeadingAnchor } from '../core/html-text.js'
 import type { SiteAudience } from '../core/site-audience.js'
+import type { SiteReferences } from '../core/site-references.js'
 import type { FilePageData } from './page-sources.js'
 
 /** MDX 页面在 page.data 里用到的部分：集合要开 postprocess.includeProcessedMarkdown，才有 getText('processed') */
@@ -66,6 +67,8 @@ export interface BaseSiteContext<Person extends SitePerson = SitePerson, Viewer 
   trustedOrigin(): string
   /** 推送通道这个频道现在的值，没推过是 undefined；功能的 layoutData 只能经它读（feature.tsx 进浏览器，不能 import 平台的 ./server） */
   feedValue(channel: string): unknown
+  /** 平台的引用扫描：从内容页出发，各功能包登记的组件引用了哪些条目、本站缺哪些；同时来的调用共用一次扫描 */
+  references(): Promise<SiteReferences>
 }
 
 type SitePageCommon = {

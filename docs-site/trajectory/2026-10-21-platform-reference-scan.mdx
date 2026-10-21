@@ -1,0 +1,20 @@
+---
+born-at: 2026-10-21T17:40
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 引用扫描进平台
+domain: 骨架
+---
+
+## 背景
+
+原型证明从内容页出发、按语法树收集引用、交给功能包换成文件再接着扫，行得通也够快。正式实现要定：扫描放在哪个出口、谁能调用、解析用哪套插件、扫不出的引用怎么报、一次请求里扫几次。
+
+## 选择
+
+- 扫描放在平台包新加的 `./node` 出口（`siteReferences`、`selfContainedProblemsOf`），vite 插件、命令行 `docsite-check` 与站点上下文的 `references()` 用同一份。功能包的 `resolveReference`、`publishHint` 也从它们各自的 `./node` 出口经动态 import 加载，不经站点的汇总文件：命令行和 build 时的检查不经 Vite，加载不了接线文件，只留一条加载路径。
+- 解析只用 mdx 解析器加 remark-math，不加载站点的 remark 插件：只解析不编译时，别的插件不改变语法树里有哪些 JSX 元素；remark-math 要加，公式里的花括号才不被当成表达式。frontmatter 换成同样行数的空行，行号仍对得上。`@mdx-js/mdx` 与 `remark-math` 因此从开发依赖挪进依赖。
+- 文件解析不了不抛错，记进 `problems`：一个写坏的页面不该让整站的侧栏分区都算不出来，dev 下它照样出现在问题按钮里，build 时由自包含检查拦住。
+- 起点固定是站点的 `content/`，和模板里站点上下文的 `contentDir` 一致；命令行拿不到 `source.config.ts` 里的集合目录，不从那里取。
+- 站点上下文的 `references()` 不按请求缓存，而是同时来的调用共用一次扫描：布局 loader 同时调各功能的 `sections`，它们自然落进同一次；站点上下文是模块级的，拿不到「这一次请求」，按请求缓存要另找地方挂。
+- 个人站的 `providedDirs` 暂时由模板传空表，托管方上下文改走推送频道后换成频道里的值。

@@ -9,7 +9,8 @@ export { contentFileLoader } from './content-file.server.js'
 export { feedAction, feedLoader, publishSiteFeed, siteFeedHasLauncher, siteFeedValue } from './feed.server.js'
 export { siteOrigin, siteOriginEnvName } from './origin.server.js'
 export { readerFontsCss } from './reader-fonts.server.js'
-export { siteAudienceOf } from './site-identity.server.js'
+export { siteAudienceOf } from '../node/site-identity.js'
+export { siteReferencesForRequests } from './references.server.js'
 export { withFeatureLayoutData, type FeatureLayoutDataOptions } from './feature-layout.server.js'
 export type {
   BaseSiteContext,
