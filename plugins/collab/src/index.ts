@@ -40,7 +40,7 @@ import { QqTaskGroups, qqCommandsDocKey } from './project/qq-task-groups.js'
 import { RepoChangeRelay } from './project/repo-change-relay.js'
 import { CollabSites } from './site-process/collab-sites.js'
 import { registerSiteCommands } from './site-process/commands.js'
-import { pnpmInstall } from './site-process/dependencies.js'
+import { pnpmInstall, pnpmTypecheck } from './site-process/dependencies.js'
 
 export const name = 'gwb-collab'
 
@@ -125,7 +125,7 @@ export function apply(ctx: GwbContext): void {
   const submitFailures = new SubmitFailures(changed)
   const submits = new CollabSubmits({
     openRemote: (repo) => remoteProjectAt({ docsite, gitea }, repo),
-    submitProject: (project) => submitCollab(project, giteaRepo(gitea.http, project.gitea.owner, project.gitea.repo)),
+    submitProject: (project) => submitCollab(project, giteaRepo(gitea.http, project.gitea.owner, project.gitea.repo), { docsiteCheck: (siteDir) => docsite.checkSite(siteDir), typecheck: pnpmTypecheck }),
     failures: submitFailures,
     publish: (repo, state) => sites.publishSubmit(repo, state),
     log,

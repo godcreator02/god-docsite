@@ -25,7 +25,7 @@ export const mergeCommand = 'git merge --ff-only origin/main'
 /* ref file="../plugins/collab/src/collab-repo/sync/sync.ts" lines="8-8" hash="b340874db258" blob="64df3cef406d" */
 export const siteDependencyFiles = ['site/package.json', 'site/pnpm-lock.yaml']
 
-/* ref file="../plugins/collab/src/site-process/dependencies.ts" lines="61-72" hash="51a30a664b34" blob="7911e32e3d15" */
+/* ref file="../plugins/collab/src/site-process/dependencies.ts" lines="67-78" hash="51a30a664b34" blob="cca55841b630" */
 export const dependencyNote = '快进进来的改动动了 site/package.json 或 site/pnpm-lock.yaml：站点在运行就先停，在 site/ 里 pnpm install，装完按常驻的规矩再启动（装失败站点保持停着，报错里写明怎么启动）'
 
 /** 四条原因的原话，照 sync.ts 的 whyNotFastForward 抄 */

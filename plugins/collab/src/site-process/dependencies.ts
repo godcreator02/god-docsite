@@ -50,6 +50,12 @@ export type SiteTypecheck = 'passed' | 'no-script'
 /** 提交前在 site/ 里跑类型检查；生产里是 pnpmTypecheck，测试里换成假的 */
 export type TypecheckSite = (siteDir: string) => Promise<SiteTypecheck>
 
+/** 站点自己那一版 docsite-check 的结论（gwb-docsite 服务的 checkSite）：passed 为 false 时 report 是它列出的问题原话 */
+export type DocsiteCheck = (siteDir: string) => Promise<{ passed: boolean; report: string }>
+
+/** site/ 有改动时提交前跑的两样：docsite-check（内容放法、引用的条目本站都有）与类型检查 */
+export type SubmitSiteChecks = { docsiteCheck: DocsiteCheck; typecheck: TypecheckSite }
+
 /** 站点写了 typecheck 脚本就在 site/ 里运行它，没通过就把输出报出来；没写就不跑 */
 export async function pnpmTypecheck(siteDir: string): Promise<SiteTypecheck> {
   const packageJson = JSON.parse(await readFile(path.join(siteDir, 'package.json'), 'utf8')) as { scripts?: Record<string, string> }

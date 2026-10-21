@@ -1,6 +1,6 @@
 import { collabPathInRepo, sitePathInRepo } from '@godcreator/collab'
 import { changedFilesBetween, leadOnlyProblems } from '@godcreator/collab/node'
-import { pnpmTypecheck, type SiteTypecheck, type TypecheckSite } from '../../site-process/dependencies.js'
+import type { SiteTypecheck, SubmitSiteChecks } from '../../site-process/dependencies.js'
 import { CollabRejected } from '../../errors.js'
 import type { GiteaRepo } from '../../gitea-api/gitea.js'
 import { fetchOrigin, git, gitMessageOf, runGit } from '../../git/git.js'
@@ -78,10 +78,10 @@ async function commitSubmittedChanges(project: Project, changes: SubmittedChange
 }
 
 /** site/ 有改动时提交前的检查：站点检查不过、类型检查没通过，都不提交 */
-async function checkSiteBeforeSubmit(project: Project, typecheck: TypecheckSite): Promise<SiteTypecheck> {
-  const problems = await siteProblemsOf(project)
+async function checkSiteBeforeSubmit(project: Project, checks: SubmitSiteChecks): Promise<SiteTypecheck> {
+  const problems = await siteProblemsOf(project, checks.docsiteCheck)
   if (problems.length > 0) throw new CollabRejected(`site/ 的站点检查不过，没有提交：\n${problems.join('\n')}`)
-  return typecheck(project.siteDir)
+  return checks.typecheck(project.siteDir)
 }
 
 /**
@@ -148,7 +148,7 @@ async function verdictOf(gitea: GiteaRepo, number: number, wait: VerdictWait): P
  * 改动回到工作区，报出原因。校验不过就不提交、不推送；改了只有负责人能改的内容、自己又不是负责人（Gitea 上协作仓的协作者）时，
  * 不推送、改动退回工作区（和执行器同一项检查）
  */
-export async function submitCollab(project: RemoteProject, gitea: GiteaRepo, typecheck: TypecheckSite = pnpmTypecheck, wait: VerdictWait = defaultVerdictWait): Promise<SubmitResult> {
+export async function submitCollab(project: RemoteProject, gitea: GiteaRepo, siteChecks: SubmitSiteChecks, wait: VerdictWait = defaultVerdictWait): Promise<SubmitResult> {
   requireMainBranch(await currentBranch(project.repo), '提交审核')
   await fetchOrigin(project.repo, project.remote.env)
   const problems = await collabProblems(project)
@@ -162,13 +162,13 @@ export async function submitCollab(project: RemoteProject, gitea: GiteaRepo, typ
     sources: filesUnder(entries, sourcesPathInRepo).length,
     workflows: filesUnder(entries, workflowsPathInRepo).length,
   }
-  const siteTypecheck = changes.site > 0 ? await checkSiteBeforeSubmit(project, typecheck) : null
+  const siteTypecheck = changes.site > 0 ? await checkSiteBeforeSubmit(project, siteChecks) : null
   const commit = await commitSubmittedChanges(project, changes)
   if ((await aheadBehind(project.repo)).ahead === 0) throw new CollabRejected('没有要提交的：collab/、site/、sources/、.gitea/ 都没有改动，本地 main 上也没有 origin/main 里还没有的提交')
   await mergeMainIn(project)
 
   const base = (await git(project.repo, ['rev-parse', upstream])).trim()
-  const afterMerge = await problemsAfterMainMergedIn(project, base)
+  const afterMerge = await problemsAfterMainMergedIn(project, base, siteChecks.docsiteCheck)
   if (afterMerge.length > 0) {
     await returnToWorkingTree(project.repo, base)
     throw new CollabRejected(`把 main 合进来之后有新问题，没有推送，改动留在工作区（没提交）：\n${afterMerge.join('\n')}`)

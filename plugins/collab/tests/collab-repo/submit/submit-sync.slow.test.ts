@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { submitCollab } from '../../../src/collab-repo/submit/submit.js'
 import { autoSyncCollab } from '../../../src/collab-repo/sync/sync.js'
 import type { InstallDependencies, SiteControl } from '../../../src/site-process/dependencies.js'
-import { admin, bob, forMain, git, merges, origin, writeRecord } from './submit-fixture.js'
+import { admin, bob, forMain, git, merges, origin, passingSiteChecks, writeRecord } from './submit-fixture.js'
 
 describe('提交审核与自动同步配合', () => {
   function adminPushes(record: CollabRecord, message: string) {
@@ -34,13 +34,13 @@ describe('提交审核与自动同步配合', () => {
     writeRecord(bob.repo, t3('done'))
     adminPushes(t3('doing'), 't3 进行中')
 
-    await expect(submitCollab(bob, merges())).rejects.toThrow(/有冲突，没有推送；冲突标记留在这些文件里[^\n]*\ncollab\/records\/20260925130000-ddddddd\.json\n/)
+    await expect(submitCollab(bob, merges(), passingSiteChecks)).rejects.toThrow(/有冲突，没有推送；冲突标记留在这些文件里[^\n]*\ncollab\/records\/20260925130000-ddddddd\.json\n/)
     expect(readFileSync(path.join(bob.repo, 'collab', recordFileOf(t3('done').id)), 'utf8')).toMatch(/^<<<<<<< /m)
     expect(() => git(origin, 'rev-parse', '--verify', '-q', 'refs/for/main')).toThrow()
     expect(await checkSyncs()).toEqual({ outcome: 'skipped', reason: '提交审核时把 main 合进来出了冲突，还没改好：让 AI 改好冲突、再提交审核' })
 
     writeRecord(bob.repo, t3('done'))
-    const result = await submitCollab(bob, merges())
+    const result = await submitCollab(bob, merges(), passingSiteChecks)
     expect(git(bob.repo, 'rev-list', '--parents', '-n', '1', 'HEAD').split(' ')).toHaveLength(3)
     expect(forMain()).toBe(result.commit)
   })

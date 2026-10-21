@@ -5,14 +5,14 @@
  */
 
 /** 共用的例子：项目是 Gitea 组织 hybrid-mmc 的协作仓 collab；人员有 admin（管理员，项目负责人）、bob（成员，本机身份）、carol（成员）；main 起点的任务是 admin 的 20260925100000-aaaaaaa，bob 新建的任务是 20260925110000-bbbbbbb，冲突的是 admin 的 20260925130000-ddddddd；推送后 Gitea 开出合并请求 #7 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-fixture.ts" lines="23-42" hash="ba0b60be3402" blob="907a7defb577" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-fixture.ts" lines="24-43" hash="ba0b60be3402" blob="caef285c7c2e" */
 const adminTaskPath = 'collab/records/20260925100000-aaaaaaa.json'
 const bobTaskPath = 'collab/records/20260925110000-bbbbbbb.json'
 const conflictTaskPath = 'collab/records/20260925130000-ddddddd.json'
 const pullNumber = 7
 
 /** main 的起点（admin 的种子提交写的）与假的执行器的默认：协作者是 ['admin']；它打回时留下的留言是 rejected 情况「原因」后面的那两行 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-fixture.ts" lines="81-146" hash="6b580eff0225" blob="dfc092fed976" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-fixture.ts" lines="82-147" hash="6b580eff0225" blob="caef285c7c2e" */
 const startingSitePackageJson = '{ "dependencies": {} }'
 const executorRejectComment = [
   '没有合并（检查的是提交 abc）：',
@@ -62,7 +62,7 @@ const notReached = { state: 'skip', note: '没走到' }
 
 /* merged、format、rejected、timeout 四种情况照 submit-main 的用例：bob 只改 collab/（或写坏一条记录），
  * site/ 没改动不用查站点，提交后本地 main 不落后不用合，推上去开出 #7 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-main.slow.test.ts" lines="10-51" hash="83afcb3feb1d" blob="14fdc2981b6d" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-main.slow.test.ts" lines="10-51" hash="6048c58afd67" blob="fe1dd47ff687" */
 const mergedCase = {
   id: 'merged',
   label: '合并了',
@@ -133,7 +133,7 @@ const timeoutCase = {
 
 /* lead-only、site-check 两种情况照 submit-site 的用例：一个用例连着跑六种场景，这里取成员改 scripts 被拦、
  * 站点检查拦下不存在日期的日志页（同时加的评论作者不在人员列表里，不被拦）两段 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-site.slow.test.ts" lines="43-121" hash="330191d26119" blob="4bc959c7a450" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-site.slow.test.ts" lines="43-121" hash="0140a6524b4a" blob="fdc2fd683359" */
 const leadOnlyCase = {
   id: 'lead-only',
   label: '成员改 scripts',
@@ -152,7 +152,7 @@ const leadOnlyCase = {
 const siteCheckCase = {
   id: 'site-check',
   label: '日志页日期不存在',
-  text: 'site/ 有改动才做站点检查，它查 journal/ 的文件名与 content/ 的放法——2 月 30 日不是真实日期，站点布局按文件名读日志，留着整站打不开。同时加的那串评论作者不在人员列表里，站点检查不拦它。不提交，类型检查也没跑。',
+  text: 'site/ 有改动才做站点检查，它查 journal/ 的文件名，再经 gwb-docsite 运行站点的 docsite-check（content/ 的放法、引用的条目本站都有；测试里是假的，一律通过）——2 月 30 日不是真实日期，站点布局按文件名读日志，留着整站打不开。同时加的那串评论作者不在人员列表里，站点检查不拦它。不提交，类型检查也没跑。',
   changes: {
     files: [
       { path: 'site/journal/2026-02-30.mdx', groups: [{ title: null, old: [], now: ['# 不存在的一天'] }] },
@@ -172,7 +172,7 @@ const siteCheckCase = {
 }
 
 /* conflict 情况照 submit-sync 的用例：admin 与 bob 改同一条任务的同一个字段，bob 提交后合 main 撞上 admin 先推的 */
-/* ref file="../plugins/collab/tests/collab-repo/submit/submit-sync.slow.test.ts" lines="30-46" hash="7cf17da4b6a2" blob="54dc8a7386cc" */
+/* ref file="../plugins/collab/tests/collab-repo/submit/submit-sync.slow.test.ts" lines="30-46" hash="4daf20eab968" blob="9bbfee0cf8f2" */
 const conflictCase = {
   id: 'conflict',
   label: '两人改同一行',

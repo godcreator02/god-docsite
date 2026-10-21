@@ -42,7 +42,7 @@ export const checkNames = ['和 main 没有冲突', '没改只有负责人能改
 export const measuredCheckNames = ['和 main 没有冲突', '合并后只改了 collab/', '合并后没有新的格式问题'];
 
 /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="56-61" hash="777ef88fb340" blob="b2999a5430a9" */
-/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="68-94" hash="9a68aae4bee7" blob="b2999a5430a9" */
+/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="68-94" hash="8420e50b7136" blob="97cd817d97a6" */
 /* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="189-189" hash="770f3420697e" blob="b2999a5430a9" */
 const submitLines = [
   { text: 'git add --all -- collab', kind: 'cmd' },

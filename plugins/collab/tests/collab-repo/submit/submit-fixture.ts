@@ -8,6 +8,7 @@ import { openProject, type RemoteProject } from '../../../src/project/project.js
 
 import type { GiteaRepo } from '../../../src/gitea-api/gitea.js'
 import type { VerdictWait } from '../../../src/collab-repo/submit/submit.js'
+import type { SubmitSiteChecks } from '../../../src/site-process/dependencies.js'
 
 /*
  * 提交审核四个测试文件共用的夹具：origin 是本机的裸仓（开着推送选项，才收得下 `-o topic=`），
@@ -144,3 +145,9 @@ export function executor(outcome: 'merge' | 'reject' | 'silent', projectLeads: s
 
 export const noWait: VerdictWait = { timeoutMilliseconds: 0, pollMilliseconds: 0 }
 export const merges = () => executor('merge').repo
+
+/** 站点的 docsite-check 一律通过：这里的协作仓没装站点依赖，跑不了真的；它的结论怎么接进提交路径由 submit-site 里的假检查验 */
+export const passingDocsiteCheck = async () => ({ passed: true, report: '' })
+
+/** 不验站点检查的用例用它：docsite-check 与类型检查都通过 */
+export const passingSiteChecks: SubmitSiteChecks = { docsiteCheck: passingDocsiteCheck, typecheck: async () => 'passed' }

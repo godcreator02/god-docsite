@@ -84,15 +84,15 @@ gwb-collab 是 gwb 工作台的插件，跑在每个成员自己的电脑上：�
 
 查格式的参照点有两个，都只算「这次带来的新问题」（`newFormatProblems`，规则见 [collab 包](/packages/collab) 的「读出状态与校验」）：提交前比的是本地 main 与 `origin/main` 的分叉点，那时就有的问题不算我的；把 main 合进来以后再比一次合进来的那个 `origin/main`，两个人各自没问题、凑在一起才出的问题只有这一步能发现。
 
-站点检查查两样：`site/journal/` 的文件名（站点布局按它读，文件名不是真实日期整站打不开）；`site/content/` 的文件放对了没有（规则在平台包的 `./content-layout` 出口，放错的页面会从侧栏消失、build 会失败；开发服务对它只报不拦，所以在进 main 之前拦）。`site/package.json` 写了 `typecheck` 脚本就在 `site/` 里跑一次，没写就跳过。别的站点问题由 gwb-docsite 启动站点时查。
+站点检查查两样：`site/journal/` 的文件名（站点布局按它读，文件名不是真实日期整站打不开）；再经 gwb-docsite 的服务 `checkSite` 在 `site/` 里运行站点自己那一版的 `docsite-check`，查 `site/content/` 的文件放对了没有（放错的页面会从侧栏消失、build 会失败）与引用的条目本站都有（引用了没发布的论文、资料，组员打开是「本站没有这条」）。开发服务对这两样只报不拦，所以在进 main 之前拦，没过时把它列的问题原样转出。`site/package.json` 写了 `typecheck` 脚本就在 `site/` 里跑一次，没写就跳过。别的站点问题由 gwb-docsite 启动站点时查。
 
 提交只带 `collab/`、`site/`、`sources/`、`.gitea/` 里有改动的那几个目录，暂存区里别的文件不带上（空的 `collab/` 不被 git 跟踪，不会写进提交命令；目录里的文件删光了，删除照样提交）；上次合 main 出的冲突已经改好时，这次提交就完成那次合并。`sources/` 是仓根下的源数据目录（页面用到的实验、出图脚本、例子代码），不做格式检查，谁都能改。`.gitea/` 下是执行器的工作流，只有负责人能改：协作仓的 main 谁都不能直接推，负责人升检查工具的版本（工作流里的 `MERGE_CHECK_RANGE`）也是改好这一行再提交审核，成员改了它在推送前那一步被拦下。提交说明与合并请求标题按带了哪几样写：「`<身份>` 的协作记录」「的页面改动」「的源数据改动」「的工作流改动」，几样都有时连起来，如「的协作记录与工作流改动」，回执里的 `siteFiles`、`sourceFiles`、`workflowFiles` 是 `site/`、`sources/`、`.gitea/` 下各改了几个文件。推送用 AGit：`HEAD:refs/for/main`，主题固定是自己的身份，同一个人推的都进同一个合并请求；之后每 2 秒查一次合并请求，最多等 3 分钟。执行器那边怎么查、怎么合并见 [实时推送与执行器](/gitea/push)。
 
-{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="145-208" hash="91b3dd9c65b9" blob="b2999a5430a9" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit.ts" lines="145-208" hash="973b96a5a98c" blob="97cd817d97a6" */}
 
 本机查的两样与两个参照点都在这份短文件里：
 
-{/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" hash="71168057df02" blob="31d511b1c156" */}
+{/* ref file="../plugins/collab/src/collab-repo/submit/submit-checks.ts" hash="5ec6ae4f25f4" blob="ac91adde21eb" */}
 
 命令与网页上的一键提交都经 `CollabSubmits.submit`：一个项目同一时刻只跑一次，正在跑时再提交就拒绝。拒绝时命令回 `{ ok: false, error }`，原话同时记成这个项目的「上次提交审核没成功」，经下文的通知推到网站提示栏；提交审核成功一次就清掉。跑的时候往站点的频道 `collab-submit` 写 `running`，合并了写 `merged`（带合并请求），失败写 null：
 
