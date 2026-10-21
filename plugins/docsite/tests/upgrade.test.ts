@@ -99,6 +99,24 @@ describe('upgradeSite：升包、重写汇总文件、列出模板变了的文�
     expect(result.identityFile).toEqual({ kind: 'base', format: 1 })
   })
 
+  it('建站时写一次、归站点维护的文件（内容、依赖清单）与 docfirst 的起始物不列', async () => {
+    write(path.join(siteDir, 'package.json'), JSON.stringify({ dependencies: { '@godcreator/god-docsite': '^0.1.0' }, devDependencies: { '@godcreator/docfirst': '^0.1.0' } }))
+    installPackage(siteDir, '@godcreator/god-docsite', '0.1.0', { 'content/start.mdx': '旧起始页\n', 'package.json': '{"name":"旧"}\n' })
+    installPackage(siteDir, '@godcreator/docfirst', '0.1.0', { 'docfirst.config.mjs': '// 旧\n' })
+    installPackage(pluginDir, '@godcreator/god-docsite', '0.2.0')
+    installPackage(pluginDir, '@godcreator/docfirst', '0.2.0')
+    const deps = {
+      ...upgradeDeps([]),
+      pnpm: async () => {
+        installPackage(siteDir, '@godcreator/god-docsite', '0.2.0', { 'content/start.mdx': '新起始页\n', 'package.json': '{"name":"新"}\n' })
+        installPackage(siteDir, '@godcreator/docfirst', '0.2.0', { 'docfirst.config.mjs': '// 新\n' })
+      },
+    }
+    const result = await upgradeSite(siteDir, {}, deps)
+    expect(result.upgraded.map(({ name }) => name)).toEqual(['@godcreator/docfirst', '@godcreator/god-docsite'])
+    expect(result.templateChanges).toEqual([])
+  })
+
   it('站点在运行、没装依赖时拒绝，不动包', async () => {
     siteWithOldPackages()
     const pnpmCalls: string[][] = []

@@ -44,7 +44,8 @@ docsite.site.upgrade {"dir":…,"versions":{"@godcreator/collab":"^0.3.0"}}   ve
 平台模板写出的文件写完就归站点，升级命令不替你改它们，只把要改的列出来：
 
 1. 站点停着时运行 `docsite.site.upgrade`：站点依赖里 `@godcreator/` 下的包升到 gwb-docsite 旁边装着的那一版，旁边没装的（协作功能包 `@godcreator/collab`、`word-report` 这类）在 `versions` 里给版本，不给就不动、列进 `notUpgraded`。
-   接着重写 `app/features/` 下的汇总文件，再把这些包新旧两版的 `template/` 逐个比，回 `templateChanges`
+   接着重写 `app/features/` 下的汇总文件，再把这些包新旧两版的 `template/` 逐个比，回 `templateChanges`。
+   建站时写一次、之后归站点维护的文件（`content/`、`comments/`、`app/routes/home.tsx`、`people.json`、`glossary.json`、`package.json`）与 `docfirst.create` 复制到站点根的起始文件不比
 2. 照 `templateChanges` 一个个改：`site` 是 `old`（站点没改过）的直接换成新模板，`missing` 的照新模板补上，`own`（站点改过）的对照 `diff` 把模板的改动并进去、站点自己改过的地方保留；`removed` 的看站点还用不用它。
    平台包的模板对站点根，功能包的对 `app/features/<功能名>/`，新模板在 `node_modules/<包名>/template/`
 3. `identityFile` 是 `docsite.json` 现在的内容：布局换代时（`format` 不是这一版认的、缺 `audience`）照模板改完再补上，`docsite.site.start` 启动前的核对才过

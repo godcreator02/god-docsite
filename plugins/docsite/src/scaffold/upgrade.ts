@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { DOCFIRST_PACKAGE } from '../docfirst/docfirst-site.js'
 import { DocsiteRejected, messageOf } from '../errors.js'
 import type { RunPnpm } from '../pnpm.js'
 import { unifiedDiffOf } from './line-diff.js'
@@ -67,15 +68,23 @@ function filesUnder(dir: string, prefix = ''): string[] {
   })
 }
 
-/** 站点里装着的这几个包的 template/：站点路径 → 文件内容 */
+/** 建站器只在建站时写一次、之后归站点自己维护的文件：内容、首页、评论、人员、术语、依赖清单 */
+function isSiteOwned(sitePath: string): boolean {
+  return ['app/routes/home.tsx', 'people.json', 'glossary.json', 'package.json', 'pnpm-workspace.yaml'].includes(sitePath) || sitePath.startsWith('content/') || sitePath.startsWith('comments/')
+}
+
+/** 站点里装着的这几个包的 template/：站点路径 → 文件内容。docfirst 的 template/ 是 docfirst.create 复制到站点根的起始文件，写完归站点，不比 */
 function templateFilesOf(siteDir: string, packageNames: readonly string[]): Map<string, string> {
   const files = new Map<string, string>()
-  for (const name of packageNames) {
+  for (const name of packageNames.filter((packageName) => packageName !== DOCFIRST_PACKAGE)) {
     const installed = packageVisibleFrom(siteDir, name)
     if (installed === undefined) throw new DocsiteRejected(`${siteDir} 的 node_modules 里没有 ${name}：先在站点目录里 pnpm install`)
     const templateDir = path.join(installed.dir, 'template')
     if (!existsSync(templateDir)) continue
-    for (const relative of filesUnder(templateDir)) files.set(sitePathOfTemplateFile(name, relative), readFileSync(path.join(templateDir, relative), 'utf8'))
+    for (const relative of filesUnder(templateDir)) {
+      const sitePath = sitePathOfTemplateFile(name, relative)
+      if (!isSiteOwned(sitePath)) files.set(sitePath, readFileSync(path.join(templateDir, relative), 'utf8'))
+    }
   }
   return files
 }
