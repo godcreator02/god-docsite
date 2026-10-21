@@ -1,0 +1,22 @@
+---
+born-at: 2026-10-21T19:39
+type: choice
+parent: [2026-09-03-god-live-doc]
+label: 已有站点一次升到 0.2
+domain: 骨架
+---
+
+## 背景
+
+god-docsite 0.2 的身份文件多了 `audience`、布局代号升到 2，gwb-docsite 0.7 不再启动旧格式的站，`docsite.site.list` 遇到任何一个托管着的旧站就整个报错。所以发版后要把机器上全部的站一次升完：各仓的文档站、三个协作站、gwb-papers 的阅读站，一共 25 个，大多停在 god-docsite 0.1.4。
+
+## 选择
+
+- 每个站先 `docsite.site.upgrade` 升包，再照模板改文件：站点文件和旧一版模板一字不差的直接换成新模板，站点改过的手工合并（两个协作站的 `root.tsx` 自己加了图标，合并时保留图标、加上阅读字体）
+- 在 git 仓里的站一律写 `audience: shared`（别人 clone 下来也能看，现在也都不引用本机目录里的条目）；只有 gwb-papers 的阅读站要读本机的论文材料，写 `personal`
+- 别的会话没提交的改动不碰：gwb-video-notes、gwb-papers 与一个 probe 站的 `root.tsx` 上正有别人加图标的改动，这三个站的阅读字体那几行留给那边，站点照样能跑，只是先不跟读者的字体；chb-dab-sst 协作仓有别人没提交的正文，这次只在本地提交、没有提交审核
+- 已经退役、没装依赖的 gwb-nas-suite 文档站与仓里的 probe 原型站不升
+
+## 代价
+
+升级命令原来把 docfirst 的 `template/`（`docfirst.create` 复制到站点根的起始文件）当成功能包比，也会把建站时写一次的 `content/`、`package.json` 这类文件列进来；这次顺手修掉，发了 gwb-docsite 0.7.1。
