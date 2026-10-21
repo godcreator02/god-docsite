@@ -1,6 +1,5 @@
 import { useMemo, type ComponentType, type ReactNode } from 'react'
 import * as jsxRuntime from 'react/jsx-runtime'
-import { runSync } from '@mdx-js/mdx'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from '@fumadocs/base-ui/layouts/docs/page'
 import type { TOCItemType } from 'fumadocs-core/toc'
 
@@ -20,8 +19,13 @@ export type ExternalMdxComponents = Record<string, ComponentType<never> | string
 
 type MdxContent = ComponentType<{ components?: ExternalMdxComponents }>
 
+/**
+ * function-body 格式的编译结果是一段函数体：参数是 JSX 运行时，回模块的导出，只能用 Function 构造运行。和 @mdx-js/mdx 的 runSync 做的一样，
+ * 不 import 它：那会把整个 mdx 编译器带进浏览器，dev 下打开第一页时 Vite 才发现这个依赖、重新预构建并整页刷新
+ */
 function contentOf(code: string): MdxContent {
-  return runSync(code, { ...jsxRuntime }).default as MdxContent
+  // oxlint-disable-next-line typescript/no-implied-eval
+  return (new Function(code) as (runtime: typeof jsxRuntime) => { default: MdxContent })({ ...jsxRuntime }).default
 }
 
 /** 编译不过时显示的说明与编译器原话 */

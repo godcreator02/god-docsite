@@ -7,3 +7,5 @@
 @import './word-report/styles.css';
 @source not '../../../collab';
 @source not '../../journal';
+@source not '../../fixture-notes';
+@source not '../../fixture-papers';

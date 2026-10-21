@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 /*
@@ -47,12 +47,35 @@ export function strayContentFileOf(siteDir, runTag) {
   return { name, file: path.join(siteDir, 'content', name), text: 'export const stray = 1\n' }
 }
 
+/** dev 下「自包含检查」那一项在内容目录里放的页：引用了试验论文库里没有的一条 */
+export function missingReferencePageOf(siteDir, runTag) {
+  const id = `e2e-missing-${runTag}`
+  return { id, name: `e2e-missing-ref-${runTag}.mdx`, file: path.join(siteDir, 'content', `e2e-missing-ref-${runTag}.mdx`), text: `---\ntitle: 引用缺项 ${runTag}\n---\n\n<FixturePaper id="${id}" />\n` }
+}
+
+/** dev 下「数据目录就地更新」那一项在试验论文库里加的一条 */
+export function addedPaperOf(siteDir, runTag) {
+  const id = `e2e-${runTag}`
+  const dir = path.join(siteDir, 'fixture-papers', id)
+  return { id, dir, title: `新加的论文 ${runTag}` }
+}
+
+export function writeAddedPaper(siteDir, runTag) {
+  const { dir, title } = addedPaperOf(siteDir, runTag)
+  mkdirSync(path.join(dir, 'mdx'), { recursive: true })
+  writeFileSync(path.join(dir, 'mdx', 'paper.mdx'), `${title} 的正文。\n`)
+  writeFileSync(path.join(dir, 'meta.json'), `${JSON.stringify({ title, pages: { paper: '正文' } })}\n`)
+}
+
 function removeTempPages(siteDir, runTag) {
-  return [addedPageOf(siteDir, runTag).file, titlePageOf(siteDir, runTag).file, strayContentFileOf(siteDir, runTag).file].filter((file) => {
+  const addedPaper = addedPaperOf(siteDir, runTag).dir
+  const removedPaper = existsSync(addedPaper) ? [addedPaper] : []
+  if (removedPaper.length > 0) rmSync(addedPaper, { recursive: true })
+  return [...removedPaper, ...[addedPageOf(siteDir, runTag).file, titlePageOf(siteDir, runTag).file, strayContentFileOf(siteDir, runTag).file, missingReferencePageOf(siteDir, runTag).file].filter((file) => {
     if (!existsSync(file)) return false
     rmSync(file)
     return true
-  })
+  })]
 }
 
 /** 评论：串头正文带 runTag 的整串删掉；别的串里带 runTag 的回复单独删 */

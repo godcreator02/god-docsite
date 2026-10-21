@@ -23,7 +23,7 @@ export const indexFiles = [
 
 /** docs-site 的功能清单与建站顺序（createSite → addBaseFeatures → 逐个 addFeature）照 scaffold-check 的比对 */
 /* ref file="../tests/scaffold-check.mjs" lines="37-45" hash="89989ec16f63" blob="cac381a2f81b" */
-/* ref file="../tests/scaffold-check.mjs" lines="81-93" hash="4c711af8ed44" blob="cac381a2f81b" */
+/* ref file="../tests/scaffold-check.mjs" lines="86-98" hash="f4797073f20f" blob="90ae48af0b32" */
 export const steps = [
   {
     id: 'create',

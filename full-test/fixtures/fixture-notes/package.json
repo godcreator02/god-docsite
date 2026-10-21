@@ -1,0 +1,20 @@
+{
+  "name": "fixture-notes",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "测试站 full-test/site 的试验功能包（笔记这一类条目）：e2e 用它核对侧栏分区、外部 mdx 页与它的评论、跨功能包的引用扫描与自包含检查；不发布",
+  "exports": {
+    ".": {
+      "types": "./library.d.mts",
+      "default": "./library.mjs"
+    },
+    "./node": "./node.mjs"
+  },
+  "godDocsite": {
+    "references": {
+      "components": ["FixtureNote"]
+    },
+    "dataDirs": ["fixture-notes"]
+  }
+}

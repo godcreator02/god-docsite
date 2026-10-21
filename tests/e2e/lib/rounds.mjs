@@ -5,6 +5,7 @@ import { runAllFeaturesChecks, runRouteTableChecks } from '../checks/all-feature
 import { runBaseChecks } from '../checks/base.mjs'
 import { runCollabChecks } from '../checks/collab.mjs'
 import { runDocsChecks } from '../checks/docs.mjs'
+import { runLibraryChecks } from '../checks/library.mjs'
 import { runReportChecks } from '../checks/report.mjs'
 import { freePort, startServer, waitForHttp } from './process.mjs'
 import { removeRunLeftovers, writeTitlePage } from './run-scratch.mjs'
@@ -19,6 +20,7 @@ const checkGroups = [
   { name: 'docs', run: runDocsChecks },
   { name: 'report', run: runReportChecks },
   { name: 'all-features', run: runAllFeaturesChecks },
+  { name: 'library', run: runLibraryChecks },
 ]
 
 const serverStartTimeoutMs = 180_000

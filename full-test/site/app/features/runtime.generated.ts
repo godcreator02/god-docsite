@@ -2,7 +2,9 @@
 import { siteFeatureRuntime } from '@godcreator/god-docsite/react'
 import * as collabFeature from './collab/feature.tsx'
 import * as commentsFeature from './comments/feature.tsx'
+import * as fixtureNotesFeature from './fixture-notes/feature.tsx'
+import * as fixturePapersFeature from './fixture-papers/feature.tsx'
 import * as trajectoryFeature from './trajectory/feature.tsx'
 import * as wordReportFeature from './word-report/feature.tsx'
 
-export const featureRuntime = siteFeatureRuntime({ 'collab': collabFeature, 'comments': commentsFeature, 'trajectory': trajectoryFeature, 'word-report': wordReportFeature })
+export const featureRuntime = siteFeatureRuntime({ 'collab': collabFeature, 'comments': commentsFeature, 'fixture-notes': fixtureNotesFeature, 'fixture-papers': fixturePapersFeature, 'trajectory': trajectoryFeature, 'word-report': wordReportFeature })

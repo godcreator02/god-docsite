@@ -96,7 +96,7 @@ reactions: "{\"👍\":[\"wang\",\"zhou\"],\"🎉\":[\"zhou\"]}"
 
 {/* ref file="../packages/comments/src/site/threads.server.ts" lines="132-138" hash="9f4b7ea77281" blob="0bcbb0808645" */}
 
-功能包显示的外部 mdx 页（论文的排版稿、资料的笔记）的评论不进站点的集合，跟着材料存在材料旁边的评论目录里。功能包的 loader 用 `externalPageThreads({ commentsDir, people, page, compileBody })`：它直接读这个目录（同 `readCommentThreads`），挑出这一页的串、作者换成名字，每条评论的正文交给 `compileBody` 编译——功能包传平台的 `compileExternalMdx`，评论包不依赖平台包。回 `{ threads, bodies }`，`bodies` 的键是评论相对评论目录的路径，页面上的 `CommentsDock` 用一个按路径取 `bodies` 的 `BodyComponent` 显示正文。评论目录还没建就是没有评论；写入照旧走 `handleCommentWrite({ commentsDir })`，传同一个目录。
+功能包显示的外部 mdx 页（论文的排版稿、资料的笔记）的评论目录由功能包定：个人站存在材料旁边的评论目录里、不进站点的集合；`shared` 站存在站点自己的 `comments/`，和报告页一样进全站评论页。功能包的 loader 用 `externalPageThreads({ commentsDir, people, page, compileBody })`：它直接读这个目录（同 `readCommentThreads`），挑出这一页的串、作者换成名字，每条评论的正文交给 `compileBody` 编译——功能包传平台的 `compileExternalMdx`，评论包不依赖平台包。回 `{ threads, bodies }`，`bodies` 的键是评论相对评论目录的路径，页面上的 `CommentsDock` 用一个按路径取 `bodies` 的 `BodyComponent` 显示正文。`page` 是这一页的站内地址，按路由参数拼：客户端导航时 loader 收到的 `request.url` 带 `.data` 后缀，取它的路径就对不上写进串头的地址。评论目录还没建就是没有评论；写入照旧走 `handleCommentWrite({ commentsDir })`，传同一个目录。
 
 按文件夹分串：串按创建时间排，回复按文件名排（文件名就是带时刻的 id）。数据不完整就直接报错并点名文件：回复没有串头、串头缺 `page`、一个文件夹两个串头、回复带了已解决状态。
 

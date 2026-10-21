@@ -29,7 +29,7 @@ const sites = [
   {
     name: 'full-test',
     dir: path.join(repoDir, 'full-test', 'site'),
-    features: ['@godcreator/collab', '@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer', '@godcreator/word-report'],
+    features: ['@godcreator/collab', '@godcreator/code-pin', '@godcreator/trajectory', '@godcreator/explainer', '@godcreator/word-report', 'fixture-papers', 'fixture-notes'],
     siteOwned: [],
     // 协作站的首页由 collab.site.init 照协作功能的模板写出，测试站的要和它一样
     homePageFrom: path.join(repoDir, 'packages', 'collab', 'templates', 'home.tsx'),
@@ -63,9 +63,14 @@ const siteBuildDirs = new Set(['node_modules', 'build', '.react-router', '.sourc
 
 const isSiteOwned = (relative, siteOwned) => siteOwned.some((entry) => (entry.path.endsWith('/') ? relative.startsWith(entry.path) : relative === entry.path))
 
+/** 工作区里的包目录：本仓的包在 packages/<去掉作用域的名字>，测试站的试验功能包（不带作用域）在 full-test/fixtures/<名字> */
+function workspacePackageDirOf(packageName) {
+  return packageName.startsWith('@') ? path.join(repoDir, 'packages', packageName.slice(packageName.indexOf('/') + 1)) : path.join(repoDir, 'full-test', 'fixtures', packageName)
+}
+
 /** 站点 node_modules 里建一个目录联接，指向工作区里的包目录 */
 function linkWorkspacePackage(siteDir, packageName) {
-  const packageDir = path.join(repoDir, 'packages', packageName.slice(packageName.indexOf('/') + 1))
+  const packageDir = workspacePackageDirOf(packageName)
   if (!existsSync(path.join(packageDir, 'package.json'))) throw new Error(`工作区里没有 ${packageName}（找的是 ${packageDir}）`)
   const target = path.join(siteDir, 'node_modules', ...packageName.split('/'))
   mkdirSync(path.dirname(target), { recursive: true })
@@ -83,7 +88,7 @@ function generateExpectedSite({ scaffold, generatedDir, features }) {
   scaffold.createSite({ dir: generatedDir, siteName: '比对用', people: [], packageSource: { kind: 'link', repoDir } })
   const manifestFile = path.join(generatedDir, 'package.json')
   const manifest = JSON.parse(readFileSync(manifestFile, 'utf8'))
-  for (const name of features) manifest.dependencies[name] = `link:${path.join(repoDir, 'packages', name.slice(name.indexOf('/') + 1)).replaceAll('\\', '/')}`
+  for (const name of features) manifest.dependencies[name] = `link:${workspacePackageDirOf(name).replaceAll('\\', '/')}`
   writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`)
   for (const name of [...basePackagesOf(generatedDir), ...features]) {
     if (!existsSync(path.join(generatedDir, 'node_modules', ...name.split('/')))) linkWorkspacePackage(generatedDir, name)

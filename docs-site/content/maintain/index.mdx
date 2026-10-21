@@ -56,6 +56,8 @@ description: 改这个仓时怎么跑、按什么节奏检查、提交怎么写�
 
 端到端检查 `pnpm test:e2e` 直接在测试站 `full-test/site` 上启动 dev 与 build + start 各跑一轮浏览器检查，一分钟左右。dev 一轮写评论、任务和页面，只写本次运行新建的，跑完删掉；start 跑的是只读的发布版，那一轮核对写不进去。最后核对测试站的 `git status` 和跑之前一样。
 
+测试站除了本仓的功能包，还装着 `full-test/fixtures/` 下的两个试验功能包 `fixture-papers`、`fixture-notes`（不发布，按工作区包装进测试站）。它们照论文库、资料库要用的写法：`site.server.ts` 导出侧栏分区，功能路由显示站点目录里 `fixture-papers/`、`fixture-notes/` 下的外部 mdx 页（页上的评论在个人站存在条目旁边、在 shared 站存在站点的 `comments/`，归属键是页面地址），`package.json` 登记引用组件，`./node` 出口给引用扫描用。e2e 的 library 组在它们上面查分区、外部页与它的评论、笔记页里引用论文的跨功能包引用、数据目录改动就地更新，以及自包含检查（问题按钮与 `docsite-check`）。改了它们的 `template/` 要在测试站上重新补功能文件，`pnpm test:scaffold` 同样比对它们。
+
 ## 提交
 
 - 一个提交一件事，提交信息用中文

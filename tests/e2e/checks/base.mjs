@@ -1,30 +1,12 @@
 import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { avatarContentType, avatarFileInSite, avatarMaxBytes, avatarSize, avatarWriteUrl, webpDimensionsOf } from '../../../packages/identity/dist/core/index.mjs'
-import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, openCommentsInbox, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage } from '../lib/checks.mjs'
+import { checkRunner, filesUnder, hasViteErrorOverlay, headingOf, markNoReload, openCommentsInbox, postFormToAction, problemResults, serverCodeInClientBuild, stepTimeoutMs, stillNoReload, waitForHydrated, watchPage, writeThreadAndReply } from '../lib/checks.mjs'
 import { addedPageOf, strayContentFileOf, titlePageOf } from '../lib/run-scratch.mjs'
 import { testerPersonId } from '../lib/site.mjs'
 
 /** 侧栏站名下的一横排：搜索按钮与功能入口（god-docsite 的 SidebarLinksRow） */
 const sidebarRow = '#nd-sidebar [data-docsite-sidebar-row]'
-
-/**
- * 写一条评论并回复：打开收件箱，在底部批整页；发出去以后这一串浮在正文顶上（data-comment-card），在它的回复框里回复；
- * 收件箱里多出这一行。返回串 id
- */
-async function writeThreadAndReply(page, { threadText, replyText }) {
-  await openCommentsInbox(page)
-  await page.fill('[data-new-thread-form] textarea[name="body"]', threadText)
-  await page.click('[data-new-thread-form] button[type="submit"]')
-  const card = page.locator('[data-comment-card]', { hasText: threadText })
-  await card.waitFor({ timeout: stepTimeoutMs })
-  const threadId = await card.getAttribute('data-comment-card')
-  await page.locator(`[data-comment-row="${threadId}"]`).waitFor({ timeout: stepTimeoutMs })
-  await page.fill(`[data-reply-form="${threadId}"] textarea[name="body"]`, replyText)
-  await page.click(`[data-reply-form="${threadId}"] button[type="submit"]`)
-  await card.locator('[data-reply]', { hasText: replyText }).waitFor({ timeout: stepTimeoutMs })
-  return threadId
-}
 
 /** 在收件箱里点开一串，等它浮在正文上；返回那一串的 locator */
 async function openThreadFromInbox(page, threadId) {

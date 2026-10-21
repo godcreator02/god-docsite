@@ -2,6 +2,8 @@
 import type { RouteConfigEntry } from '@react-router/dev/routes'
 import * as collabRoutes from './collab/routes.ts'
 import * as commentsRoutes from './comments/routes.ts'
+import * as fixtureNotesRoutes from './fixture-notes/routes.ts'
+import * as fixturePapersRoutes from './fixture-papers/routes.ts'
 import * as identityRoutes from './identity/routes.ts'
 import * as trajectoryRoutes from './trajectory/routes.ts'
 import * as wordReportRoutes from './word-report/routes.ts'
@@ -12,7 +14,7 @@ interface FeatureRoutesModule {
   standaloneRoutes?: RouteConfigEntry[]
 }
 
-const featureRoutesModules: FeatureRoutesModule[] = [collabRoutes, commentsRoutes, identityRoutes, trajectoryRoutes, wordReportRoutes]
+const featureRoutesModules: FeatureRoutesModule[] = [collabRoutes, commentsRoutes, fixtureNotesRoutes, fixturePapersRoutes, identityRoutes, trajectoryRoutes, wordReportRoutes]
 
 export const featureRoutes: RouteConfigEntry[] = featureRoutesModules.flatMap((routes) => routes.default ?? [])
 export const featureStandaloneRoutes: RouteConfigEntry[] = featureRoutesModules.flatMap((routes) => routes.standaloneRoutes ?? [])

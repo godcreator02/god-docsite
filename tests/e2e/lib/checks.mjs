@@ -58,6 +58,24 @@ export async function openCommentsInbox(page) {
   await page.locator('[data-comments-inbox]').waitFor({ timeout: stepTimeoutMs })
 }
 
+/**
+ * 写一条评论并回复：打开收件箱，在底部批整页；发出去以后这一串浮在正文顶上（data-comment-card），在它的回复框里回复；
+ * 收件箱里多出这一行。返回串 id
+ */
+export async function writeThreadAndReply(page, { threadText, replyText }) {
+  await openCommentsInbox(page)
+  await page.fill('[data-new-thread-form] textarea[name="body"]', threadText)
+  await page.click('[data-new-thread-form] button[type="submit"]')
+  const card = page.locator('[data-comment-card]', { hasText: threadText })
+  await card.waitFor({ timeout: stepTimeoutMs })
+  const threadId = await card.getAttribute('data-comment-card')
+  await page.locator(`[data-comment-row="${threadId}"]`).waitFor({ timeout: stepTimeoutMs })
+  await page.fill(`[data-reply-form="${threadId}"] textarea[name="body"]`, replyText)
+  await page.click(`[data-reply-form="${threadId}"] button[type="submit"]`)
+  await card.locator('[data-reply]', { hasText: replyText }).waitFor({ timeout: stepTimeoutMs })
+  return threadId
+}
+
 export async function headingOf(page) {
   return (await page.locator('h1').first().textContent({ timeout: stepTimeoutMs }))?.trim()
 }
