@@ -4,7 +4,7 @@
 @import 'katex/dist/katex.css';
 @import '@godcreator/god-docsite/styles.css';
 @import '@godcreator/identity/styles.css';
-/* 各功能目录的 styles.css（评论的样式与正文高亮在 features/comments/）；功能把写数据的目录用 @source not 排除写在自己的 styles.css 里 */
+/* 各功能目录的 styles.css（评论的样式与正文高亮在 features/comments/），以及功能包登记的数据目录（godDocsite.dataDirs）的 @source not；别的会被写入的目录由功能自己的 styles.css 排除 */
 @import './features/styles.generated.css';
 
 /* 站点里会被写入的文件不进 Tailwind 的源码扫描：扫描到的文件一变，Tailwind 在 dev 下让整页刷新，推送连接与页面状态都断掉 */

@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { dataDirsDeclaredBy, siteDependencyNamesOf } from '../data-dirs.js'
 import { scanExports } from './exported-names.js'
 import { isRecord, readJsonFile } from './files.js'
 import { packageInNodeModules } from './installed-packages.js'
@@ -59,7 +60,7 @@ function identifierOf(name: string): string {
   return name.replace(/-([a-z0-9])/g, (_, letter: string) => letter.toUpperCase())
 }
 
-/** 功能包 package.json 里的 "godDocsite": { "collections": [...] }；没写就是没有集合。同一对象里的 dataDirs 由 vite 插件读 */
+/** 功能包 package.json 里的 "godDocsite": { "collections": [...] }；没写就是没有集合。同一对象里的 dataDirs 由 vite 插件与样式汇总读 */
 function declaredCollectionsOf(manifestFile: string): string[] {
   const manifest = readJsonFile(manifestFile)
   if (!isRecord(manifest) || manifest['godDocsite'] === undefined) return []
@@ -206,8 +207,30 @@ function serverIndexOf(features: readonly SiteFeature[]): string {
   ].join('')
 }
 
-function stylesIndexOf(features: readonly SiteFeature[]): string {
-  return [`/* ${generatedNotice} */\n`, ...features.filter((feature) => feature.hasStyles).map((feature) => `@import './${feature.name}/${featureFiles.styles}';\n`)].join('')
+/**
+ * 站点直接依赖的包在 package.json 里登记的数据目录（相对站点根），按包名、登记先后排、去重。
+ * 还没装的依赖跳过：建站时写汇总文件在 pnpm install 之前，装包以后 addFeature 与升级都会重写汇总文件
+ */
+function siteDataDirsOf(siteDir: string): string[] {
+  const manifest = readJsonFile(path.join(siteDir, 'package.json'))
+  if (!isRecord(manifest)) throw new Error(`${siteDir}/package.json 要是 JSON 对象`)
+  const dirs = siteDependencyNamesOf(manifest)
+    .sort()
+    .flatMap((name) => {
+      const installed = packageInNodeModules(siteDir, name)
+      if (installed === undefined) return []
+      return dataDirsDeclaredBy(name, readJsonFile(path.join(installed.dir, 'package.json')) as Record<string, unknown>)
+    })
+  return [...new Set(dirs.map((dir) => path.posix.normalize(dir.replaceAll('\\', '/')).replace(/\/$/, '')))]
+}
+
+/** 各功能的 styles.css，再把数据目录排除出 Tailwind 的源码扫描：扫描到的文件一变，Tailwind 在 dev 下让整页刷新，推送连接与页面状态都断掉 */
+function stylesIndexOf(features: readonly SiteFeature[], dataDirs: readonly string[]): string {
+  return [
+    `/* ${generatedNotice}；数据目录来自站点依赖的包 package.json 里的 godDocsite.dataDirs */\n`,
+    ...features.filter((feature) => feature.hasStyles).map((feature) => `@import './${feature.name}/${featureFiles.styles}';\n`),
+    ...dataDirs.map((dir) => `@source not '${path.posix.join('../..', dir)}';\n`),
+  ].join('')
 }
 
 /** source.config.ts 自己导出的集合名（不含 default 与 export * 再导出的） */
@@ -233,7 +256,7 @@ export function regenerateFeatureIndex(siteDir: string): FeatureIndex {
     runtime: runtimeIndexOf(features),
     mdx: mdxIndexOf(features),
     collections: collectionsIndexOf(features),
-    styles: stylesIndexOf(features),
+    styles: stylesIndexOf(features, siteDataDirsOf(siteDir)),
     server: serverIndexOf(features),
   }
   const files: string[] = []

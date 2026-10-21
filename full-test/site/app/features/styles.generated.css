@@ -1,7 +1,9 @@
-/* 建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts、styles.css 或 site.server.ts 的子目录 */
+/* 建站器生成，勿手改：addFeature / regenerateFeatureIndex 每次都重写。功能清单是 app/features/ 下含 routes.ts、feature.tsx、mdx.ts、styles.css 或 site.server.ts 的子目录；数据目录来自站点依赖的包 package.json 里的 godDocsite.dataDirs */
 @import './code-pin/styles.css';
 @import './collab/styles.css';
 @import './comments/styles.css';
 @import './explainer/styles.css';
 @import './trajectory/styles.css';
 @import './word-report/styles.css';
+@source not '../../../collab';
+@source not '../../journal';

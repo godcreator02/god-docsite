@@ -3,37 +3,18 @@ import path from 'node:path'
 import { normalizePath, type Plugin } from 'vite'
 import { findDepPkgJsonPath } from 'vitefu'
 import { dataDirsChangedEvent } from '../core/dev-events.js'
+import { dataDirsDeclaredBy, siteDependencyNamesOf } from '../node/data-dirs.js'
 
 type PackageJson = Record<string, unknown>
 
 /** 一批文件改动（git 拉进来、agent 连着写几个文件）攒到最后一个改动之后这么久，只让浏览器重新取一次数据 */
 export const dataDirsChangeBatchMs = 300
 
-/**
- * 功能包 package.json 里 "godDocsite": { "dataDirs": [...] }：功能的 loader 直接读、不经 Vite 模块的目录，相对站点根。
- * 没写就是没有；写了就要是字符串数组
- */
-export function dataDirsDeclaredBy(packageName: string, packageJson: PackageJson): string[] {
-  const declared = packageJson['godDocsite']
-  if (declared === undefined) return []
-  if (typeof declared !== 'object' || declared === null) throw new Error(`${packageName} 的 package.json 里 godDocsite 要是对象，收到 ${JSON.stringify(declared)}`)
-  const dataDirs = (declared as Record<string, unknown>)['dataDirs']
-  if (dataDirs === undefined) return []
-  if (!Array.isArray(dataDirs) || !dataDirs.every((dir) => typeof dir === 'string' && dir !== '')) {
-    throw new Error(`${packageName} 的 package.json 里 godDocsite.dataDirs 要是目录的数组（相对站点根），收到 ${JSON.stringify(dataDirs)}`)
-  }
-  return dataDirs as string[]
-}
-
-async function siteDependencyNamesOf(root: string): Promise<string[]> {
-  const sitePackageJson = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')) as PackageJson
-  return [...new Set([...Object.keys((sitePackageJson['dependencies'] ?? {}) as object), ...Object.keys((sitePackageJson['devDependencies'] ?? {}) as object)])]
-}
-
 /** 站点直接依赖的包登记的数据目录，换成绝对路径 */
 async function declaredDataDirsOf(root: string): Promise<string[]> {
+  const sitePackageJson = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')) as PackageJson
   const dirs = await Promise.all(
-    (await siteDependencyNamesOf(root)).map(async (name) => {
+    siteDependencyNamesOf(sitePackageJson).map(async (name) => {
       const file = await findDepPkgJsonPath(name, root)
       if (file === undefined) return []
       return dataDirsDeclaredBy(name, JSON.parse(await readFile(file, 'utf8')) as PackageJson).map((dir) => normalizePath(path.resolve(root, dir)))

@@ -32,7 +32,7 @@ export type CollabSitesOptions = {
 const siteDirOf = (repo: string) => path.join(repo, sitePathInRepo)
 
 /**
- * 站点运行时会被写入的两个目录：仓根的 collab/（任务与模块）与站点的 journal/（日志）。协作功能的 styles.css 用 @source not
+ * 站点运行时会被写入的两个目录：仓根的 collab/（任务与模块）与站点的 journal/（日志）。协作功能包把它们登记成 dataDirs，建站器在样式汇总里用 @source not
  * 把它们排除出 Tailwind 的扫描，目录要在开发服务启动前就存在才生效；否则一写入就整页刷新、推送连接断掉
  */
 function createDirsWrittenWhileRunning(repo: string): void {

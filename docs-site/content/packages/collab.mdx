@@ -176,7 +176,7 @@ gwb-collab 推送前也调同一个 `leadOnlyProblems`，成员在本机就能�
 
 其余接线文件各一句：`site.server.ts` 每次请求现组装 `CollabSite`（不在模块顶层算，构建时算不出可信 origin）；`feature.tsx` 浏览器侧也会加载，给侧栏横排的「任务」「日历」入口、布局顶部的通知栏、MDX 组件表，布局数据不读 `collab/`；`mdx.ts` 给每个集合加 remark 插件，并定义日志集合 `journal`。
 
-任务页、日历这些 loader 每次请求现读 `collab/` 与 `journal/`，不经 Vite 的模块图，所以包的 `package.json` 在 `godDocsite.dataDirs` 里登记 `../collab` 与 `journal`（相对站点根）：dev 下平台的 vite 插件盯着这两个目录，站外改了记录（agent 调命令、自动同步拉进别人的提交），已经打开的页面重新取一次数据、就地更新，机制见 [god-docsite](/packages/god-docsite) 包页的「dev 下页面怎么跟着变」。
+任务页、日历这些 loader 每次请求现读 `collab/` 与 `journal/`，不经 Vite 的模块图，所以包的 `package.json` 在 `godDocsite.dataDirs` 里登记 `../collab` 与 `journal`（相对站点根）：dev 下平台的 vite 插件盯着这两个目录，站外改了记录（agent 调命令、自动同步拉进别人的提交），已经打开的页面重新取一次数据、就地更新；建站器也把这两个目录写成样式汇总里的 `@source not`，写记录不会让整页刷新。机制见 [god-docsite](/packages/god-docsite) 包页的「dev 下页面怎么跟着变」。
 
 站点上的数据只走三条路——读、写、通知，每条链里写各环节手里的真实东西：
 

@@ -4,7 +4,8 @@ import path from 'node:path'
 import { afterAll, describe, expect, it, vi } from 'vitest'
 import { contentLayoutIssuesOf, hotUpdateIssueOf, runtimeIssueOf } from '../src/site/dev-updates.js'
 import { devContentLayoutReportOf, sameContentLayoutReport } from '../src/vite/content-layout.js'
-import { batchedCalls, dataDirsDeclaredBy } from '../src/vite/data-dirs.js'
+import { dataDirsDeclaredBy } from '../src/node/data-dirs.js'
+import { batchedCalls } from '../src/vite/data-dirs.js'
 
 const roots: string[] = []
 afterAll(() => {

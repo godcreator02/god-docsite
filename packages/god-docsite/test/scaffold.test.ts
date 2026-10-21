@@ -219,6 +219,17 @@ describe('addFeature', () => {
     expect(addBaseFeatures({ siteDir }).map(({ addedFiles, keptFiles }) => [addedFiles, keptFiles])).toEqual([[[], ['routes.ts', 'styles.css']]])
   })
 
+  it('站点依赖的包登记的数据目录写成样式汇总里的 @source not，没装的依赖跳过', () => {
+    const siteDir = newSite()
+    const stylesIndex = () => readFileSync(path.join(siteDir, 'app', 'features', 'styles.generated.css'), 'utf8')
+    expect(stylesIndex()).not.toContain('@source')
+    installFakeFeature(siteDir, '@godcreator/demo-feature', demoTemplate)
+    const manifestFile = path.join(siteDir, 'node_modules', '@godcreator', 'demo-feature', 'package.json')
+    writeFileSync(manifestFile, JSON.stringify({ ...readJson(manifestFile), godDocsite: { dataDirs: ['../collab', 'journal/', 'journal'] } }))
+    addFeature({ siteDir, packageName: '@godcreator/demo-feature' })
+    expect(stylesIndex()).toMatch(/@import '\.\/demo-feature\/styles\.css';\n@source not '\.\.\/\.\.\/\.\.\/collab';\n@source not '\.\.\/\.\.\/journal';\n$/)
+  })
+
   it('模板只有 styles.css 的功能包：算作功能，只进样式汇总', () => {
     const siteDir = newSite()
     installFakeFeature(siteDir, '@godcreator/style-only', { 'styles.css': "@import '@godcreator/style-only/styles.css';\n" })
