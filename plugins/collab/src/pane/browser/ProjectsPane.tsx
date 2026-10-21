@@ -114,7 +114,7 @@ export function ProjectsPane({ host, shell }: { host: HostBridge; shell: ShellBr
 
       {projects.length === 0 ? (
         <p className="collab:m-0 collab:text-sm collab:text-muted-foreground">
-          还没有项目。把项目的组织地址告诉你的 AI，比如「加入 https://…/hybrid-mmc 这个项目，放在 D:\projects 下」，它会克隆组织里的全部仓并加到这里。
+          还没有项目。把项目的组织地址告诉你的 AI，比如「加入 https://…/hybrid-mmc 这个项目，放在 D:\projects 下」，它会克隆组织里没归档的仓并加到这里。
         </p>
       ) : (
         <ul className="collab:m-0 collab:flex collab:list-none collab:flex-col collab:gap-2 collab:p-0">
