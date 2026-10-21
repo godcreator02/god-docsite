@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/comments",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "文档站评论：评论文件的格式与读写、评论串整理、唯一一份评论写入 action、给页面 loader 读本页评论、本页评论的收件箱与正文下方的评论浮窗、正文里的定位、全站评论表格。template/ 是建站器复制进站点 app/features/comments/ 的接线文件（全站评论页兼评论写入的路由、侧栏入口、样式与正文高亮）",
   "license": "MIT",
   "type": "module",
