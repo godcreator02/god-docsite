@@ -29,7 +29,8 @@ async function compileSource(file: string, source: string, options: ExternalMdxO
         remarkStructureOptions: false,
         remarkHeadingOptions: { generateToc: true },
         remarkPlugins: [...options.plugins.remarkPlugins, remarkExternalPageRules(file, options)] as PluginList,
-        rehypePlugins: options.plugins.rehypePlugins as PluginList,
+        // 全站的排在 fumadocs 自带的前面，和内容页的集合一样：rehype-katex 要在代码高亮之前换掉块级公式，否则高亮报 language-math 不认识
+        rehypePlugins: (presetPlugins: PluginList) => [...(options.plugins.rehypePlugins as PluginList), ...presetPlugins],
       }),
     )
     return { state: 'ready', frontmatter: parsed.frontmatter, code: String(compiled), toc: compiled.data['toc'] as TOCItemType[] }

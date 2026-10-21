@@ -76,6 +76,22 @@ describe('compileExternalMdx', () => {
     expect(render(await compileFile('import.mdx'))).toContain('这一页编译不过')
   })
 
+  it('全站的 rehype 插件排在平台自带的前面：块级公式先被公式插件换掉，代码高亮碰不到它', async () => {
+    type HastNode = { type: string; tagName?: string; properties?: { className?: unknown }; children?: HastNode[] }
+    const isDisplayMath = (node: HastNode) => node.tagName === 'pre' && node.children?.some((child) => String(child.properties?.className ?? '').includes('math-display')) === true
+    /** 和 rehype-katex 一样把块级公式换成渲染好的元素：排在代码高亮后面时，高亮先拿到 language-math 的代码块就报错 */
+    const rehypeFakeKatex = () => (tree: HastNode) => {
+      const visit = (node: HastNode) => {
+        node.children = node.children?.map((child) => (isDisplayMath(child) ? { type: 'element', tagName: 'div', properties: { className: ['fake-katex'] }, children: [] } : child))
+        node.children?.forEach(visit)
+      }
+      visit(tree)
+    }
+    const dir = materialFolder({ 'note.mdx': '公式：\n\n$$\na^2 + b^2 = c^2\n$$\n' })
+    const compiled = await compileExternalMdx(path.join(dir, 'note.mdx'), { ...optionsOf(dir), plugins: { remarkPlugins: [remarkMath], rehypePlugins: [rehypeFakeKatex] } })
+    expect(render(readyOf(compiled))).toContain('class="fake-katex"')
+  })
+
   it('文件没变沿用上次的结果，改了就重新编译', async () => {
     const dir = materialFolder({ 'note.mdx': '第一版\n' })
     const file = path.join(dir, 'note.mdx')
