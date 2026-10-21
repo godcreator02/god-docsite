@@ -19,6 +19,7 @@ import { ProvidedSiteDirs } from './provided-dirs.js'
 import { listInstalledFontFamilies, readerFontsFrom, readerFontSettings } from './reader-fonts.js'
 import { addSiteFeature } from './scaffold/add-feature.js'
 import { createDocsite } from './scaffold/create.js'
+import { upgradeSite } from './scaffold/upgrade.js'
 import type { HomePageCheckDeps } from './scaffold/home-page-check.js'
 import { loadPlatformNode, loadPlatformScaffold, pluginDir } from './scaffold/platform.js'
 import { DocsiteService, type GwbDocsiteApi } from './service.js'
@@ -150,7 +151,8 @@ export function apply(ctx: GwbContext): void {
 
   const list = async () => siteListingsOf(await hosted.list(), host.list(), (dir) => host.statusOf(dir), siteDescriptionOf)
   const openSiteWindow = (url: string, siteTitle: string | null) => openInChromeApp(findChrome(chromeCandidatesOf(process.env)), url, siteTitle)
-  registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list, openSiteWindow })
+  const upgrade = (dir: string, versions: Readonly<Record<string, string>>) => upgradeSite(dir, versions, { scaffold, pnpm: runPnpm, versionsFrom: pluginDir, isRunning: (siteDir) => host.statusOf(siteDir).state === 'running' })
+  registerCommands({ commands, docsite: api, isRegistered: (dir) => hosted.isRegistered(dir), list, openSiteWindow, upgradeSite: upgrade })
   registerDocfirstCommands({ commands, docsite: api, packagesFrom: pluginDir, log })
 
   ctx.inject(['gwbSkills'], (scoped) => {

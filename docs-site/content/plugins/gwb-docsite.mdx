@@ -19,11 +19,11 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 插件自己的状态：设置里有本 home 的身份码 `identity-code` 与阅读字体三项 `font-body`、`font-heading`、`font-mono`；gwb-data 里有常驻站点的登记表 `hosted-sites`、每个站上次用的端口 `site-ports`；内存里还有别的插件提供的本机目录表。人会去看、会去改的放设置；插件运行时自己维护的放 gwb-data：
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="55-64" hash="7695cd218dc9" blob="77e3694f1f79" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="56-65" hash="7695cd218dc9" blob="4c92d3a7a100" */}
 
 图上全部接线都在 `apply` 里：定义设置、第一次加载时生成身份码，造出端口记录 `SitePorts`、提供目录表 `ProvidedSiteDirs`、拼托管方上下文的函数、进程表 `SiteHost`、常驻表 `HostedSites`，监听身份码与三项字体设置（变了就把托管方上下文重推给在运行的站），组装成一份 `GwbDocsiteApi` 给服务与命令共用，把登记着的站逐个启动（不等），最后注册命令（`docsite.site.open` 打开窗口用的函数在这里接上本机 Chrome）、说明书与站点窗格。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="66-172" hash="6a04db65f785" blob="77e3694f1f79" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="67-174" hash="d1f6cf2b87eb" blob="4c92d3a7a100" */}
 
 身份码第一次加载时生成 12 个小写字母与数字（去掉容易看错的 l、o、0、1）；之后每次读都校验，设置里写错了就报错、不替人改。它经托管方上下文交给站点（见「托管方上下文」），改了设置马上重推给在运行的站，不用重启。
 
@@ -37,7 +37,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 三项的值拼成托管方上下文的 `readerFonts`（平台包的 `ReaderFonts`：`body`、`heading`、`mono`，没设是 `null`），设置里不是字体名就报错。三项各 `watch` 一次，变了就把每个在运行的站的托管方上下文重推一次：
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="105-105" hash="dbb5a7eb5c5f" blob="77e3694f1f79" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="106-106" hash="dbb5a7eb5c5f" blob="4c92d3a7a100" */}
 
 站点收到新的上下文后让浏览器重新取数据，开着的页面不用刷新就换上新字体。站点那边怎么读、写成哪几个 CSS 变量，见[平台包](/packages/god-docsite)页的「阅读字体」。
 
@@ -56,6 +56,10 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 加功能的规则有几条图上没画：站点在运行就拒绝（Windows 上运行中的开发服务占着依赖里的文件）；依赖说明不给就取插件旁边装着的那一版写 `^<版本>`，插件没装这个包就拒绝；依赖说明只认版本范围或 `link:` / `file:` 加绝对路径，因为它经 shell 交给 pnpm。
 
 {/* ref file="../plugins/docsite/src/scaffold/add-feature.ts" lines="56-74" hash="382c636a8e71" blob="32c6853a5d5e" */}
+
+升级已有站点（`docsite.site.upgrade`）不起服务、不改模板写出的文件，只做三件事：站点依赖里 `@godcreator/` 下的包 `pnpm add` 成调用方在 `versions` 里给的、或插件旁边装着的那一版（不是从 registry 装的、两处都没有版本的不动，写明原因）；重写功能汇总文件；把这些包升级前后两版的 `template/` 逐个比，每个变了的文件标出站点里那一份现在是没有、和旧模板一样、已经和新模板一样，还是站点自己改过，改了的附上模板的统一差异格式。旧模板在 `pnpm add` 之前先读进内存，装完新版就读不到了。站点的身份文件不要求是这一版认的：布局换代的旧站正要靠它升级。
+
+{/* ref file="../plugins/docsite/src/scaffold/upgrade.ts" lines="143-175" hash="8c92292b7e12" blob="d22890d68dd0" */}
 
 站名不给就依次用仓根 `package.json` 的 `title`、包名去掉 scope、仓目录名。仓根已有 README.md / AGENTS.md / CLAUDE.md 时，第一次 `pnpm doc:render` 会用 `content/docs/outputs/` 里的正本覆盖它们，`docfirst.create` 的回执在 warn 里列出是哪几个。
 
@@ -125,7 +129,7 @@ gwb-docsite 是 gwb 工作台和[平台包](/packages/god-docsite) `@godcreator/
 
 插件自己知道、站点要用的事合成一份，推进站点推送通道的频道 `host`（格式归[平台包](/packages/god-docsite)页的「托管方上下文」）：本 home 的身份码、三项阅读字体；站点的身份文件写着 `audience: "personal"` 时，再加上别的插件提供的本机目录 `dirs`，`shared` 的站收不到它。
 
-{/* ref file="../plugins/docsite/src/index.ts" lines="92-103" hash="9c0cbe2ecef9" blob="77e3694f1f79" */}
+{/* ref file="../plugins/docsite/src/index.ts" lines="93-104" hash="9c0cbe2ecef9" blob="4c92d3a7a100" */}
 
 什么时候推：每次启动时开发服务报出地址之后推第一次，推完 `start` 才回执；身份码、三项字体设置变了，或别的插件登记、撤销了目录，把每个在运行的站重推一次。重推时某个站推不进去，记一条警告，那个站照旧用上一份，下次启动时推新的；设置变了的回调里没有人等结果。
 

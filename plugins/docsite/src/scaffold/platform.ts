@@ -6,7 +6,7 @@ import type * as PlatformNodeExports from '@godcreator/god-docsite/node'
 import type * as Scaffold from '@godcreator/god-docsite/scaffold'
 import { DocsiteRejected } from '../errors.js'
 
-export type PlatformScaffold = Pick<typeof Scaffold, 'createSite' | 'addBaseFeatures' | 'addFeature' | 'isPortFree'>
+export type PlatformScaffold = Pick<typeof Scaffold, 'createSite' | 'addBaseFeatures' | 'addFeature' | 'isPortFree' | 'regenerateFeatureIndex'>
 export type { PackageSource } from '@godcreator/god-docsite/scaffold'
 
 export const platformPackageName = '@godcreator/god-docsite'

@@ -111,16 +111,16 @@ export const platformSeams = defineSeamGraph({
   ],
   seams: [
     // 接缝 1 的 iface 照抄 gwb-docsite 源码里用到的那几个导出名（plugins/docsite/src/scaffold/platform.ts 的 PlatformScaffold）
-    /* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="9-9" hash="3daa88a23d12" blob="27bafe4c2054" */
+    /* ref file="../plugins/docsite/src/scaffold/platform.ts" lines="9-9" hash="d748c0143a19" blob="8e5997f489be" */
     {
       n: 1,
       name: '建站与加功能',
       a: ['gwb-scaffold'],
       b: ['create', 'add'],
-      iface: '函数调用：createSite · addBaseFeatures · addFeature（从 @godcreator/god-docsite/scaffold 加载）',
+      iface: '函数调用：createSite · addBaseFeatures · addFeature · regenerateFeatureIndex（从 @godcreator/god-docsite/scaffold 加载）',
       convention: false,
       via: 'code',
-      text: 'gwb-docsite 的 docsite.site.init 依次调 createSite、addBaseFeatures，docsite.feature.add 调 addFeature。建站器按自己所在位置找平台包的 template/，所以插件从装好的平台包目录加载它，不打包进插件。',
+      text: 'gwb-docsite 的 docsite.site.init 依次调 createSite、addBaseFeatures，docsite.feature.add 调 addFeature，docsite.site.upgrade 升完包调 regenerateFeatureIndex。建站器按自己所在位置找平台包的 template/，所以插件从装好的平台包目录加载它，不打包进插件。',
     },
     {
       n: 2,

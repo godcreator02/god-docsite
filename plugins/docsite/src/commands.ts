@@ -4,6 +4,7 @@ import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 import { listComments, writeComment, type CommentFilter, type CommentWrite } from './comments.js'
 import { DocsiteRejected, messageOf } from './errors.js'
 import { appWindowUrlOf, type SiteWindowOpened } from './chrome-app.js'
+import type { SiteUpgraded } from './scaffold/upgrade.js'
 import type { GwbDocsiteApi } from './service.js'
 import { siteTitleOf, type SiteListing } from './site-list.js'
 
@@ -49,6 +50,8 @@ export type CommandServices = {
   list(): Promise<SiteListing[]>
   /** 用 Chrome 应用窗口打开站点的一页：siteTitle 是站名，靠它认出这个站已经开着的窗口 */
   openSiteWindow(url: string, siteTitle: string | null): Promise<SiteWindowOpened>
+  /** 升级已有站点：升包、重写汇总文件、列出模板变了的文件 */
+  upgradeSite(dir: string, versions: Readonly<Record<string, string>>): Promise<SiteUpgraded>
 }
 
 function register(commands: GwbCommandsApi, definition: { name: string; description: string; usage: string; effect: 'read' | 'write' | 'external' }, handler: Handler) {
@@ -72,7 +75,7 @@ const listingShape =
 const commentWriteUsage =
   '要站点在运行（POST 到站点的评论写入路由 /comments，和网页评论面板同一套规则与字段）；署名是本 home 的身份码在 people.json 里对应的人，agent 写时给 as（people.json 里 agent 为 true 的 id）'
 
-export function registerCommands({ commands, docsite, isRegistered, list, openSiteWindow }: CommandServices): void {
+export function registerCommands({ commands, docsite, isRegistered, list, openSiteWindow, upgradeSite }: CommandServices): void {
   const urlOfRunning = (dir: string) => {
     const status = docsite.status(dir)
     if (status.state !== 'running' || status.url === null) throw new DocsiteRejected(`${dir} 的站点没在运行：先 docsite.site.start`)
@@ -218,6 +221,31 @@ export function registerCommands({ commands, docsite, isRegistered, list, openSi
       const parsed = argsOf(args, ['dir', 'package', 'version'])
       const version = optionalString(parsed, 'version')
       return docsite.addFeature(dirOf(parsed), { packageName: requiredString(parsed, 'package'), ...(version !== undefined ? { specifier: version } : {}) })
+    },
+  )
+
+  register(
+    commands,
+    {
+      name: 'docsite.site.upgrade',
+      description: '升级已有站点：平台包与功能包升到 gwb-docsite 旁边装着的那一版、重写功能汇总文件，列出模板变了的文件与改了哪几行，模板写出的文件由人或 agent 照着改',
+      usage:
+        '{ dir, versions? }：dir 是站点目录的绝对路径，要装好依赖；站点在运行时拒绝，先 docsite.site.stop。不要求身份文件 docsite.json 是这一版认的（旧站就靠它升级）。' +
+        'versions 是 { "<包名>": "<版本范围>" }，给 gwb-docsite 旁边没装的包（如协作功能包 @godcreator/collab）指定升到哪一版，包要在站点的依赖里。' +
+        '站点 package.json 里 @godcreator 的包都 pnpm add 成 versions 给的、或 gwb-docsite 旁边那一版的 ^<版本>；不是从 registry 装的（workspace: / link: / file:）、两处都没有版本的不动，列进 notUpgraded 并写明原因。' +
+        '再重写 app/features/ 下的汇总文件，把这些包新旧两版的 template/ 逐个比（平台包对站点根，功能包对 app/features/<功能名>/）。不改模板写出的文件、不改 docsite.json，也不起服务。' +
+        '回 { upgraded, notUpgraded, features, templateChanges, identityFile }：upgraded 每项 { name, from, to }（装着的版本）；templateChanges 每项 { file, template, site, diff? }，' +
+        'file 是站点里的路径，template 是 added（新模板新加的）、removed（新模板去掉的）或 changed，site 是这个文件在站点里现在的样子：missing 没有、old 和旧模板一字不差（没改过，直接换成新模板）、new 已经和新模板一样、own 站点自己改过（对照 diff 把模板的改动并进去）；' +
+        'diff 是 changed 时模板旧版到新版的统一差异格式。identityFile 是 docsite.json 原样的内容（没有为 null）：照模板改完，补上 audience、把 format 改成这一版平台认的，docsite.site.start 启动前的核对才过',
+      effect: 'write',
+    },
+    async (args) => {
+      const parsed = argsOf(args, ['dir', 'versions'])
+      const versions = parsed['versions'] ?? {}
+      if (typeof versions !== 'object' || versions === null || Array.isArray(versions) || !Object.values(versions).every((value) => typeof value === 'string')) {
+        throw new DocsiteRejected(`versions 要是 { "<包名>": "<版本范围>" }，收到 ${JSON.stringify(versions)}`)
+      }
+      return upgradeSite(dirOf(parsed), versions as Record<string, string>)
     },
   )
 

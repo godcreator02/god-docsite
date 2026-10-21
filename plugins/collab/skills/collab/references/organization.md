@@ -45,11 +45,10 @@
   不是负责人就不升级，告诉人：升级要改 `site/package.json` 里 `@godcreator/` 下的版本，只有负责人能提交，成员升了会被 `collab.submit` 拦下，连同一批里的身份码、页面、评论都推不出去；请负责人升级、合进 main，自动同步快进时会在 `site/` 里装好新版本。
   已经升了、被拦下的，照 `references/collab-repo.md` 的「只有项目负责人能改的」把升级改回去。
 
-  是负责人时：没有升级命令，`collab.site.init` 只建新站。先看协作仓工作区里有没有别人还没提交审核的改动，问人升到哪一版，`docsite.site.stop {"dir":"<协作仓>/site"}` 后：
+  是负责人时：先看协作仓工作区里有没有别人还没提交审核的改动，问人协作功能包升到哪一版，`docsite.site.stop {"dir":"<协作仓>/site"}` 后：
 
-  - 升协作功能包用 `docsite.feature.add {"dir":"<协作仓>/site","package":"@godcreator/collab","version":"^<版本>"}`，它升版本、补上站点还没有的接线文件，不覆盖已有的；它最后启动服务检查首页、常驻的站就此保持运行，接着还要 `pnpm add` 的话先再 `docsite.site.stop` 一次
-  - 平台包与别的功能包在 `site/` 里 `pnpm add <包>@^<版本>`
-  - 平台模板写出的文件与接线文件由你对照平台包与功能包的 `template/` 逐个判断要改哪些文件（见说明书 `docsite` 的「升级已有站点」），站点自己改过的地方保留
+  - `docsite.site.upgrade {"dir":"<协作仓>/site","versions":{"@godcreator/collab":"^<版本>"}}`：平台包升到 gwb-docsite 旁边的那一版，协作功能包升到给的版本，回模板变了的文件
+  - 照它回的 `templateChanges` 改平台模板写出的文件与接线文件（见说明书 `docsite` 的「升级已有站点」），站点自己改过的地方保留
   - 站点还没有身份文件 `site/docsite.json` 时补一份 `{ "kind": "collab", "audience": "shared", "format": 2 }`：没有它插件认不出协作仓、gwb-docsite 也不托管这个站。它只有负责人能改，和别的升级改动一起提交审核
   - 升了协作功能包，新版本不在 `.gitea/workflows/collab-auto-merge.yaml` 里 `MERGE_CHECK_RANGE` 的范围内（比如范围是 `^0.1.1`、升到了 `0.2.1`）时，把这一行改成 `^<新版本>`：执行器按它装合并检查，`collab.submit` 把 `.gitea/` 和别的升级改动一起提交审核。别的行不动，这份是负责人管的
 
